@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Producto sin imagen">
+  <rect width="400" height="400" fill="#171717"/>
+  <rect x="24" y="24" width="352" height="352" rx="24" fill="#262626" stroke="#404040" stroke-width="2"/>
+  <path d="M120 260 L180 190 L230 230 L280 170 L320 260 Z" fill="#404040"/>
+  <circle cx="160" cy="150" r="28" fill="#525252"/>
+  <text x="200" y="330" text-anchor="middle" fill="#737373" font-family="Arial, sans-serif" font-size="22">Sin imagen</text>
+</svg>

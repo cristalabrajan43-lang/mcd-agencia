@@ -1,0 +1,103 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Nueva solicitud de cotización - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>🔔 Nueva solicitud de cotización</h2>
+
+<p>
+    Se ha recibido una nueva solicitud de cotización en el sistema.
+</p>
+
+<div class="info-box">
+    <p style="margin: 0;">
+        <strong>Número de solicitud:</strong> {{ request.request_number }}<br>
+        <strong>Fecha:</strong> {{ request.created_at|date:"d/m/Y H:i" }}
+    </p>
+</div>
+
+<h3>Información del cliente</h3>
+
+<table class="data-table">
+    <tr>
+        <th>Nombre</th>
+        <td>{% if request.user %}{{ request.user.get_full_name }}{% else %}{{ request.customer_name }}{% endif %}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{% if request.user %}{{ request.user.email }}{% else %}{{ request.customer_email }}{% endif %}</td>
+    </tr>
+    {% if request.customer_phone %}
+    <tr>
+        <th>Teléfono</th>
+        <td>{{ request.customer_phone }}</td>
+    </tr>
+    {% endif %}
+    {% if request.customer_company %}
+    <tr>
+        <th>Empresa</th>
+        <td>{{ request.customer_company }}</td>
+    </tr>
+    {% endif %}
+</table>
+
+<h3>Detalles del proyecto</h3>
+
+<div class="order-summary">
+    {% if request.catalog_item %}
+    <div class="line-item">
+        <span><strong>Producto/Servicio:</strong></span>
+        <span>{{ request.catalog_item.name }}</span>
+    </div>
+    {% endif %}
+
+    {% if request.quantity %}
+    <div class="line-item">
+        <span><strong>Cantidad:</strong></span>
+        <span>{{ request.quantity }}</span>
+    </div>
+    {% endif %}
+
+    {% if request.dimensions %}
+    <div class="line-item">
+        <span><strong>Dimensiones:</strong></span>
+        <span>{{ request.dimensions }}</span>
+    </div>
+    {% endif %}
+
+    {% if request.material %}
+    <div class="line-item">
+        <span><strong>Material:</strong></span>
+        <span>{{ request.material }}</span>
+    </div>
+    {% endif %}
+
+    {% if request.includes_installation %}
+    <div class="line-item">
+        <span><strong>Instalación:</strong></span>
+        <span>Requerida</span>
+    </div>
+    {% endif %}
+</div>
+
+{% if request.description %}
+<h3>Descripción del proyecto</h3>
+<div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p style="margin: 0; white-space: pre-line;">{{ request.description }}</p>
+</div>
+{% endif %}
+
+{% if request.attachments.exists %}
+<p><strong>📎 Archivos adjuntos:</strong> {{ request.attachments.count }} archivo{{ request.attachments.count|pluralize:"s" }}</p>
+{% endif %}
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ request_url }}" class="btn btn-primary">
+        Ver solicitud completa
+    </a>
+</div>
+
+<p style="color: #6b7280; font-size: 14px;">
+    Este es un mensaje automático del sistema de cotizaciones de {{ company_name }}.
+</p>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Alerta de Inventario Bajo - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>Alerta de Inventario</h2>
+
+<p>Se han detectado {{ total_alerts }} productos con niveles de stock bajos que requieren atención:</p>
+
+{% if critical_items %}
+<div class="info-box error">
+    <h3 style="margin-top: 0; color: #dc2626;">Artículos Críticos ({{ critical_items|length }})</h3>
+    <p>Estos productos requieren atención inmediata:</p>
+
+    <table class="data-table" style="background: white;">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th style="text-align: right;">Stock Actual</th>
+                <th style="text-align: right;">Punto de Reorden</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in critical_items %}
+            <tr>
+                <td><strong>{{ stock.variant.sku }}</strong></td>
+                <td>{{ stock.variant.product.name }} - {{ stock.variant.name }}</td>
+                <td style="text-align: right; color: #dc2626; font-weight: bold;">{{ stock.quantity }}</td>
+                <td style="text-align: right;">{{ stock.reorder_point }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if warning_items %}
+<div class="info-box warning">
+    <h3 style="margin-top: 0; color: #d97706;">Artículos con Stock Bajo ({{ warning_items|length }})</h3>
+    <p>Estos productos se están agotando:</p>
+
+    <table class="data-table" style="background: white;">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th style="text-align: right;">Stock Actual</th>
+                <th style="text-align: right;">Punto de Reorden</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in warning_items %}
+            <tr>
+                <td><strong>{{ stock.variant.sku }}</strong></td>
+                <td>{{ stock.variant.product.name }} - {{ stock.variant.name }}</td>
+                <td style="text-align: right; color: #d97706; font-weight: bold;">{{ stock.quantity }}</td>
+                <td style="text-align: right;">{{ stock.reorder_point }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ inventory_url }}" class="btn btn-primary">Ir a Inventario</a>
+</div>
+
+<p style="font-size: 12px; color: #6b7280;">
+    Reporte generado automáticamente el {{ generated_at|date:"d/m/Y H:i" }}
+</p>
+{% endblock %}

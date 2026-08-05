@@ -1,0 +1,309 @@
+{
+  "epics_created": {},
+  "sprints_created": {
+    "Sprint 1: Setup & Autenticación": null,
+    "Sprint 2: Modelo de Datos & Órdenes": null,
+    "Sprint 3: Cotizaciones": null,
+    "Sprint 4: Inventario & Órdenes": null,
+    "Sprint 5: Pagos & Integraciones": null,
+    "Sprint 6: Analytics & Refinamiento": null
+  },
+  "issues_created": [
+    {
+      "success": true,
+      "key": "MCD-60",
+      "id": "10168",
+      "summary": "US-001: Registrarse como Cliente"
+    },
+    {
+      "success": true,
+      "key": "MCD-61",
+      "id": "10169",
+      "summary": "US-002: Autenticación con Google OAuth 2.0"
+    },
+    {
+      "success": true,
+      "key": "MCD-62",
+      "id": "10170",
+      "summary": "US-003: Recuperación de Contraseña"
+    },
+    {
+      "success": true,
+      "key": "MCD-63",
+      "id": "10171",
+      "summary": "US-004: Crear Categoría de Productos"
+    },
+    {
+      "success": true,
+      "key": "MCD-64",
+      "id": "10172",
+      "summary": "US-005: Crear Producto con Variantes"
+    },
+    {
+      "success": true,
+      "key": "MCD-65",
+      "id": "10173",
+      "summary": "US-006: Listar y Filtrar Productos"
+    },
+    {
+      "success": true,
+      "key": "MCD-66",
+      "id": "10174",
+      "summary": "US-007: Solicitar Cotización"
+    },
+    {
+      "success": true,
+      "key": "MCD-67",
+      "id": "10175",
+      "summary": "US-008: Crear y Enviar Cotización"
+    },
+    {
+      "success": true,
+      "key": "MCD-68",
+      "id": "10176",
+      "summary": "US-009: Aceptar/Rechazar Cotización"
+    },
+    {
+      "success": true,
+      "key": "MCD-69",
+      "id": "10177",
+      "summary": "US-010: Agregar Productos al Carrito"
+    },
+    {
+      "success": true,
+      "key": "MCD-70",
+      "id": "10178",
+      "summary": "US-011: Crear Orden desde Carrito"
+    },
+    {
+      "success": true,
+      "key": "MCD-71",
+      "id": "10179",
+      "summary": "US-012: Rastrear Orden"
+    },
+    {
+      "success": true,
+      "key": "MCD-72",
+      "id": "10180",
+      "summary": "US-013: Pagar Orden con Mercado Pago"
+    },
+    {
+      "success": true,
+      "key": "MCD-73",
+      "id": "10181",
+      "summary": "US-014: Procesar Reembolso"
+    },
+    {
+      "success": true,
+      "key": "MCD-74",
+      "id": "10182",
+      "summary": "US-015: Registrar Entrada de Stock"
+    },
+    {
+      "success": true,
+      "key": "MCD-75",
+      "id": "10183",
+      "summary": "US-016: Alertas de Stock Bajo"
+    },
+    {
+      "success": true,
+      "key": "MCD-76",
+      "id": "10184",
+      "summary": "US-017: Formulario de Contacto en Sitio Web"
+    },
+    {
+      "success": true,
+      "key": "MCD-77",
+      "id": "10185",
+      "summary": "US-018: Chatbot de Atención al Cliente"
+    },
+    {
+      "success": true,
+      "key": "MCD-78",
+      "id": "10186",
+      "summary": "US-019: Dashboard de Ventas"
+    },
+    {
+      "success": true,
+      "key": "MCD-79",
+      "id": "10187",
+      "summary": "US-020: Reporte de Visitas y Comportamiento"
+    },
+    {
+      "success": true,
+      "key": "MCD-80",
+      "id": "10188",
+      "summary": "US-021: Crear Roles Personalizados"
+    },
+    {
+      "success": true,
+      "key": "MCD-81",
+      "id": "10189",
+      "summary": "US-022: Asignar Roles a Usuarios"
+    },
+    {
+      "success": true,
+      "key": "MCD-82",
+      "id": "10190",
+      "summary": "US-023: Registro de Auditoría Completo"
+    },
+    {
+      "success": true,
+      "key": "MCD-83",
+      "id": "10191",
+      "summary": "US-024: Exportar Datos de Usuario (GDPR)"
+    },
+    {
+      "success": true,
+      "key": "MCD-84",
+      "id": "10192",
+      "summary": "TASK-001: Configurar entorno de desarrollo"
+    },
+    {
+      "success": true,
+      "key": "MCD-85",
+      "id": "10193",
+      "summary": "TASK-002: Definir estructura de repositorio y ramas"
+    },
+    {
+      "success": true,
+      "key": "MCD-86",
+      "id": "10194",
+      "summary": "TASK-003: Crear pipeline CI/CD básico"
+    },
+    {
+      "success": true,
+      "key": "MCD-87",
+      "id": "10195",
+      "summary": "TASK-004: Documentar instalación inicial"
+    },
+    {
+      "success": true,
+      "key": "MCD-88",
+      "id": "10196",
+      "summary": "TASK-005: Modelar base de datos"
+    },
+    {
+      "success": true,
+      "key": "MCD-89",
+      "id": "10197",
+      "summary": "TASK-006: Crear migraciones iniciales"
+    },
+    {
+      "success": true,
+      "key": "MCD-90",
+      "id": "10198",
+      "summary": "TASK-007: Definir endpoints de órdenes"
+    },
+    {
+      "success": true,
+      "key": "MCD-91",
+      "id": "10199",
+      "summary": "TASK-008: Escribir tests unitarios de modelo"
+    },
+    {
+      "success": true,
+      "key": "MCD-92",
+      "id": "10200",
+      "summary": "TASK-009: Diseñar UI cotizaciones"
+    },
+    {
+      "success": true,
+      "key": "MCD-93",
+      "id": "10201",
+      "summary": "TASK-010: Implementar cálculo de cotización"
+    },
+    {
+      "success": true,
+      "key": "MCD-94",
+      "id": "10202",
+      "summary": "TASK-011: Guardar cotizaciones en base"
+    },
+    {
+      "success": true,
+      "key": "MCD-95",
+      "id": "10203",
+      "summary": "TASK-012: Enviar email de cotización"
+    },
+    {
+      "success": true,
+      "key": "MCD-96",
+      "id": "10204",
+      "summary": "TASK-013: Control stock en ordenes"
+    },
+    {
+      "success": true,
+      "key": "MCD-97",
+      "id": "10205",
+      "summary": "TASK-014: Crear dashboard de inventario"
+    },
+    {
+      "success": true,
+      "key": "MCD-98",
+      "id": "10206",
+      "summary": "TASK-015: Gestionar estado de ordenes"
+    },
+    {
+      "success": true,
+      "key": "MCD-99",
+      "id": "10207",
+      "summary": "TASK-016: Automatizar alertas stock"
+    },
+    {
+      "success": true,
+      "key": "MCD-100",
+      "id": "10208",
+      "summary": "TASK-017: Integrar Stripe"
+    },
+    {
+      "success": true,
+      "key": "MCD-101",
+      "id": "10209",
+      "summary": "TASK-018: Implementar manejo de reembolsos"
+    },
+    {
+      "success": true,
+      "key": "MCD-102",
+      "id": "10210",
+      "summary": "TASK-019: Configurar webhooks de pago"
+    },
+    {
+      "success": true,
+      "key": "MCD-103",
+      "id": "10211",
+      "summary": "TASK-020: Test E2E de checkout"
+    },
+    {
+      "success": true,
+      "key": "MCD-104",
+      "id": "10212",
+      "summary": "TASK-021: Crear reportes de métricas"
+    },
+    {
+      "success": true,
+      "key": "MCD-105",
+      "id": "10213",
+      "summary": "TASK-022: Optimizar consultas críticas"
+    },
+    {
+      "success": true,
+      "key": "MCD-106",
+      "id": "10214",
+      "summary": "TASK-023: Documentar API y uso"
+    },
+    {
+      "success": true,
+      "key": "MCD-107",
+      "id": "10215",
+      "summary": "TASK-024: Pruebas de performance"
+    }
+  ],
+  "summary": {
+    "epics": 0,
+    "sprints": 0,
+    "stories": 24,
+    "tasks": 24,
+    "total_issues": 48,
+    "total_story_points": 210
+  }
+}

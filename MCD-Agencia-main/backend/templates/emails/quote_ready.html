@@ -1,0 +1,81 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Tu Cotización #{{ quote.quote_number }} - MCD Agencia{% endblock %}
+
+{% block content %}
+{% if is_revised %}
+<h2>Tu cotización ha sido actualizada</h2>
+
+<p>Hola {{ recipient_name }},</p>
+
+<p>Hemos actualizado la cotización que solicitaste con los cambios acordados. A continuación encontrarás los nuevos detalles:</p>
+{% else %}
+<h2>Tu cotización está lista</h2>
+
+<p>Hola {{ recipient_name }},</p>
+
+<p>Hemos preparado la cotización que solicitaste. A continuación encontrarás los detalles:</p>
+{% endif %}
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>Número de cotización:</strong> #{{ quote.quote_number }}</p>
+    <p style="margin: 5px 0 0 0;"><strong>Válida hasta:</strong> {{ quote.valid_until|date:"d/m/Y" }}</p>
+</div>
+
+<h3 style="color: #374151; margin-top: 25px;">Detalle de la cotización</h3>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Descripción</th>
+            <th style="text-align: right;">Cantidad</th>
+            <th style="text-align: right;">Precio Unit.</th>
+            <th style="text-align: right;">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for line in quote.lines.all %}
+        <tr>
+            <td>{{ line.description }}</td>
+            <td style="text-align: right;">{{ line.quantity }}</td>
+            <td style="text-align: right;">${{ line.unit_price }}</td>
+            <td style="text-align: right;">${{ line.line_total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="order-summary">
+    <div class="line-item">
+        <span>Subtotal</span>
+        <span>${{ quote.subtotal }}</span>
+    </div>
+    <div class="line-item">
+        <span>IVA ({{ quote.tax_rate }}%)</span>
+        <span>${{ quote.tax_amount }}</span>
+    </div>
+    <div class="line-item total">
+        <span>Total</span>
+        <span>${{ quote.total }} MXN</span>
+    </div>
+</div>
+
+{% if quote.terms %}
+<h3 style="color: #374151; margin-top: 25px;">Términos y condiciones</h3>
+<div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; font-size: 14px;">
+    {{ quote.terms|linebreaksbr }}
+</div>
+{% endif %}
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ quote_url }}" class="btn btn-primary">Ver y aceptar cotización</a>
+</div>
+
+<div class="info-box warning">
+    <p style="margin: 0;"><strong>Importante:</strong> Esta cotización es válida hasta el {{ quote.valid_until|date:"d/m/Y" }}. Después de esta fecha, los precios pueden variar.</p>
+</div>
+
+<p>¿Tienes preguntas o necesitas ajustes? No dudes en contactarnos.</p>
+
+<p>Saludos,<br>El equipo de {{ company_name }}</p>
+{% endblock %}

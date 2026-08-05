@@ -1,0 +1,128 @@
+# =============================================================================
+# Render Blueprint — MCD-Agencia (Backend + Database in ONE platform)
+# =============================================================================
+# Deploy with one click: Connect GitHub repo → Render auto-detects this file
+#
+# This creates:
+#   1. Django Backend (Web Service — free)
+#   2. PostgreSQL Database (free — 90 days, 256MB)
+#
+# Frontend goes to Vercel separately.
+# Total platforms needed: Render + Vercel = 2
+#
+# https://render.com/docs/blueprint-spec
+# =============================================================================
+
+databases:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL (included free on Render — no external platform needed)
+  # ---------------------------------------------------------------------------
+  - name: mcd-agencia-db
+    plan: free
+    region: oregon
+    databaseName: mcd_agencia
+    user: mcd_user
+
+services:
+  # ---------------------------------------------------------------------------
+  # Django Backend API
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: mcd-agencia-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120 --keep-alive 5 --max-requests 1000 --max-requests-jitter 50"
+    healthCheckPath: /health/
+    autoDeploy: true
+    envVars:
+      # Django Core
+      - key: DJANGO_ENV
+        value: cloud
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.7
+
+      # Database (auto-linked from the database above)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mcd-agencia-db
+          property: connectionString
+
+      # Hosts & CORS (update after first deploy with your actual URLs)
+      - key: ALLOWED_HOSTS
+        sync: false  # e.g.: mcd-agencia-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false  # e.g.: https://mcd-agencia.vercel.app
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false  # e.g.: https://mcd-agencia.vercel.app
+
+      # Frontend URL (your Vercel deployment URL)
+      - key: FRONTEND_URL
+        sync: false  # e.g.: https://mcd-agencia.vercel.app
+      - key: BACKEND_URL
+        sync: false  # e.g.: https://mcd-agencia-api.onrender.com
+
+      # Email (Gmail SMTP — free, uses your existing credentials)
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+      # Cloudflare R2 (persistent file storage — free 10 GB)
+      # Without these, uploaded images are LOST on every deploy!
+      # Setup: https://dash.cloudflare.com → R2 → Create bucket → API Tokens
+      # NOTE: Uses presigned URLs (AWS_QUERYSTRING_AUTH=True) to bypass
+      #       Cloudflare Bot Fight Mode (error 1010) on r2.dev domains.
+      #       No custom domain or public access needed.
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false  # https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+
+      # Admin user (created automatically on first deploy)
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+      # Payment gateways (optional — set when ready)
+      - key: MERCADOPAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADOPAGO_PUBLIC_KEY
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+
+      # Chatbot AI (Google Gemini — free tier: 1,500 req/day)
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: "gemini-2.5-flash"
+      - key: CHATBOT_AI_PROVIDER
+        value: "auto"
+
+      # Sentry (optional — free tier)
+      - key: SENTRY_DSN
+        sync: false

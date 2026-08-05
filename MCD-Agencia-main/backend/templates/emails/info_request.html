@@ -1,0 +1,75 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Información adicional requerida - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>¡Hola {{ request.customer_name }}!</h2>
+
+<p>
+    Hemos recibido tu solicitud de cotización <strong>#{{ request.request_number }}</strong> y necesitamos información adicional para poder procesarla correctamente.
+</p>
+
+{% if message %}
+<div class="info-box warning">
+    <p style="margin: 0;">
+        <strong>📋 Mensaje del equipo:</strong><br>
+        {{ message }}
+    </p>
+</div>
+{% endif %}
+
+{% if flagged_fields %}
+<div class="order-summary" style="margin-top: 20px;">
+    <h3 style="margin-top: 0;">📌 Campos que necesitan revisión</h3>
+    <p style="color: #999; font-size: 13px; margin-bottom: 12px;">
+        Nuestro equipo necesita que revises o completes la siguiente información:
+    </p>
+    {% for field in flagged_fields %}
+    <div class="line-item" style="padding: 8px 0;">
+        <span style="color: #e67e22; font-weight: 600;">▸ {{ field }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="order-summary">
+    <h3 style="margin-top: 0;">Datos de tu solicitud</h3>
+
+    <div class="line-item">
+        <span>Servicio</span>
+        <span>{{ request.catalog_item_name }}</span>
+    </div>
+
+    {% if request.description %}
+    <div class="line-item">
+        <span>Descripción</span>
+        <span>{{ request.description|truncatewords:15 }}</span>
+    </div>
+    {% endif %}
+
+    <div class="line-item">
+        <span>Fecha de solicitud</span>
+        <span>{{ request.created_at|date:"d/m/Y" }}</span>
+    </div>
+</div>
+
+<p>
+    Por favor, haz clic en el siguiente botón para completar la información faltante de tu solicitud.
+    Esto nos permitirá preparar tu cotización lo antes posible.
+</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ update_url }}" class="btn btn-primary">
+        Completar información
+    </a>
+</div>
+
+<p style="color: #999; font-size: 13px;">
+    Si no solicitaste esta cotización, puedes ignorar este correo.
+</p>
+
+<p>
+    Saludos cordiales,<br>
+    <strong>El equipo de {{ company_name }}</strong>
+</p>
+{% endblock %}

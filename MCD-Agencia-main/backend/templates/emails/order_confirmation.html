@@ -1,0 +1,70 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Confirmación de Pedido #{{ order.order_number }} - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>¡Gracias por tu pedido!</h2>
+
+<p>Hola {{ user.first_name|default:user.email }},</p>
+
+<p>Hemos recibido tu pedido y lo estamos procesando. Aquí están los detalles:</p>
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>Número de pedido:</strong> #{{ order.order_number }}</p>
+    <p style="margin: 5px 0 0 0;"><strong>Fecha:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+</div>
+
+<h3 style="color: #374151; margin-top: 25px;">Resumen del pedido</h3>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th style="text-align: right;">Cantidad</th>
+            <th style="text-align: right;">Precio</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for line in order.lines.all %}
+        <tr>
+            <td>
+                {{ line.name }}
+                {% if line.variant_name %}<br><small style="color: #6b7280;">{{ line.variant_name }}</small>{% endif %}
+            </td>
+            <td style="text-align: right;">{{ line.quantity }}</td>
+            <td style="text-align: right;">${{ line.line_total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="order-summary">
+    <div class="line-item">
+        <span>Subtotal</span>
+        <span>${{ order.subtotal }}</span>
+    </div>
+    <div class="line-item">
+        <span>IVA ({{ order.tax_rate }}%)</span>
+        <span>${{ order.tax_amount }}</span>
+    </div>
+    <div class="line-item total">
+        <span>Total</span>
+        <span>${{ order.total }} MXN</span>
+    </div>
+</div>
+
+<h3 style="color: #374151; margin-top: 25px;">Dirección de envío</h3>
+<p style="background-color: #f9fafb; padding: 15px; border-radius: 8px;">
+    {{ order.shipping_address|linebreaksbr }}
+</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ order_url }}" class="btn btn-primary">Ver mi pedido</a>
+</div>
+
+<p>Te enviaremos un correo cuando tu pedido esté en camino.</p>
+
+<p>¿Tienes preguntas? Contáctanos en cualquier momento.</p>
+
+<p>Saludos,<br>El equipo de {{ company_name }}</p>
+{% endblock %}

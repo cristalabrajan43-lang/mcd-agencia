@@ -1,0 +1,32 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Pago Confirmado - Pedido #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<h2>¡Pago recibido!</h2>
+
+<p>Hola {{ user.first_name|default:user.email }},</p>
+
+<p>Hemos recibido tu pago correctamente. Tu pedido está siendo procesado.</p>
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>Número de pedido:</strong> #{{ order.order_number }}</p>
+    <p style="margin: 5px 0;"><strong>Monto pagado:</strong> ${{ payment.amount }} MXN</p>
+    <p style="margin: 5px 0 0 0;"><strong>Método de pago:</strong> {{ payment.get_provider_display }}</p>
+</div>
+
+<div class="order-summary">
+    <div class="line-item total">
+        <span>Total pagado</span>
+        <span style="color: #059669;">${{ payment.amount }} MXN</span>
+    </div>
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ order_url }}" class="btn btn-primary">Ver mi pedido</a>
+</div>
+
+<p>Te notificaremos cuando tu pedido esté listo para envío.</p>
+
+<p>Saludos,<br>El equipo de {{ company_name }}</p>
+{% endblock %}

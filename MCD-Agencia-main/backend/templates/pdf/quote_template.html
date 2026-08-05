@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cotización {{ quote.quote_number }} - MCD Agencia</title>
+    <style>
+        /* Reset and Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: letter;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #262626;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #00FFFF;
+        }
+
+        .logo-section {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 28pt;
+            font-weight: bold;
+            color: #000000;
+            letter-spacing: -1px;
+        }
+
+        .company-tagline {
+            font-size: 10pt;
+            color: #666666;
+            margin-top: 5px;
+        }
+
+        .quote-info {
+            text-align: right;
+        }
+
+        .quote-number {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #00BFBF;
+        }
+
+        .quote-date {
+            font-size: 10pt;
+            color: #666666;
+            margin-top: 5px;
+        }
+
+        /* Customer and Company Info */
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            width: 48%;
+        }
+
+        .info-box h3 {
+            font-size: 10pt;
+            text-transform: uppercase;
+            color: #00BFBF;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .info-box p {
+            font-size: 10pt;
+            margin: 3px 0;
+            color: #333333;
+        }
+
+        .info-box .company {
+            font-weight: bold;
+        }
+
+        /* Items Table */
+        .items-section {
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #262626;
+            color: #ffffff;
+            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th:last-child,
+        th:nth-child(3),
+        th:nth-child(4) {
+            text-align: right;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 10pt;
+        }
+
+        td:last-child,
+        td:nth-child(3),
+        td:nth-child(4) {
+            text-align: right;
+        }
+
+        .item-description {
+            font-weight: 500;
+        }
+
+        .item-details {
+            font-size: 9pt;
+            color: #666666;
+            margin-top: 3px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Totals Section */
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .totals-table {
+            width: 300px;
+        }
+
+        .totals-table tr td {
+            padding: 8px 10px;
+            border-bottom: none;
+        }
+
+        .totals-table tr td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .totals-table tr td:last-child {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .totals-table .total-row {
+            background-color: #00FFFF;
+            font-weight: bold;
+        }
+
+        .totals-table .total-row td {
+            font-size: 12pt;
+            padding: 12px 10px;
+            color: #000000;
+        }
+
+        /* Notes Section */
+        .notes-section {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+
+        .notes-section h3 {
+            font-size: 10pt;
+            text-transform: uppercase;
+            color: #666666;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .notes-section p {
+            font-size: 10pt;
+            color: #333333;
+            white-space: pre-line;
+        }
+
+        /* Terms Section */
+        .terms-section {
+            font-size: 9pt;
+            color: #666666;
+            margin-bottom: 30px;
+        }
+
+        .terms-section h3 {
+            font-size: 10pt;
+            text-transform: uppercase;
+            color: #333333;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .terms-section ul {
+            padding-left: 20px;
+        }
+
+        .terms-section li {
+            margin: 5px 0;
+        }
+
+        /* Validity Banner */
+        .validity-banner {
+            background-color: #FF00FF;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 2px solid #00FFFF;
+            padding-top: 15px;
+            font-size: 9pt;
+            color: #666666;
+            text-align: center;
+        }
+
+        .footer .contact {
+            margin-bottom: 5px;
+        }
+
+        .footer .social {
+            color: #00BFBF;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 20px;
+        }
+
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #333333;
+            padding-top: 10px;
+            margin-top: 60px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+        }
+
+        .signature-title {
+            font-size: 9pt;
+            color: #666666;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+
+        .status-sent {
+            background-color: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .status-draft {
+            background-color: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-accepted {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-section">
+            <div class="company-name">MCD AGENCIA</div>
+            <div class="company-tagline">Soluciones en Impresión y Publicidad</div>
+        </div>
+        <div class="quote-info">
+            <div class="quote-number">COTIZACIÓN #{{ quote.quote_number }}</div>
+            <div class="quote-date">
+                Fecha: {{ generated_at|date:"d/m/Y" }}<br>
+                Válida hasta: {{ quote.valid_until|date:"d/m/Y" }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer and Company Info -->
+    <div class="info-section">
+        <div class="info-box">
+            <h3>Cliente</h3>
+            {% if customer %}
+            <p class="company">{{ customer.get_full_name }}</p>
+            {% if customer.company_name %}
+            <p>{{ customer.company_name }}</p>
+            {% endif %}
+            <p>{{ customer.email }}</p>
+            {% if customer.phone %}
+            <p>{{ customer.phone }}</p>
+            {% endif %}
+            {% else %}
+            <p class="company">{{ quote.request.contact_name }}</p>
+            {% if quote.request.company %}
+            <p>{{ quote.request.company }}</p>
+            {% endif %}
+            <p>{{ quote.request.contact_email }}</p>
+            {% if quote.request.contact_phone %}
+            <p>{{ quote.request.contact_phone }}</p>
+            {% endif %}
+            {% endif %}
+        </div>
+        <div class="info-box" style="text-align: right;">
+            <h3>{{ company_name }}</h3>
+            <p>{{ company_address }}</p>
+            <p>{{ company_phone }}</p>
+            <p>{{ company_email }}</p>
+            <p>RFC: XXX-XXXXXX-XXX</p>
+        </div>
+    </div>
+
+    <!-- Validity Banner -->
+    <div class="validity-banner">
+        Esta cotización es válida hasta el {{ quote.valid_until|date:"d de F de Y" }}
+    </div>
+
+    <!-- Items Table -->
+    <div class="items-section">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Descripción</th>
+                    <th style="width: 15%;">Cantidad</th>
+                    <th style="width: 15%;">Precio Unitario</th>
+                    <th style="width: 20%;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in lines %}
+                <tr>
+                    <td>
+                        <div class="item-description">{{ line.description }}</div>
+                        {% if line.specifications %}
+                        <div class="item-details">{{ line.specifications }}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ line.quantity }}</td>
+                    <td>${{ line.unit_price|floatformat:2 }} MXN</td>
+                    <td>${{ line.line_total|floatformat:2 }} MXN</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <table class="totals-table">
+            <tr>
+                <td>Subtotal:</td>
+                <td>${{ quote.subtotal|floatformat:2 }} MXN</td>
+            </tr>
+            {% if quote.discount_amount %}
+            <tr>
+                <td>Descuento{% if quote.discount_percentage %} ({{ quote.discount_percentage }}%){% endif %}:</td>
+                <td>-${{ quote.discount_amount|floatformat:2 }} MXN</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td>IVA ({{ quote.tax_rate }}%):</td>
+                <td>${{ quote.tax_amount|floatformat:2 }} MXN</td>
+            </tr>
+            <tr class="total-row">
+                <td>TOTAL:</td>
+                <td>${{ quote.total|floatformat:2 }} MXN</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Notes -->
+    {% if quote.notes or quote.internal_notes %}
+    <div class="notes-section">
+        <h3>Notas</h3>
+        <p>{{ quote.notes|default:"" }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Terms and Conditions -->
+    <div class="terms-section">
+        <h3>Términos y Condiciones</h3>
+        <ul>
+            <li>Los precios están expresados en Pesos Mexicanos (MXN) e incluyen IVA.</li>
+            <li>La cotización tiene una vigencia de {{ quote.validity_days }} días a partir de la fecha de emisión.</li>
+            <li>Se requiere un anticipo del 50% para iniciar el trabajo.</li>
+            <li>El tiempo de entrega será acordado una vez confirmada la orden.</li>
+            <li>Los artes finales deben enviarse en formato vectorial (AI, EPS, PDF).</li>
+            <li>Cambios adicionales fuera del alcance original pueden generar costos adicionales.</li>
+            <li>MCD Agencia no se hace responsable por errores en textos aprobados por el cliente.</li>
+        </ul>
+    </div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">
+                <div class="signature-name">{{ customer.get_full_name|default:quote.request.contact_name }}</div>
+                <div class="signature-title">Cliente</div>
+            </div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">
+                <div class="signature-name">{{ quote.created_by.get_full_name|default:"MCD Agencia" }}</div>
+                <div class="signature-title">Representante de Ventas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="contact">
+            Tel: {{ company_phone }} | Email: {{ company_email }} | {{ company_address }}
+        </div>
+        <div class="social">
+            www.agenciamcd.mx | @agenciamcd
+        </div>
+    </div>
+</body>
+</html>

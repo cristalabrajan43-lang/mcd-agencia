@@ -1,0 +1,28 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Verifica tu correo - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>¡Bienvenido a MCD Agencia!</h2>
+
+<p>Hola {{ user.first_name|default:"" }},</p>
+
+<p>Gracias por registrarte en MCD Agencia. Para completar tu registro y acceder a todos nuestros servicios, por favor verifica tu correo electrónico haciendo clic en el botón de abajo:</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ verification_url }}" class="btn btn-primary">Verificar mi correo</a>
+</div>
+
+<div class="info-box">
+    <p style="margin: 0;"><strong>Nota:</strong> Este enlace expirará en 24 horas. Si no solicitaste esta verificación, puedes ignorar este correo.</p>
+</div>
+
+<p>Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+<p style="word-break: break-all; color: #06b6d4;">{{ verification_url }}</p>
+
+<p>Si tienes alguna pregunta, no dudes en contactarnos a <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+
+<p>¡Gracias por elegirnos!</p>
+
+<p>Saludos,<br>El equipo de {{ company_name }}</p>
+{% endblock %}

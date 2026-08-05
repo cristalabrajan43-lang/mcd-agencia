@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for dir in apps/users/migrations apps/catalog/migrations apps/orders/migrations apps/quotes/migrations apps/inventory/migrations apps/audit/migrations apps/content/migrations apps/payments/migrations apps/notifications/migrations apps/chatbot/migrations apps/core/migrations)",
+      "Bash(do touch \"$dir/__init__.py\")",
+      "Bash(done)",
+      "Bash(curl:*)"
+    ]
+  }
+}

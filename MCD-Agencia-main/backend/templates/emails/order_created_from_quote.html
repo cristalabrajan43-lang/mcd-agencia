@@ -1,0 +1,71 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Tu pedido #{{ order_number }} ha sido creado - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>🎉 ¡Tu pedido ha sido creado!</h2>
+
+<p>Hola {{ recipient_name }},</p>
+
+<p>
+    Nos complace informarte que tu cotización <strong>#{{ quote.quote_number }}</strong> ha sido convertida
+    en un pedido. Tu número de pedido es:
+</p>
+
+<div class="info-box" style="background-color: #ecfdf5; border-color: #34d399;">
+    <p style="margin: 0; text-align: center; font-size: 18px;">
+        <strong>Pedido #{{ order_number }}</strong>
+    </p>
+</div>
+
+<h3>Resumen</h3>
+
+<div class="order-summary">
+    {% for line in quote.lines.all %}
+    <div class="line-item">
+        <span>{{ line.concept }} (x{{ line.quantity }})</span>
+        <span>${{ line.line_total|floatformat:2 }}</span>
+    </div>
+    {% endfor %}
+
+    <div class="line-item">
+        <span>Subtotal</span>
+        <span>${{ quote.subtotal|floatformat:2 }}</span>
+    </div>
+
+    <div class="line-item">
+        <span>IVA</span>
+        <span>${{ quote.tax_amount|floatformat:2 }}</span>
+    </div>
+
+    <div class="line-item total">
+        <span>Total</span>
+        <span>${{ quote.total|floatformat:2 }} {{ quote.currency }}</span>
+    </div>
+</div>
+
+<h3>Próximos pasos</h3>
+
+<ol>
+    <li>Nuestro equipo te contactará para coordinar el pago</li>
+    <li>Una vez confirmado el pago, iniciaremos la producción</li>
+    <li>Te mantendremos informado del avance de tu pedido</li>
+</ol>
+
+{% if dashboard_url %}
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ dashboard_url }}" class="btn btn-primary">
+        Ver mi cuenta
+    </a>
+</div>
+{% endif %}
+
+<p>
+    Si tienes alguna pregunta, no dudes en contactarnos. Estamos a tus órdenes.
+</p>
+
+<p>
+    Saludos cordiales,<br>
+    <strong>El equipo de {{ company_name }}</strong>
+</p>
+{% endblock %}

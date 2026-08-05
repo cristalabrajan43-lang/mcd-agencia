@@ -1,0 +1,72 @@
+# =============================================================================
+# Fly.io Configuration — MCD-Agencia Backend
+# =============================================================================
+# Deploy steps:
+#   1. fly auth login
+#   2. fly launch --no-deploy --name mcd-agencia-api
+#   3. fly postgres create --name mcd-agencia-db
+#   4. fly postgres attach mcd-agencia-db
+#   5. fly secrets set DJANGO_SECRET_KEY="..." (see render.yaml for full list)
+#   6. fly deploy
+#
+# Free tier: 3 shared-256MB VMs, 3GB disk, auto-sleep after inactivity.
+# This config uses auto-stop (sleeps when unused → $0 on idle).
+# First request after sleep takes ~3–5 s to wake up.
+# =============================================================================
+
+app            = "mcd-agencia-api"
+primary_region = "dfw"   # Dallas — closest free region to Mexico
+
+# ---------------------------------------------------------------------------
+# Build: use the existing production Dockerfile
+# ---------------------------------------------------------------------------
+[build]
+  dockerfile = "Dockerfile.prod"
+  target     = "production"
+
+# ---------------------------------------------------------------------------
+# Environment variables that are NOT secrets (safe to commit)
+# ---------------------------------------------------------------------------
+[env]
+  DJANGO_ENV     = "cloud"
+  PORT           = "8000"
+  PYTHONUNBUFFERED = "1"
+
+# ---------------------------------------------------------------------------
+# HTTP service (web)
+# ---------------------------------------------------------------------------
+[http_service]
+  internal_port       = 8000
+  force_https         = true
+  auto_stop_machines  = "suspend" # wakes faster than "stop" while still idle-friendly
+  auto_start_machines = true
+  min_machines_running = 0        # 0 = fully stop, saves free allowance
+
+  [http_service.concurrency]
+    type       = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+# ---------------------------------------------------------------------------
+# Health check (Django /health/ endpoint)
+# ---------------------------------------------------------------------------
+[[http_service.checks]]
+  grace_period  = "15s"
+  interval      = "30s"
+  method        = "GET"
+  path          = "/health/"
+  timeout       = "10s"
+
+# ---------------------------------------------------------------------------
+# Release command — runs AFTER image build, BEFORE traffic switches over.
+# Equivalent to Render's build.sh but without pip install (already in image).
+# ---------------------------------------------------------------------------
+[deploy]
+  release_command = "bash /app/fly-release.sh"
+
+# ---------------------------------------------------------------------------
+# VM size — 1 shared CPU, 512 MB RAM (WeasyPrint needs at least 256 MB)
+# ---------------------------------------------------------------------------
+[[vm]]
+  size   = "shared-cpu-1x"
+  memory = "512mb"

@@ -1,0 +1,44 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Tu cotización ha expirado - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>¡Hola {{ recipient_name }}!</h2>
+
+<p>Te informamos que tu cotización <strong>#{{ quote.quote_number }}</strong> ha expirado.</p>
+
+<div class="info-box warning">
+    <p style="margin: 0;"><strong>Fecha de expiración:</strong> {{ quote.valid_until|date:"d/m/Y" }}</p>
+</div>
+
+<p>
+    Pero no te preocupes, estamos aquí para ayudarte. Si aún estás interesado en nuestros servicios,
+    podemos generar una nueva cotización actualizada para ti.
+</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ contact_url }}" class="btn btn-primary">
+        Solicitar nueva cotización
+    </a>
+</div>
+
+<p>
+    Recuerda que en {{ company_name }} contamos con:
+</p>
+
+<ul>
+    <li>Lonas y vinilos de alta calidad</li>
+    <li>Impresión digital de gran formato</li>
+    <li>Señalética y rotulación</li>
+    <li>Instalación profesional</li>
+</ul>
+
+<p>
+    Si tienes alguna pregunta, no dudes en contactarnos. Estamos a tus órdenes.
+</p>
+
+<p>
+    Saludos cordiales,<br>
+    <strong>El equipo de {{ company_name }}</strong>
+</p>
+{% endblock %}

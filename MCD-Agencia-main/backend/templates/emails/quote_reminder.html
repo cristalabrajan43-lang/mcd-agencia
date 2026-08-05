@@ -1,0 +1,64 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Tu cotización expira pronto - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>¡Hola {{ recipient_name }}!</h2>
+
+<p>
+    Te recordamos que tu cotización <strong>#{{ quote.quote_number }}</strong> está próxima a expirar.
+</p>
+
+<div class="info-box warning">
+    <p style="margin: 0;">
+        <strong>⏰ Días restantes:</strong> {{ days_remaining }} día{{ days_remaining|pluralize:"s" }}<br>
+        <strong>Fecha de expiración:</strong> {{ quote.valid_until|date:"d/m/Y" }}
+    </p>
+</div>
+
+<div class="order-summary">
+    <h3 style="margin-top: 0;">Resumen de la cotización</h3>
+
+    {% for line in quote.lines.all %}
+    <div class="line-item">
+        <span>{{ line.description }}</span>
+        <span>${{ line.line_total|floatformat:2 }}</span>
+    </div>
+    {% endfor %}
+
+    <div class="line-item">
+        <span>Subtotal</span>
+        <span>${{ quote.subtotal|floatformat:2 }}</span>
+    </div>
+
+    <div class="line-item">
+        <span>IVA ({{ quote.tax_rate }}%)</span>
+        <span>${{ quote.tax_amount|floatformat:2 }}</span>
+    </div>
+
+    <div class="line-item total">
+        <span>Total</span>
+        <span>${{ quote.total|floatformat:2 }} MXN</span>
+    </div>
+</div>
+
+<p>
+    No pierdas esta oportunidad. Una vez que expire, los precios podrían cambiar.
+</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ quote_url }}" class="btn btn-primary">
+        Ver cotización y aceptar
+    </a>
+</div>
+
+<p>
+    Si tienes alguna pregunta o necesitas modificaciones, no dudes en contactarnos.
+    Estamos aquí para ayudarte.
+</p>
+
+<p>
+    Saludos cordiales,<br>
+    <strong>El equipo de {{ company_name }}</strong>
+</p>
+{% endblock %}

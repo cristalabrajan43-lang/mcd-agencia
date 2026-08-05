@@ -1,0 +1,585 @@
+{
+  "landing": {
+    "hero": {
+      "title": "Transforma tus",
+      "titleHighlight": "ideas.",
+      "subtitle": "Lonas, vinilos y publicidad exterior con calidad profesional. Envío o recolección en Acapulco.",
+      "cta": "Cotizar ahora →",
+      "ctaWhatsapp": "WhatsApp",
+      "trustBadges": {
+        "fastDelivery": "Entrega rápida",
+        "qualityGuaranteed": "Calidad garantizada",
+        "businessHours": "Atención {hours} hrs"
+      },
+      "carousel": {
+        "mobileBillboards": "Vallas Móviles",
+        "banners": "Lonas Publicitarias",
+        "largeFormat": "Gran Formato",
+        "vinyls": "Vinilos & Adhesivos"
+      }
+    },
+    "services": {
+      "title": "Soluciones de impresión para cada necesidad",
+      "subtitle": "Ofrecemos servicios especializados de impresión y publicidad para impulsar tu marca y hacer crecer tu negocio.",
+      "viewDetails": "Ver detalles",
+      "close": "Cerrar",
+      "subcategoriesLabel": "Selecciona para cotizar:",
+      "materials": "Materiales disponibles",
+      "requestQuote": "Solicitar cotización",
+      "whatsappConsult": "Consultar por WhatsApp",
+      "tip": "Contáctanos para información personalizada sobre precios y tiempos de entrega.",
+      "subcategories": {
+        "letras3d": "Letras 3D",
+        "cajasLuz": "Cajas de luz",
+        "neonLed": "Neón LED",
+        "anuncios2d": "Anuncios 2D",
+        "bastidores": "Bastidores",
+        "toldos": "Toldos",
+        "unipolar": "Unipolar",
+        "azotea": "Azotea",
+        "mural": "Mural publicitario",
+        "vallasMoviles": "Vallas móviles",
+        "publibuses": "Publibuses",
+        "perifoneo": "Perifoneo",
+        "lona": "Lona",
+        "vinil": "Vinil",
+        "tela": "Tela",
+        "rotulacionCompleta": "Rotulación completa",
+        "rotulacionParcial": "Rotulación parcial",
+        "vinilRecortado": "Vinil recortado",
+        "impresionDigital": "Impresión digital",
+        "interior": "Interior",
+        "exterior": "Exterior",
+        "vial": "Vial",
+        "routerCnc": "Router CNC",
+        "corteLaser": "Corte láser",
+        "grabadoLaser": "Grabado láser",
+        "logotipos": "Logotipos",
+        "papeleria": "Papelería",
+        "redesSociales": "Redes sociales",
+        "tarjetasPresentacion": "Tarjetas de Presentación",
+        "volantes": "Volantes",
+        "otro": "Otro"
+      },
+      "items": {
+        "fabricacion-anuncios": {
+          "title": "Fabricación de Anuncios",
+          "description": "Anuncios personalizados con iluminación LED, letras 3D, cajas de luz, toldos y más para destacar tu marca."
+        },
+        "espectaculares": {
+          "title": "Espectaculares",
+          "description": "Anuncios de gran formato en ubicaciones estratégicas para máximo impacto visual."
+        },
+        "publicidad-movil": {
+          "title": "Publicidad Móvil",
+          "description": "Lleva tu mensaje a donde está tu audiencia con vallas móviles, publibuses y perifoneo de alto impacto."
+        },
+        "impresion-gran-formato": {
+          "title": "Impresión en Gran Formato",
+          "description": "Impresiones de alta resolución en lona, vinil y tela para banners, lonas publicitarias y más."
+        },
+        "rotulacion-vehicular": {
+          "title": "Rotulación Vehicular",
+          "description": "Rotulación completa o parcial de vehículos con vinil de alta durabilidad."
+        },
+        "senalizacion": {
+          "title": "Señalización",
+          "description": "Señalética interior y exterior para empresas, comercios e instituciones."
+        },
+        "corte-grabado-cnc-laser": {
+          "title": "Corte y Grabado CNC/Láser",
+          "description": "Corte y grabado de precisión en diversos materiales con tecnología CNC y láser."
+        },
+        "diseno-grafico": {
+          "title": "Diseño Gráfico",
+          "description": "Creación de diseños personalizados para impresión y medios digitales."
+        },
+        "impresion-offset-serigrafia": {
+          "title": "Impresión Offset, Serigrafía y Sublimación",
+          "description": "Tarjetas de presentación, volantes y productos impresos con técnicas tradicionales de alta calidad."
+        }
+      }
+    },
+    "aboutUs": {
+      "title": "Acerca de Nosotros",
+      "description": "Somos una empresa que nace en el puerto de Acapulco, con territorio en el estado de Guerrero. Desarrollamos estrategias y soluciones para satisfacer las necesidades de nuestros clientes de comunicación visual por medio de publicidad impresa y digital.",
+      "mission": {
+        "title": "Misión",
+        "description": "Brindar soluciones integrales a las necesidades de nuestros clientes, mediante la producción de productos innovadores con la mejor tecnología. Asegurando un desarrollo profesional a nuestro equipo."
+      },
+      "vision": {
+        "title": "Visión",
+        "description": "Ser líder empresarial en el sector publicitario ante el mercado transnacional, como la mejor opción de innovación y calidad."
+      },
+      "values": {
+        "title": "Nuestros Valores",
+        "items": {
+          "leadership": "Liderazgo",
+          "commitment": "Compromiso",
+          "dedication": "Dedicación",
+          "innovation": "Innovación",
+          "customerFocus": "Orientación al cliente",
+          "creativity": "Creatividad",
+          "quality": "Calidad"
+        }
+      }
+    },
+    "header": {
+      "nav": {
+        "home": "Inicio",
+        "catalog": "Catálogo",
+        "services": "Servicios",
+        "portfolio": "Portafolio",
+        "clients": "Clientes",
+        "faq": "FAQ",
+        "contact": "Contacto",
+        "cart": "Carrito",
+        "buy": "Comprar"
+      },
+      "quote": "Cotizar",
+      "changeLanguage": "Cambiar idioma",
+      "contactWhatsapp": "Contactar por WhatsApp",
+      "myAccount": "Mi Cuenta",
+      "myOrders": "Mis Pedidos",
+      "admin": "Administración",
+      "welcome": "Bienvenido",
+      "logout": "Cerrar sesión",
+      "login": "Iniciar sesión",
+      "register": "Registrarse"
+    },
+    "portfolio": {
+      "title": "Trabajos que hablan por nosotros",
+      "subtitle": "Mira cómo transformamos ideas en proyectos de impacto.",
+      "likeThis": "¿Te gustaría un proyecto similar?",
+      "requestQuote": "Solicitar cotización →",
+      "playVideo": "Reproducir video",
+      "videoAlt": "Video de trabajos realizados por Agencia MCD",
+      "video1Label": "Impresión gran formato",
+      "video2Label": "Rotulación y vinilos"
+    },
+    "clients": {
+      "title": "Confían en nosotros",
+      "subtitle": "Empresas líderes en México eligen Agencia MCD para sus campañas de gran formato y publicidad exterior.",
+      "satisfied": "+{count} empresas satisfechas con nuestros servicios de impresión"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "subtitle": "Encuentra respuestas a las dudas más comunes sobre nuestros servicios",
+      "items": {
+        "delivery": {
+          "question": "¿Cuánto tiempo tarda la entrega?",
+          "answer": "El tiempo de entrega depende del tipo de proyecto y cantidad. En promedio, lonas y gran formato se entregan en 3-5 días hábiles. Para pedidos urgentes, consúltanos por WhatsApp."
+        },
+        "shipping": {
+          "question": "¿Hacen envíos fuera de Acapulco?",
+          "answer": "Sí, enviamos a toda la República Mexicana. También puedes recoger tu pedido directamente en nuestras oficinas."
+        },
+        "formats": {
+          "question": "¿Qué formatos de archivo aceptan?",
+          "answer": "Aceptamos PDF, AI, PSD, JPG de alta resolución. Si no cuentas con el archivo adecuado, nuestro equipo de diseño puede ayudarte (costo adicional)."
+        },
+        "samples": {
+          "question": "¿Puedo solicitar una muestra antes del pedido completo?",
+          "answer": "Sí, para pedidos grandes ofrecemos muestras de material y calidad de impresión. Contáctanos para más detalles."
+        },
+        "design": {
+          "question": "¿Ofrecen diseño gráfico?",
+          "answer": "Sí, contamos con servicio de diseño. Si no tienes tu arte final, cotiza junto con tu proyecto de impresión."
+        },
+        "payment": {
+          "question": "¿Cuáles son las formas de pago?",
+          "answer": "Aceptamos transferencia, depósito bancario y pago en efectivo (contra entrega o recolección)."
+        },
+        "warranty": {
+          "question": "¿Qué garantía tienen los trabajos?",
+          "answer": "Garantizamos la calidad de impresión y materiales. Si hay un defecto de fabricación, lo reponemos sin costo."
+        },
+        "hours": {
+          "question": "¿En qué horario puedo contactarlos?",
+          "answer": "Nuestro horario de atención es de 9:00 a 18:00 hrs, de lunes a viernes. Fuera de horario, déjanos tu mensaje y te responderemos al siguiente día hábil."
+        }
+      }
+    },
+    "locations": {
+      "title": "Nuestras Ubicaciones",
+      "subtitle": "Visítanos en cualquiera de nuestras oficinas o contáctanos directamente",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "hours": "Horario",
+      "getDirections": "Cómo llegar",
+      "whatsappCta": "Escribir por WhatsApp",
+      "items": {
+        "acapulco-diamante": {
+          "name": "Acapulco Diamante",
+          "city": "Acapulco, Guerrero",
+          "address": "Granjas Márquez Plaza Diamante, C.P. 39890"
+        },
+        "costa-azul": {
+          "name": "Acapulco Costa Azul",
+          "city": "Acapulco, Guerrero",
+          "address": "Capitán Vasco de Gama 295, 2° piso Plaza Yamaha, Fracc. Costa Azul, 39850 Acapulco de Juárez, Gro."
+        },
+        "tecoanapa": {
+          "name": "Tecoanapa",
+          "city": "Tecoanapa, Guerrero",
+          "address": "Carretera Federal Tierra Colorada – Ayutla, Col. San Isidro, frente a los Arcos"
+        }
+      }
+    },
+    "quoteForm": {
+      "title": "Solicita tu cotización",
+      "subtitle": "Cuéntanos sobre tu proyecto y te contactaremos en menos de 24 horas",
+      "contactData": "Datos de contacto",
+      "projectDetails": "Detalles del proyecto",
+      "name": "Nombre completo",
+      "namePlaceholder": "Juan Pérez",
+      "email": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "phone": "Teléfono (10 dígitos)",
+      "phonePlaceholder": "2228055700",
+      "deliveryMethod": "Método de entrega",
+      "deliveryOptions": {
+        "shipping": "Envío a domicilio",
+        "pickup": "Recolección en oficina",
+        "notSure": "No estoy seguro"
+      },
+      "requestType": "Tipo de solicitud",
+      "requestOptions": {
+        "quote": "Cotización",
+        "contact": "Contacto general"
+      },
+      "service": "Servicio / Producto",
+      "selectService": "Selecciona un servicio...",
+      "selected": "Seleccionado",
+      "width": "Ancho (opcional)",
+      "widthPlaceholder": "2m",
+      "height": "Alto (opcional)",
+      "heightPlaceholder": "3m",
+      "usage": "Uso (opcional)",
+      "usageOptions": {
+        "select": "Seleccionar...",
+        "indoor": "Interior",
+        "outdoor": "Exterior"
+      },
+      "targetDate": "Fecha objetivo (opcional)",
+      "comments": "Comentarios adicionales (opcional)",
+      "commentsPlaceholder": "Describe tu proyecto, necesidades especiales, o cualquier información adicional que nos ayude a cotizar mejor...",
+      "attachFile": "Adjuntar archivo (opcional)",
+      "changeFile": "Cambiar archivo",
+      "dragOrClick": "Haz clic o arrastra un archivo aquí",
+      "fileTypes": "PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, ZIP (máx. 10MB)",
+      "fileLater": "Si no tienes el archivo ahora, puedes enviarlo después por WhatsApp o email",
+      "fileTooLarge": "El archivo es demasiado grande. Máximo 10MB.",
+      "fileTypeNotAllowed": "Tipo de archivo no permitido. Soportados: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, ZIP",
+      "privacy": "Acepto el",
+      "privacyLink": "aviso de privacidad",
+      "submit": "Enviar cotización →",
+      "sending": "Enviando tu solicitud...",
+      "success": "¡Tu solicitud ha sido enviada!",
+      "successMessage": "Te contactaremos pronto.",
+      "error": "Hubo un problema",
+      "errorRetry": "Por favor intenta de nuevo o contáctanos por WhatsApp:"
+    },
+    "routeSelector": {
+      "routeConfigured": "Ruta configurada",
+      "configureRoute": "Configurar ruta del recorrido",
+      "dragMarkers": "Arrastra los marcadores en el mapa",
+      "edit": "Editar",
+      "configureRouteTitle": "Configura la ruta",
+      "configureRouteDesc": "Arrastra los marcadores o escribe las direcciones",
+      "searchOrigin": "Buscar origen...",
+      "searchDestination": "Buscar destino...",
+      "dragOriginTooltip": "Arrastra para mover el origen",
+      "dragDestinationTooltip": "Arrastra para mover el destino",
+      "loadingMap": "Cargando mapa...",
+      "calculatingRoute": "Calculando ruta...",
+      "dragInstruction": "Arrastra los marcadores A y B para definir la ruta",
+      "noValidRoute": "No se encontró una ruta válida",
+      "routeError": "Error al calcular la ruta",
+      "distance": "Distancia",
+      "time": "Tiempo",
+      "confirmRoute": "Confirmar ruta",
+      "savePosition": "Guardar posición"
+    },
+    "footer": {
+      "description": "Impresión de gran formato y publicidad exterior en Acapulco.",
+      "acapulco": "MCD Acapulco",
+      "tecoanapa": "MCD Tecoanapa",
+      "quickLinks": "Enlaces Rápidos",
+      "services": "Servicios",
+      "contact": "Contacto",
+      "copyright": "© {year} Agencia MCD. Todos los derechos reservados.",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "comingSoon": "Próximamente",
+      "nav": {
+        "home": "Inicio",
+        "services": "Servicios",
+        "portfolio": "Portafolio",
+        "clients": "Clientes",
+        "contact": "Contacto"
+      },
+      "viewAllServices": "Ver todos los servicios →"
+    }
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "products": "productos",
+    "product": "producto",
+    "sortBy": "Ordenar por",
+    "newest": "Más recientes",
+    "nameAZ": "Nombre (A-Z)",
+    "nameZA": "Nombre (Z-A)",
+    "priceLowHigh": "Precio: Menor a Mayor",
+    "priceHighLow": "Precio: Mayor a Menor",
+    "noProducts": "No hay productos",
+    "loading": "Cargando...",
+    "filters": "Filtros",
+    "priceRange": "Rango de Precio",
+    "from": "Desde",
+    "to": "Hasta",
+    "apply": "Aplicar",
+    "reset": "Limpiar",
+    "category": "Categoría",
+    "allCategories": "Todas las Categorías",
+    "viewDetails": "Ver Detalles",
+    "addToCart": "Agregar al Carrito",
+    "search": "Buscar productos...",
+    "noResults": "No se encontraron resultados para",
+    "tryOtherSearch": "Intenta otra búsqueda o explora nuestras categorías"
+  },
+  "common": {
+    "appName": "Agencia MCD",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "yes": "Sí",
+    "no": "No",
+    "confirm": "Confirmar",
+    "actions": "Acciones",
+    "status": "Estado",
+    "date": "Fecha",
+    "viewAll": "Ver todo",
+    "noResults": "Sin resultados",
+    "required": "Requerido"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "catalog": "Catálogo",
+    "services": "Servicios",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "cart": "Carrito",
+    "account": "Mi Cuenta",
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "admin": "Administración",
+    "orders": "Mis Pedidos",
+    "profile": "Mi Perfil"
+  },
+  "nav": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "portfolio": "Portafolio",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "quote": "Cotizar",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "myAccount": "Mi cuenta",
+    "cart": "Carrito",
+    "admin": "Administración"
+  },
+  "hero": {
+    "title": "Impresión de Alta Calidad en Acapulco",
+    "subtitle": "Más de 20 años de experiencia en impresión digital y offset",
+    "cta": "Solicitar Cotización",
+    "ctaSecondary": "Ver Servicios"
+  },
+  "services": {
+    "title": "Nuestros Servicios",
+    "subtitle": "Soluciones integrales de impresión para tu negocio",
+    "offset": {
+      "title": "Impresión Offset",
+      "description": "Ideal para grandes tirajes con calidad excepcional"
+    },
+    "digital": {
+      "title": "Impresión Digital",
+      "description": "Perfecta para tirajes cortos y personalización"
+    },
+    "largeFormat": {
+      "title": "Gran Formato",
+      "description": "Lonas, vinilos y materiales de gran tamaño"
+    },
+    "promotional": {
+      "title": "Artículos Promocionales",
+      "description": "Merchandising personalizado para tu marca"
+    }
+  },
+  "quote": {
+    "title": "Solicitar Cotización",
+    "subtitle": "Cuéntanos sobre tu proyecto y te enviaremos una cotización personalizada",
+    "name": "Nombre completo",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "company": "Empresa (opcional)",
+    "service": "Tipo de servicio",
+    "quantity": "Cantidad aproximada",
+    "description": "Descripción del proyecto",
+    "attachments": "Archivos adjuntos",
+    "submit": "Enviar solicitud",
+    "success": "¡Tu solicitud ha sido enviada! Te contactaremos pronto.",
+    "error": "Hubo un error al enviar tu solicitud. Por favor intenta de nuevo."
+  },
+  "contact": {
+    "title": "Contacto",
+    "address": "Dirección",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "hours": "Horario de atención",
+    "hoursValue": "Lunes a Viernes: 9:00 - 18:00"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos y Condiciones",
+    "description": "Soluciones integrales en medios impresos, señalética y publicidad exterior.",
+    "columns": {
+      "company": "Empresa",
+      "catalog": "Catálogo",
+      "support": "Soporte"
+    },
+    "links": {
+      "about": "Nosotros",
+      "services": "Servicios",
+      "branches": "Sucursales",
+      "contact": "Contacto",
+      "products": "Productos",
+      "signage": "Señalética",
+      "printing": "Impresión",
+      "outdoor": "Exterior",
+      "faq": "Preguntas Frecuentes",
+      "quote": "Cotizar",
+      "tracking": "Seguimiento de Pedidos",
+      "terms": "Términos y Condiciones",
+      "privacy": "Política de Privacidad",
+      "cookies": "Política de Cookies"
+    }
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPassword": "Restablecer contraseña",
+    "loginWithGoogle": "Continuar con Google",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "invalidCredentials": "Credenciales inválidas",
+    "accountCreated": "Cuenta creada exitosamente"
+  },
+  "admin": {
+    "dashboard": "Panel de Control",
+    "orders": "Pedidos",
+    "quotes": "Cotizaciones",
+    "products": "Productos",
+    "catalog": "Catálogo",
+    "customers": "Clientes",
+    "users": "Usuarios",
+    "settings": "Configuración",
+    "reports": "Reportes",
+    "inventory": "Inventario",
+    "payments": "Pagos",
+    "content": "Contenido",
+    "audit": "Bitácora",
+    "chatbot": "Chatbot",
+    "conversations": "Conversaciones",
+    "welcome": "Bienvenido al panel de administración",
+    "totalSales": "Ventas Totales",
+    "pendingOrders": "Pedidos Pendientes",
+    "pendingQuotes": "Cotizaciones Pendientes",
+    "newCustomers": "Clientes Nuevos",
+    "recentActivity": "Actividad Reciente"
+  },
+  "orders": {
+    "title": "Pedidos",
+    "orderNumber": "Número de pedido",
+    "customer": "Cliente",
+    "total": "Total",
+    "status": "Estado",
+    "createdAt": "Fecha de creación",
+    "statuses": {
+      "draft": "Borrador",
+      "pending_payment": "Pendiente de pago",
+      "paid": "Pagado",
+      "partially_paid": "Parcialmente pagado",
+      "in_production": "En producción",
+      "ready": "Listo",
+      "shipped": "Enviado",
+      "delivered": "Entregado",
+      "cancelled": "Cancelado",
+      "refunded": "Reembolsado"
+    }
+  },
+  "quotes": {
+    "title": "Cotizaciones",
+    "quoteNumber": "Número de cotización",
+    "customer": "Cliente",
+    "status": "Estado",
+    "validUntil": "Válida hasta",
+    "statuses": {
+      "draft": "Borrador",
+      "in_review": "En revisión",
+      "quote_sent": "Cotización enviada",
+      "accepted": "Aceptada",
+      "rejected": "Rechazada",
+      "expired": "Expirada"
+    }
+  },
+  "cart": {
+    "title": "Carrito de Compras",
+    "empty": "Tu carrito está vacío",
+    "subtotal": "Subtotal",
+    "tax": "IVA (16%)",
+    "total": "Total",
+    "checkout": "Proceder al pago",
+    "continueShopping": "Seguir comprando",
+    "remove": "Eliminar",
+    "quantity": "Cantidad"
+  },
+  "checkout": {
+    "title": "Finalizar Compra",
+    "shipping": "Datos de envío",
+    "billing": "Datos de facturación",
+    "payment": "Método de pago",
+    "review": "Revisar pedido",
+    "placeOrder": "Realizar pedido",
+    "paymentMethods": {
+      "mercadopago": "MercadoPago",
+      "paypal": "PayPal",
+      "transfer": "Transferencia bancaria"
+    }
+  },
+  "validation": {
+    "required": "Este campo es requerido",
+    "email": "Ingresa un correo electrónico válido",
+    "minLength": "Mínimo {min} caracteres",
+    "maxLength": "Máximo {max} caracteres",
+    "phone": "Ingresa un teléfono válido",
+    "passwordMatch": "Las contraseñas no coinciden"
+  }
+}

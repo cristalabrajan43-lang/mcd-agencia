@@ -1,0 +1,83 @@
+{% extends "emails/base.html" %}
+
+{% block title %}¡Cotización aceptada! - MCD Agencia{% endblock %}
+
+{% block content %}
+<h2>🎉 ¡Cotización aceptada!</h2>
+
+<p>
+    Excelentes noticias. Un cliente ha aceptado una cotización.
+</p>
+
+<div class="info-box" style="background-color: #ecfdf5; border-color: #34d399;">
+    <p style="margin: 0;">
+        <strong>Cotización:</strong> #{{ quote.quote_number }}<br>
+        <strong>Monto total:</strong> ${{ quote.total|floatformat:2 }} MXN
+    </p>
+</div>
+
+<h3>Información del cliente</h3>
+
+<table class="data-table">
+    <tr>
+        <th>Nombre</th>
+        <td>{{ customer_name }}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{{ customer_email }}</td>
+    </tr>
+</table>
+
+<h3>Resumen de la cotización</h3>
+
+<div class="order-summary">
+    {% for line in quote.lines.all %}
+    <div class="line-item">
+        <span>{{ line.description }} (x{{ line.quantity }})</span>
+        <span>${{ line.line_total|floatformat:2 }}</span>
+    </div>
+    {% endfor %}
+
+    <div class="line-item">
+        <span>Subtotal</span>
+        <span>${{ quote.subtotal|floatformat:2 }}</span>
+    </div>
+
+    {% if quote.discount_amount %}
+    <div class="line-item">
+        <span>Descuento</span>
+        <span>-${{ quote.discount_amount|floatformat:2 }}</span>
+    </div>
+    {% endif %}
+
+    <div class="line-item">
+        <span>IVA ({{ quote.tax_rate }}%)</span>
+        <span>${{ quote.tax_amount|floatformat:2 }}</span>
+    </div>
+
+    <div class="line-item total">
+        <span>Total</span>
+        <span>${{ quote.total|floatformat:2 }} MXN</span>
+    </div>
+</div>
+
+<h3>Próximos pasos</h3>
+
+<ol>
+    <li>Contactar al cliente para coordinar el pago del anticipo</li>
+    <li>Solicitar artes finales si no han sido enviados</li>
+    <li>Programar producción y fecha de entrega</li>
+    <li>Coordinar instalación (si aplica)</li>
+</ol>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ quote_url }}" class="btn btn-primary">
+        Ver cotización en el sistema
+    </a>
+</div>
+
+<p style="color: #6b7280; font-size: 14px;">
+    Este es un mensaje automático del sistema de cotizaciones de {{ company_name }}.
+</p>
+{% endblock %}

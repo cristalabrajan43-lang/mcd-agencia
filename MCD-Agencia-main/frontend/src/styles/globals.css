@@ -1,0 +1,362 @@
+/**
+ * Global Styles for MCD-Agencia
+ *
+ * This file includes:
+ * - Tailwind directives
+ * - CSS custom properties
+ * - Base styles
+ * - Utility classes
+ */
+
+/* =============================================================================
+   Tailwind Directives
+   ============================================================================= */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+   CSS Custom Properties
+   ============================================================================= */
+
+:root {
+  /* Brand Colors */
+  --color-brand-cyan: #0DA3EF;
+  --color-brand-magenta: #EC2D8D;
+  --color-brand-yellow: #FFE884;
+  --color-brand-black: #000000;
+
+  /* Gradients */
+  --gradient-cmyk: linear-gradient(
+    135deg,
+    rgba(0, 255, 255, 0.2),
+    rgba(255, 0, 255, 0.2),
+    rgba(255, 255, 0, 0.2)
+  );
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+
+  /* Shadows */
+  --shadow-glow-cyan: 0 0 20px rgba(0, 255, 255, 0.3);
+  --shadow-glow-magenta: 0 0 20px rgba(255, 0, 255, 0.3);
+  --shadow-glow-yellow: 0 0 20px rgba(255, 255, 0, 0.3);
+}
+
+/* =============================================================================
+   Base Styles
+   ============================================================================= */
+
+@layer base {
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: var(--color-brand-cyan);
+    color: var(--color-brand-black);
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-cyan);
+    outline-offset: 2px;
+  }
+
+  /* Body defaults */
+  body {
+    @apply bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-white;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+
+  /* Links */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Images — Tailwind preflight handles max-w-full + h-auto;
+     removed duplicate rule that interfered with absolute-positioned images */
+}
+
+/* =============================================================================
+   Component Styles
+   ============================================================================= */
+
+@layer components {
+  /* Container */
+  .container-custom {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-6 xl:px-8;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-cmyk-cyan px-6 py-3 font-semibold text-black transition-all duration-200;
+    @apply hover:bg-primary-400 hover:shadow-glow-cyan;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-cmyk-cyan px-6 py-3 font-semibold text-cmyk-cyan transition-all duration-200;
+    @apply hover:bg-cmyk-cyan hover:text-black;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 font-semibold text-white transition-all duration-200;
+    @apply hover:bg-white/10;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-neutral-950;
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-2xl bg-white border border-neutral-200 p-6 shadow-sm transition-all duration-200;
+    @apply dark:bg-neutral-900 dark:border-transparent dark:shadow-none;
+    @apply hover:shadow-lg;
+  }
+
+  /* Card with glow effect */
+  .card-glow {
+    @apply card;
+    @apply hover:shadow-glow-cyan;
+  }
+
+  /* Input */
+  .input {
+    @apply w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 placeholder-neutral-400 transition-all duration-200;
+    @apply dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400;
+    @apply focus:border-cmyk-cyan focus:outline-none focus:ring-2 focus:ring-cmyk-cyan/20;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Select */
+  .select {
+    @apply input appearance-none bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23737373'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+    padding-right: 3rem;
+  }
+
+  /* Textarea */
+  .textarea {
+    @apply input min-h-[120px] resize-y;
+  }
+
+  /* Label */
+  .label {
+    @apply mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300;
+  }
+
+  /* Label for landing form */
+  .label-field {
+    @apply block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2;
+  }
+
+  /* Input for landing form */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg bg-white border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-all duration-200;
+    @apply dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:placeholder-gray-500;
+    @apply focus:border-cmyk-cyan focus:outline-none focus:ring-2 focus:ring-cmyk-cyan/20;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Error message for forms */
+  .error-message {
+    @apply mt-1 text-sm text-red-400;
+  }
+
+  /* Section utility */
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  /* Button WhatsApp */
+  .btn-whatsapp {
+    @apply inline-flex items-center justify-center rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-neutral-900 transition-all duration-200;
+    @apply hover:bg-yellow-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-neutral-950;
+  }
+
+  /* Error text */
+  .error-text {
+    @apply mt-1 text-sm text-red-500;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-cmyk-cyan/20 text-cmyk-cyan;
+  }
+
+  .badge-secondary {
+    @apply badge bg-cmyk-magenta/20 text-cmyk-magenta;
+  }
+
+  .badge-success {
+    @apply badge bg-green-500/20 text-green-400;
+  }
+
+  .badge-warning {
+    @apply badge bg-cmyk-yellow/20 text-cmyk-yellow;
+  }
+
+  .badge-error {
+    @apply badge bg-red-500/20 text-red-400;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply mb-4 text-center text-3xl font-bold md:text-4xl;
+  }
+
+  .section-subheading {
+    @apply mx-auto mb-12 max-w-2xl text-center text-neutral-400;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent;
+  }
+
+  /* Divider with glow */
+  .divider-glow {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-primary-500 to-transparent;
+  }
+}
+
+/* =============================================================================
+   Utility Classes
+   ============================================================================= */
+
+@layer utilities {
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-cyan) transparent;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: var(--color-brand-cyan);
+    border-radius: 3px;
+  }
+
+  /* Glow effects */
+  .glow-cyan {
+    box-shadow: var(--shadow-glow-cyan);
+  }
+
+  .glow-magenta {
+    box-shadow: var(--shadow-glow-magenta);
+  }
+
+  .glow-yellow {
+    box-shadow: var(--shadow-glow-yellow);
+  }
+
+  /* Animation delay utilities */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Aspect ratios */
+  .aspect-video-vertical {
+    aspect-ratio: 9 / 16;
+  }
+
+  .aspect-banner {
+    aspect-ratio: 21 / 9;
+  }
+}
+
+/* =============================================================================
+   Animation Keyframes
+   ============================================================================= */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}

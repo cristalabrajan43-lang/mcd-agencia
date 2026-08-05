@@ -1,0 +1,585 @@
+{
+  "landing": {
+    "hero": {
+      "title": "Transform your",
+      "titleHighlight": "ideas.",
+      "subtitle": "Banners, vinyl and outdoor advertising with professional quality. Shipping or pickup in Acapulco.",
+      "cta": "Get Quote →",
+      "ctaWhatsapp": "WhatsApp",
+      "trustBadges": {
+        "fastDelivery": "Fast delivery",
+        "qualityGuaranteed": "Quality guaranteed",
+        "businessHours": "Service {hours} hrs"
+      },
+      "carousel": {
+        "mobileBillboards": "Mobile Billboards",
+        "banners": "Advertising Banners",
+        "largeFormat": "Large Format",
+        "vinyls": "Vinyl & Adhesives"
+      }
+    },
+    "services": {
+      "title": "Printing solutions for every need",
+      "subtitle": "We offer specialized printing and advertising services to boost your brand and grow your business.",
+      "viewDetails": "View details",
+      "close": "Close",
+      "subcategoriesLabel": "Select to quote:",
+      "materials": "Available materials",
+      "requestQuote": "Request quote",
+      "whatsappConsult": "Ask via WhatsApp",
+      "tip": "Contact us for personalized information about prices and delivery times.",
+      "subcategories": {
+        "letras3d": "3D Letters",
+        "cajasLuz": "Light boxes",
+        "neonLed": "LED Neon",
+        "anuncios2d": "2D Signs",
+        "bastidores": "Frames",
+        "toldos": "Awnings",
+        "unipolar": "Unipole",
+        "azotea": "Rooftop",
+        "mural": "Advertising mural",
+        "vallasMoviles": "Mobile billboards",
+        "publibuses": "Bus advertising",
+        "perifoneo": "Mobile audio",
+        "lona": "Canvas",
+        "vinil": "Vinyl",
+        "tela": "Fabric",
+        "rotulacionCompleta": "Full wrap",
+        "rotulacionParcial": "Partial wrap",
+        "vinilRecortado": "Cut vinyl",
+        "impresionDigital": "Digital printing",
+        "interior": "Interior",
+        "exterior": "Exterior",
+        "vial": "Road signage",
+        "routerCnc": "CNC Router",
+        "corteLaser": "Laser cutting",
+        "grabadoLaser": "Laser engraving",
+        "logotipos": "Logos",
+        "papeleria": "Stationery",
+        "redesSociales": "Social media",
+        "tarjetasPresentacion": "Business Cards",
+        "volantes": "Flyers",
+        "otro": "Other"
+      },
+      "items": {
+        "fabricacion-anuncios": {
+          "title": "Sign Manufacturing",
+          "description": "Custom signs with LED lighting, 3D letters, light boxes, awnings and more to make your brand stand out."
+        },
+        "espectaculares": {
+          "title": "Billboards",
+          "description": "Large format ads in strategic locations for maximum visual impact."
+        },
+        "publicidad-movil": {
+          "title": "Mobile Advertising",
+          "description": "Take your message where your audience is with mobile billboards, bus ads and loudspeaker campaigns."
+        },
+        "impresion-gran-formato": {
+          "title": "Large Format Printing",
+          "description": "High resolution prints on canvas, vinyl and fabric for banners, advertising displays and more."
+        },
+        "rotulacion-vehicular": {
+          "title": "Vehicle Wrapping",
+          "description": "Full or partial vehicle wrapping with high durability vinyl."
+        },
+        "senalizacion": {
+          "title": "Signage",
+          "description": "Interior and exterior signage for businesses, shops and institutions."
+        },
+        "corte-grabado-cnc-laser": {
+          "title": "CNC & Laser Cutting",
+          "description": "Precision cutting and engraving on various materials with CNC and laser technology."
+        },
+        "diseno-grafico": {
+          "title": "Graphic Design",
+          "description": "Custom design creation for print and digital media."
+        },
+        "impresion-offset-serigrafia": {
+          "title": "Offset, Screen Printing & Sublimation",
+          "description": "Business cards, flyers and printed products with high quality traditional techniques."
+        }
+      }
+    },
+    "aboutUs": {
+      "title": "About Us",
+      "description": "We are a company born in the port of Acapulco, with territory in the state of Guerrero. We develop strategies and solutions to meet our clients' visual communication needs through print and digital advertising.",
+      "mission": {
+        "title": "Mission",
+        "description": "To provide comprehensive solutions to our clients' needs through the production of innovative products with the best technology. Ensuring professional development for our team."
+      },
+      "vision": {
+        "title": "Vision",
+        "description": "To be a business leader in the advertising sector in the transnational market, as the best option for innovation and quality."
+      },
+      "values": {
+        "title": "Our Values",
+        "items": {
+          "leadership": "Leadership",
+          "commitment": "Commitment",
+          "dedication": "Dedication",
+          "innovation": "Innovation",
+          "customerFocus": "Customer Focus",
+          "creativity": "Creativity",
+          "quality": "Quality"
+        }
+      }
+    },
+    "header": {
+      "nav": {
+        "home": "Home",
+        "catalog": "Catalog",
+        "services": "Services",
+        "portfolio": "Portfolio",
+        "clients": "Clients",
+        "faq": "FAQ",
+        "contact": "Contact",
+        "cart": "Cart",
+        "buy": "Shop"
+      },
+      "quote": "Get Quote",
+      "changeLanguage": "Change language",
+      "contactWhatsapp": "Contact via WhatsApp",
+      "myAccount": "My Account",
+      "myOrders": "My Orders",
+      "admin": "Administration",
+      "welcome": "Welcome",
+      "logout": "Log out",
+      "login": "Log in",
+      "register": "Sign up"
+    },
+    "portfolio": {
+      "title": "Work that speaks for itself",
+      "subtitle": "See how we turn ideas into high-impact projects.",
+      "likeThis": "Would you like a similar project?",
+      "requestQuote": "Request quote →",
+      "playVideo": "Play video",
+      "videoAlt": "Video of work done by Agencia MCD",
+      "video1Label": "Large format printing",
+      "video2Label": "Lettering & vinyl"
+    },
+    "clients": {
+      "title": "They trust us",
+      "subtitle": "Leading companies in Mexico choose Agencia MCD for their large format campaigns and outdoor advertising.",
+      "satisfied": "+{count} companies satisfied with our printing services"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Find answers to the most common questions about our services",
+      "items": {
+        "delivery": {
+          "question": "How long does delivery take?",
+          "answer": "Delivery time depends on the type of project and quantity. On average, banners and large format are delivered in 3-5 business days. For urgent orders, contact us via WhatsApp."
+        },
+        "shipping": {
+          "question": "Do you ship outside of Acapulco?",
+          "answer": "Yes, we ship to all of Mexico. You can also pick up your order directly at our offices."
+        },
+        "formats": {
+          "question": "What file formats do you accept?",
+          "answer": "We accept PDF, AI, PSD, high resolution JPG. If you don't have the right file, our design team can help (additional cost)."
+        },
+        "samples": {
+          "question": "Can I request a sample before the full order?",
+          "answer": "Yes, for large orders we offer material and print quality samples. Contact us for more details."
+        },
+        "design": {
+          "question": "Do you offer graphic design?",
+          "answer": "Yes, we have a design service. If you don't have your final artwork, quote it along with your print project."
+        },
+        "payment": {
+          "question": "What are the payment methods?",
+          "answer": "We accept wire transfer, bank deposit and cash payment (on delivery or pickup)."
+        },
+        "warranty": {
+          "question": "What warranty do the jobs have?",
+          "answer": "We guarantee print and material quality. If there's a manufacturing defect, we replace it at no cost."
+        },
+        "hours": {
+          "question": "What hours can I contact you?",
+          "answer": "Our business hours are 9:00 AM to 6:00 PM, Monday to Friday. After hours, leave us a message and we'll respond the next business day."
+        }
+      }
+    },
+    "locations": {
+      "title": "Our Locations",
+      "subtitle": "Visit us at any of our offices or contact us directly",
+      "phone": "Phone",
+      "address": "Address",
+      "hours": "Hours",
+      "getDirections": "Get directions",
+      "whatsappCta": "Message on WhatsApp",
+      "items": {
+        "acapulco-diamante": {
+          "name": "Acapulco Diamante",
+          "city": "Acapulco, Guerrero",
+          "address": "Granjas Márquez, Plaza Diamante, C.P. 39890"
+        },
+        "costa-azul": {
+          "name": "Acapulco Costa Azul",
+          "city": "Acapulco, Guerrero",
+          "address": "Capitán Vasco de Gama 295, 2nd floor Plaza Yamaha, Fracc. Costa Azul, 39850 Acapulco de Juárez, Gro."
+        },
+        "tecoanapa": {
+          "name": "Tecoanapa",
+          "city": "Tecoanapa, Guerrero",
+          "address": "Tierra Colorada – Ayutla Federal Highway, Col. San Isidro, across from Los Arcos"
+        }
+      }
+    },
+    "quoteForm": {
+      "title": "Request your quote",
+      "subtitle": "Tell us about your project and we'll contact you within 24 hours",
+      "contactData": "Contact information",
+      "projectDetails": "Project details",
+      "name": "Full name",
+      "namePlaceholder": "John Doe",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "phone": "Phone (10 digits)",
+      "phonePlaceholder": "2228055700",
+      "deliveryMethod": "Delivery method",
+      "deliveryOptions": {
+        "shipping": "Home delivery",
+        "pickup": "Office pickup",
+        "notSure": "Not sure"
+      },
+      "requestType": "Request type",
+      "requestOptions": {
+        "quote": "Quote",
+        "contact": "General inquiry"
+      },
+      "service": "Service / Product",
+      "selectService": "Select a service...",
+      "selected": "Selected",
+      "width": "Width (optional)",
+      "widthPlaceholder": "2m",
+      "height": "Height (optional)",
+      "heightPlaceholder": "3m",
+      "usage": "Usage (optional)",
+      "usageOptions": {
+        "select": "Select...",
+        "indoor": "Indoor",
+        "outdoor": "Outdoor"
+      },
+      "targetDate": "Target date (optional)",
+      "comments": "Additional comments (optional)",
+      "commentsPlaceholder": "Describe your project, special needs, or any additional information to help us quote better...",
+      "attachFile": "Attach file (optional)",
+      "changeFile": "Change file",
+      "dragOrClick": "Click or drag a file here",
+      "fileTypes": "PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, ZIP (max. 10MB)",
+      "fileLater": "If you don't have the file now, you can send it later via WhatsApp or email",
+      "fileTooLarge": "File is too large. Maximum 10MB.",
+      "fileTypeNotAllowed": "File type not allowed. Supported: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, ZIP",
+      "privacy": "I accept the",
+      "privacyLink": "privacy policy",
+      "submit": "Send quote →",
+      "sending": "Sending your request...",
+      "success": "Your request has been sent!",
+      "successMessage": "We will contact you soon.",
+      "error": "There was a problem",
+      "errorRetry": "Please try again or contact us via WhatsApp:"
+    },
+    "routeSelector": {
+      "routeConfigured": "Route configured",
+      "configureRoute": "Configure route path",
+      "dragMarkers": "Drag the markers on the map",
+      "edit": "Edit",
+      "configureRouteTitle": "Configure the route",
+      "configureRouteDesc": "Drag the markers or type the addresses",
+      "searchOrigin": "Search origin...",
+      "searchDestination": "Search destination...",
+      "dragOriginTooltip": "Drag to move the origin",
+      "dragDestinationTooltip": "Drag to move the destination",
+      "loadingMap": "Loading map...",
+      "calculatingRoute": "Calculating route...",
+      "dragInstruction": "Drag markers A and B to define the route",
+      "noValidRoute": "No valid route found",
+      "routeError": "Error calculating the route",
+      "distance": "Distance",
+      "time": "Time",
+      "confirmRoute": "Confirm route",
+      "savePosition": "Save position"
+    },
+    "footer": {
+      "description": "Large format printing and outdoor advertising in Acapulco.",
+      "acapulco": "MCD Acapulco",
+      "tecoanapa": "MCD Tecoanapa",
+      "quickLinks": "Quick Links",
+      "services": "Services",
+      "contact": "Contact",
+      "copyright": "© {year} Agencia MCD. All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "comingSoon": "Coming soon",
+      "nav": {
+        "home": "Home",
+        "services": "Services",
+        "portfolio": "Portfolio",
+        "clients": "Clients",
+        "contact": "Contact"
+      },
+      "viewAllServices": "View all services →"
+    }
+  },
+  "catalog": {
+    "title": "Catalog",
+    "products": "products",
+    "product": "product",
+    "sortBy": "Sort by",
+    "newest": "Newest",
+    "nameAZ": "Name (A-Z)",
+    "nameZA": "Name (Z-A)",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low",
+    "noProducts": "No products found",
+    "loading": "Loading...",
+    "filters": "Filters",
+    "priceRange": "Price Range",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "reset": "Reset",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "viewDetails": "View Details",
+    "addToCart": "Add to Cart",
+    "search": "Search products...",
+    "noResults": "No results found for",
+    "tryOtherSearch": "Try another search or browse our categories"
+  },
+  "common": {
+    "appName": "Agencia MCD",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "viewAll": "View all",
+    "noResults": "No results",
+    "required": "Required"
+  },
+  "navigation": {
+    "home": "Home",
+    "catalog": "Catalog",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "cart": "Cart",
+    "account": "My Account",
+    "login": "Log In",
+    "logout": "Log Out",
+    "admin": "Administration",
+    "orders": "My Orders",
+    "profile": "My Profile"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "about": "About",
+    "contact": "Contact",
+    "quote": "Get Quote",
+    "login": "Log in",
+    "logout": "Log out",
+    "myAccount": "My Account",
+    "cart": "Cart",
+    "admin": "Administration"
+  },
+  "hero": {
+    "title": "High Quality Printing in Acapulco",
+    "subtitle": "Over 20 years of experience in digital and offset printing",
+    "cta": "Request Quote",
+    "ctaSecondary": "View Services"
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Comprehensive printing solutions for your business",
+    "offset": {
+      "title": "Offset Printing",
+      "description": "Ideal for large print runs with exceptional quality"
+    },
+    "digital": {
+      "title": "Digital Printing",
+      "description": "Perfect for short runs and personalization"
+    },
+    "largeFormat": {
+      "title": "Large Format",
+      "description": "Banners, vinyl, and oversized materials"
+    },
+    "promotional": {
+      "title": "Promotional Items",
+      "description": "Custom merchandise for your brand"
+    }
+  },
+  "quote": {
+    "title": "Request a Quote",
+    "subtitle": "Tell us about your project and we will send you a personalized quote",
+    "name": "Full name",
+    "email": "Email address",
+    "phone": "Phone number",
+    "company": "Company (optional)",
+    "service": "Service type",
+    "quantity": "Approximate quantity",
+    "description": "Project description",
+    "attachments": "Attachments",
+    "submit": "Submit request",
+    "success": "Your request has been sent! We will contact you soon.",
+    "error": "There was an error submitting your request. Please try again."
+  },
+  "contact": {
+    "title": "Contact",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Business hours",
+    "hoursValue": "Monday to Friday: 9:00 AM - 6:00 PM"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms and Conditions",
+    "description": "Comprehensive solutions in print media, signage and outdoor advertising.",
+    "columns": {
+      "company": "Company",
+      "catalog": "Catalog",
+      "support": "Support"
+    },
+    "links": {
+      "about": "About Us",
+      "services": "Services",
+      "branches": "Locations",
+      "contact": "Contact",
+      "products": "Products",
+      "signage": "Signage",
+      "printing": "Printing",
+      "outdoor": "Outdoor",
+      "faq": "FAQ",
+      "quote": "Get Quote",
+      "tracking": "Order Tracking",
+      "terms": "Terms & Conditions",
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Policy"
+    }
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot your password?",
+    "resetPassword": "Reset password",
+    "loginWithGoogle": "Continue with Google",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "invalidCredentials": "Invalid credentials",
+    "accountCreated": "Account created successfully"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "quotes": "Quotes",
+    "products": "Products",
+    "catalog": "Catalog",
+    "customers": "Customers",
+    "users": "Users",
+    "settings": "Settings",
+    "reports": "Reports",
+    "inventory": "Inventory",
+    "payments": "Payments",
+    "content": "Content",
+    "audit": "Audit Log",
+    "chatbot": "Chatbot",
+    "conversations": "Conversations",
+    "welcome": "Welcome to the admin panel",
+    "totalSales": "Total Sales",
+    "pendingOrders": "Pending Orders",
+    "pendingQuotes": "Pending Quotes",
+    "newCustomers": "New Customers",
+    "recentActivity": "Recent Activity"
+  },
+  "orders": {
+    "title": "Orders",
+    "orderNumber": "Order number",
+    "customer": "Customer",
+    "total": "Total",
+    "status": "Status",
+    "createdAt": "Created date",
+    "statuses": {
+      "draft": "Draft",
+      "pending_payment": "Pending payment",
+      "paid": "Paid",
+      "partially_paid": "Partially paid",
+      "in_production": "In production",
+      "ready": "Ready",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    }
+  },
+  "quotes": {
+    "title": "Quotes",
+    "quoteNumber": "Quote number",
+    "customer": "Customer",
+    "status": "Status",
+    "validUntil": "Valid until",
+    "statuses": {
+      "draft": "Draft",
+      "in_review": "In review",
+      "quote_sent": "Quote sent",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "tax": "Tax (16%)",
+    "total": "Total",
+    "checkout": "Proceed to checkout",
+    "continueShopping": "Continue shopping",
+    "remove": "Remove",
+    "quantity": "Quantity"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shipping": "Shipping information",
+    "billing": "Billing information",
+    "payment": "Payment method",
+    "review": "Review order",
+    "placeOrder": "Place order",
+    "paymentMethods": {
+      "mercadopago": "MercadoPago",
+      "paypal": "PayPal",
+      "transfer": "Bank transfer"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email address",
+    "minLength": "Minimum {min} characters",
+    "maxLength": "Maximum {max} characters",
+    "phone": "Enter a valid phone number",
+    "passwordMatch": "Passwords do not match"
+  }
+}

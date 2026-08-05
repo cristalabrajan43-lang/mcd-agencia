@@ -1,0 +1,876 @@
+{
+  "proyecto": {
+    "nombre": "MCD-Agencia",
+    "descripcion": "Plataforma de e-commerce y cotizaciones para medios impresos y publicidad exterior",
+    "fecha_analisis": "2026-03-22",
+    "versión": "1.0"
+  },
+  "roles_usuario": [
+    {
+      "id": 1,
+      "nombre": "Visitante",
+      "db_name": null,
+      "descripcion": "Usuario no autenticado, navegación pública",
+      "permisos": [
+        "catalog.view",
+        "contact.submit"
+      ],
+      "casos_uso": [
+        "Navegar catálogo público",
+        "Ver información general",
+        "Llenar formulario de contacto",
+        "Iniciar sesión/registro"
+      ]
+    },
+    {
+      "id": 2,
+      "nombre": "Customer (Cliente)",
+      "db_name": "customer",
+      "descripcion": "Cliente autenticado con acceso a funcionalidades de compra",
+      "permisos": [
+        "quotes.create_request",
+        "quotes.view_own",
+        "orders.view_own",
+        "orders.create_from_cart",
+        "payments.initiate",
+        "profile.edit_own"
+      ],
+      "casos_uso": [
+        "Solicitar cotizaciones personalizadas",
+        "Ver estado de cotizaciones",
+        "Aceptar/rechazar cotizaciones",
+        "Comprar productos del catálogo",
+        "Realizar pagos",
+        "Ver pedidos y su seguimiento",
+        "Usar chatbot",
+        "Recibir notificaciones"
+      ]
+    },
+    {
+      "id": 3,
+      "nombre": "Sales (Vendedor)",
+      "db_name": "sales",
+      "descripcion": "Personal de ventas, gestión de operaciones comerciales",
+      "permisos": [
+        "quotes.create",
+        "quotes.assign",
+        "quotes.view_all",
+        "quotes.update",
+        "orders.view_all",
+        "orders.view_sales",
+        "leads.view",
+        "leads.manage",
+        "inventory.view",
+        "reports.sales_view"
+      ],
+      "casos_uso": [
+        "Revisar solicitudes de cotización",
+        "Asignar cotizaciones",
+        "Crear y enviar cotizaciones",
+        "Gestionar cambios en cotizaciones",
+        "Convertir cotización a orden",
+        "Ver historial de clientes",
+        "Gestionar leads capturados",
+        "Ver reportes de ventas",
+        "Ver inventario disponible"
+      ]
+    },
+    {
+      "id": 4,
+      "nombre": "Admin (Administrador)",
+      "db_name": "admin",
+      "descripcion": "Acceso completo al sistema",
+      "permisos": [
+        "users.manage",
+        "roles.manage",
+        "catalog.full",
+        "inventory.manage",
+        "orders.manage",
+        "quotes.manage",
+        "payments.manage",
+        "content.edit",
+        "audit.view",
+        "reports.view_all"
+      ],
+      "casos_uso": [
+        "Gestionar usuarios y roles",
+        "Gestionar catálogo completo",
+        "Gestionar inventario",
+        "Procesar rembolsos",
+        "Ver todos los pedidos",
+        "Gestionar contenido (CMS)",
+        "Ver reportes y analytics",
+        "Acceder a bitácora de auditoría",
+        "Configurar parámetros del sistema",
+        "Gestionar integraciones de pago"
+      ]
+    }
+  ],
+  "modulos": [
+    {
+      "id": "catalog",
+      "nombre": "Catálogo",
+      "descripción": "Gestión centralizada de productos y servicios",
+      "entidades": [
+        "Category (MPPT hierarchy)",
+        "CatalogItem",
+        "ProductVariant (SKU)",
+        "Attribute",
+        "AttributeValue",
+        "Tag",
+        "CatalogImage"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Categorías jerárquicas",
+          "descripcion": "Estructura multinivel con MPPT para navegación"
+        },
+        {
+          "nombre": "Productos/Servicios",
+          "descripcion": "Items con múltiples variantes, SKU, atributos"
+        },
+        {
+          "nombre": "Variantes de producto",
+          "descripcion": "SKU específico con precio, atributos, stock vinculado"
+        },
+        {
+          "nombre": "Modos de venta",
+          "descripcion": "BUY (venta directa), QUOTE (solo cotización), HYBRID (ambos)"
+        },
+        {
+          "nombre": "Imágenes y SEO",
+          "descripcion": "Galerías múltiples, meta datos para SEO"
+        }
+      ]
+    },
+    {
+      "id": "quotes",
+      "nombre": "Cotizaciones (RFQ)",
+      "descripción": "Sistema de solicitud y gestión de cotizaciones",
+      "entidades": [
+        "QuoteRequest",
+        "Quote",
+        "QuoteLine",
+        "QuoteAttachment",
+        "ChangeRequest"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Solicitud de cotización",
+          "descripcion": "Cliente solicita con especificaciones personalizadas"
+        },
+        {
+          "nombre": "Asignación automática",
+          "descripcion": "Por especialidad, carga de vendedor, fallback"
+        },
+        {
+          "nombre": "Generación de PDF",
+          "descripcion": "Cotización bilingüe con logo y datos fiscales"
+        },
+        {
+          "nombre": "Tokens públicos",
+          "descripcion": "Link compartible para cliente sin autenticación"
+        },
+        {
+          "nombre": "Solicitudes de cambio",
+          "descripcion": "Cliente puede solicitar ajustes antes de aceptar"
+        },
+        {
+          "nombre": "Validez configurable",
+          "descripcion": "Auto-expiración después de N días (default 15)"
+        },
+        {
+          "nombre": "Conversión a orden",
+          "descripcion": "Cotización aceptada se convierte en orden automática"
+        }
+      ],
+      "estados": {
+        "QuoteRequest": ["draft", "pending", "assigned", "in_review", "info_requested", "quoted", "accepted", "rejected", "expired", "cancelled"],
+        "Quote": ["draft", "sent", "accepted", "rejected", "expired"]
+      }
+    },
+    {
+      "id": "orders",
+      "nombre": "Pedidos",
+      "descripción": "Gestión del ciclo completo de pedidos",
+      "entidades": [
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderLine",
+        "Address"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Carrito de compras",
+          "descripcion": "Persistente por usuario, manejo de stock"
+        },
+        {
+          "nombre": "Checkout",
+          "descripcion": "Validación de stock, cálculo de impuestos IVA 16%"
+        },
+        {
+          "nombre": "Ciclo FSM",
+          "descripcion": "draft → pending_payment → paid → in_production → ready → completed"
+        },
+        {
+          "nombre": "Seguimiento",
+          "descripcion": "Cliente ve estado en tiempo real"
+        },
+        {
+          "nombre": "Reembolsos",
+          "descripcion": "Gestión de devoluciones y reembolsos"
+        }
+      ],
+      "estados": ["draft", "pending_payment", "paid", "partially_paid", "in_production", "ready", "completed", "cancelled", "refunded"]
+    },
+    {
+      "id": "payments",
+      "nombre": "Pagos",
+      "descripción": "Integración con pasarelas de pago",
+      "entidades": [
+        "Payment",
+        "PaymentWebhookLog",
+        "Refund"
+      ],
+      "proveedores": [
+        {
+          "nombre": "Mercado Pago",
+          "tipos_pago": ["tarjeta_credito", "tarjeta_debito", "transferencia_bancaria"],
+          "modo": ["sandbox", "live"],
+          "currencies": ["MXN"]
+        },
+        {
+          "nombre": "PayPal",
+          "tipos_pago": ["tarjeta_credito", "paypal_wallet", "alternativas_locales"],
+          "modo": ["sandbox", "live"],
+          "currencies": ["MXN", "USD"]
+        }
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Iniciación de pago",
+          "descripcion": "Crear preferencia/orden en gateway"
+        },
+        {
+          "nombre": "Webhooks",
+          "descripcion": "Notificaciones síncronas de cambios de estado"
+        },
+        {
+          "nombre": "Idempotencia",
+          "descripcion": "Eventos duplicados procesados una sola vez"
+        },
+        {
+          "nombre": "Depósitos parciales",
+          "descripcion": "Pagos por monto específico"
+        }
+      ],
+      "estados": ["pending", "approved", "rejected", "in_process", "cancelled", "refunded"]
+    },
+    {
+      "id": "inventory",
+      "nombre": "Inventario",
+      "descripción": "Control de stock con trazabilidad",
+      "entidades": [
+        "InventoryMovement",
+        "StockAlert"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Movimientos de stock",
+          "descripcion": "IN, OUT, ADJUSTMENT con razones codificadas"
+        },
+        {
+          "nombre": "Auditoría completa",
+          "descripcion": "Antes/después de cada movimiento"
+        },
+        {
+          "nombre": "Alertas de stock bajo",
+          "descripcion": "Notificaciones cuando llega a umbral"
+        },
+        {
+          "nombre": "Reservas",
+          "descripcion": "Stock reservado antes de confirmar orden"
+        }
+      ],
+      "movimiento_tipos": ["IN", "OUT", "ADJUSTMENT"],
+      "movimiento_razones": [
+        "purchase", "sale", "return", "internal_use", "damaged", "expired", "lost", "transfer_in", "transfer_out", "inventory_count"
+      ]
+    },
+    {
+      "id": "notifications",
+      "nombre": "Notificaciones",
+      "descripción": "Sistema in-app de notificaciones",
+      "entidades": ["Notification"],
+      "tipos": [
+        "quote_request",
+        "quote_sent",
+        "quote_accepted",
+        "quote_rejected",
+        "change_request",
+        "order_created",
+        "order_status",
+        "order_completed",
+        "payment_received",
+        "new_user",
+        "catalog_purchase",
+        "quote_expiring",
+        "request_unattended",
+        "general"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Notificaciones por rol",
+          "descripcion": "Dirigidas a usuarios/roles específicos"
+        },
+        {
+          "nombre": "Tracking de lectura",
+          "descripcion": "Flag is_read para cada notificación"
+        },
+        {
+          "nombre": "Bulk creation",
+          "descripcion": "Notificaciones a múltiples usuarios a la vez"
+        }
+      ]
+    },
+    {
+      "id": "chatbot",
+      "nombre": "Chatbot y Leads",
+      "descripción": "Captura de leads y conversaciones",
+      "entidades": [
+        "Lead",
+        "Conversation",
+        "Message"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Lead capture",
+          "descripcion": "Recopila datos de contacto y mensaje inicial"
+        },
+        {
+          "nombre": "Multi-fuente",
+          "descripcion": "Chatbot, formulario, cotización, WhatsApp, teléfono, referencia"
+        },
+        {
+          "nombre": "Asignación a vendedor",
+          "descripcion": "Para seguimiento comercial"
+        },
+        {
+          "nombre": "Conversión a cliente",
+          "descripcion": "Lead → Usuario registrado → Cliente"
+        },
+        {
+          "nombre": "Rastreo de marketing",
+          "descripcion": "UTM source/medium, IP, User Agent"
+        }
+      ],
+      "lead_estados": ["new", "contacted", "qualified", "converted", "lost"],
+      "lead_fuentes": ["contact_form", "chatbot", "quote_request", "whatsapp", "phone", "referral", "other"]
+    },
+    {
+      "id": "analytics",
+      "nombre": "Analytics",
+      "descripción": "Tracking y análisis de comportamiento",
+      "entidades": [
+        "PageView",
+        "TrackEvent"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Page view tracking",
+          "descripcion": "URL, referrer, duración, device info"
+        },
+        {
+          "nombre": "Event tracking",
+          "descripcion": "CTA clicks, form interactions, conversiones"
+        },
+        {
+          "nombre": "Session tracking",
+          "descripcion": "Anónimo vía session_id (cookie)"
+        },
+        {
+          "nombre": "User tracking",
+          "descripcion": "User ID si está autenticado"
+        },
+        {
+          "nombre": "UTM capture",
+          "descripcion": "source, medium, campaign"
+        },
+        {
+          "nombre": "Geolocalización",
+          "descripcion": "País y ciudad derivados de IP"
+        }
+      ]
+    },
+    {
+      "id": "audit",
+      "nombre": "Auditoría",
+      "descripción": "Registro irrevocable de operaciones sensibles",
+      "entidades": ["AuditLog"],
+      "funcionalidades": [
+        {
+          "nombre": "Append-only",
+          "descripcion": "No se pueden modificar o eliminar registros"
+        },
+        {
+          "nombre": "Snapshot before/after",
+          "descripcion": "JSON state antes y después"
+        },
+        {
+          "nombre": "Diff calculado",
+          "descripcion": "Identificar exactamente qué cambió"
+        },
+        {
+          "nombre": "Actor tracking",
+          "descripcion": "Usuario, IP, User Agent, email preservado"
+        },
+        {
+          "nombre": "Exportable",
+          "descripcion": "CSV/JSON para auditorías externas"
+        }
+      ],
+      "acciones": [
+        "created", "updated", "deleted", "state_changed", "login", "logout", "password_changed", "permission_changed", "viewed", "exported", "payment_processed", "email_sent"
+      ],
+      "entidades_auditadas": [
+        "CatalogItem", "ProductVariant", "Category", "Order", "OrderLine", "Quote", "QuoteRequest", "Payment", "InventoryMovement", "User", "Role", "Content"
+      ]
+    },
+    {
+      "id": "content",
+      "nombre": "CMS",
+      "descripción": "Gestión de contenido dinámico",
+      "entidades": [
+        "CarouselSlide",
+        "Testimonial",
+        "ClientLogo",
+        "FAQ",
+        "Branch",
+        "LegalPage",
+        "SiteConfiguration"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Carrusel héroe",
+          "descripcion": "Slides con imagen, título, CTA, enlace a servicio"
+        },
+        {
+          "nombre": "Testimonios",
+          "descripcion": "Quotes de clientes con foto y rating"
+        },
+        {
+          "nombre": "FAQs",
+          "descripcion": "Preguntas frecuentes por categoría"
+        },
+        {
+          "nombre": "Ubicaciones",
+          "descripcion": "Sucursales con datos de contacto"
+        },
+        {
+          "nombre": "Multiidioma",
+          "descripcion": "ES/EN para cada elemento"
+        },
+        {
+          "nombre": "Ordenamiento manual",
+          "descripcion": "Campo position para control visual"
+        }
+      ]
+    },
+    {
+      "id": "users",
+      "nombre": "Usuarios",
+      "descripción": "Gestión de cuentas y autenticación",
+      "entidades": [
+        "User",
+        "Role",
+        "UserConsent",
+        "FiscalData"
+      ],
+      "funcionalidades": [
+        {
+          "nombre": "Email-based auth",
+          "descripcion": "Autenticación por email, no username"
+        },
+        {
+          "nombre": "JWT authentication",
+          "descripcion": "Token-based para API"
+        },
+        {
+          "nombre": "Google OAuth",
+          "descripcion": "Social login vía Google"
+        },
+        {
+          "nombre": "Email verification",
+          "descripcion": "Confirmación en registro"
+        },
+        {
+          "nombre": "RBAC",
+          "descripcion": "Role-based access control con permisos JSON"
+        },
+        {
+          "nombre": "Soft delete",
+          "descripcion": "Flag deleted_at para borrado lógico"
+        },
+        {
+          "nombre": "Consentimientos",
+          "descripcion": "GDPR/LFPDPPP tracking"
+        }
+      ],
+      "idiomas": ["es", "en"]
+    },
+    {
+      "id": "core",
+      "nombre": "Core",
+      "descripción": "Modelos y utilidades base",
+      "caracteristicas": [
+        "TimeStampedModel (created_at, updated_at)",
+        "SoftDeleteModel (deleted_at)",
+        "SEOModel (meta title, description)",
+        "OrderedModel (position field)",
+        "ERPIntegrationModel (integration fields)",
+        "StandardPagination",
+        "Excepciones personalizadas",
+        "RecaptchaValidator"
+      ]
+    }
+  ],
+  "procesos_negocio": [
+    {
+      "nombre": "Venta Directa (E-commerce)",
+      "actores": ["Customer", "Sistema de Pagos", "Admin"],
+      "pasos": [
+        "Cliente navega catálogo",
+        "Agrega a carrito (stock validado)",
+        "Completa checkout",
+        "Selecciona proveedor pago",
+        "Redirigido a portal seguro",
+        "Webhook notifica resultado",
+        "Order.status = Paid",
+        "Inventario ajustado",
+        "Producción inicia"
+      ],
+      "entidades_principales": ["CatalogItem", "Cart", "Order", "Payment"],
+      "integraciones": ["Mercado Pago", "PayPal", "Brevo"]
+    },
+    {
+      "nombre": "Solicitud y Gestión de Cotizaciones",
+      "actores": ["Customer", "Sales", "Admin", "Sistema"],
+      "pasos": [
+        "Cliente solicita cotización",
+        "Sistema asigna automáticamente a vendedor",
+        "Vendedor revisa especificaciones",
+        "Crea Quote con PDF",
+        "Envía email con link público",
+        "Cliente revisa, acepta o pide cambios",
+        "Si acepta, Order creada automática",
+        "Cliente procede a pagar"
+      ],
+      "entidades_principales": ["QuoteRequest", "Quote", "Order"],
+      "integraciones": ["Brevo (email)", "ReportLab (PDF)"]
+    },
+    {
+      "nombre": "Gestión de Inventario",
+      "actores": ["Admin", "Sistema"],
+      "pasos": [
+        "Entrada de stock (compra/devolución)",
+        "InventoryMovement creado (IN)",
+        "Stock se incrementa",
+        "Salida de stock (venta/daño)",
+        "InventoryMovement creado (OUT)",
+        "Stock se decrementa",
+        "Alerta si stock < mínimo"
+      ],
+      "entidades_principales": ["ProductVariant", "InventoryMovement"],
+      "notificaciones": ["Stock bajo", "Reabastecimiento"]
+    },
+    {
+      "nombre": "Gestión de Leads",
+      "actores": ["Visitante", "Sales", "Sistema"],
+      "pasos": [
+        "Cliente completa formulario/chatbot",
+        "Lead creado con fuente registrada",
+        "Admin asigna a vendedor",
+        "Vendedor contacta (llamada/email/WhatsApp)",
+        "Calificación: qualified/lost",
+        "Si qualified: invita a registrarse",
+        "Lead.status = converted"
+      ],
+      "entidades_principales": ["Lead", "Notification"],
+      "rastreo": ["UTM parameters", "IP address", "User agent"]
+    },
+    {
+      "nombre": "Procesamiento de Pagos",
+      "actores": ["Customer", "Payment Gateway", "Sistema"],
+      "pasos": [
+        "Payment creado en DB",
+        "Llamada a gateway (MP/PayPal)",
+        "Respuesta con order/preference ID",
+        "Cliente redirigido a portal",
+        "Completa pago en proveedor",
+        "Webhook recibido con resultado",
+        "Webhook handler verifica y procesa",
+        "Payment.status actualizado",
+        "Order/Quote cascada de cambios"
+      ],
+      "entidades_principales": ["Payment", "Order", "Quote"],
+      "integraciones": ["Mercado Pago", "PayPal", "Brevo"],
+      "seguridad": ["HMAC signature verification", "Idempotencia", "Event logging"]
+    }
+  ],
+  "integraciones_externas": [
+    {
+      "nombre": "Mercado Pago",
+      "tipo": "Pasarela de Pagos",
+      "status": "Activo",
+      "modos": ["Sandbox", "Live"],
+      "tipos_pago": ["Tarjeta crédito/débito", "Mercado Pago wallet", "Transferencia bancaria"],
+      "currencies": ["MXN"],
+      "documentacion": "https://www.mercadopago.com.mx/developers/es",
+      "webhook_eventos": ["payment.created", "payment.updated", "payment.approved", "payment.failed"],
+      "campos_mapeados": {
+        "provider_order_id": "preference_id",
+        "provider_payment_id": "payment_id",
+        "payment_method_type": "credit_card",
+        "payment_method_id": "visa/mastercard"
+      }
+    },
+    {
+      "nombre": "PayPal",
+      "tipo": "Pasarela de Pagos",
+      "status": "Activo",
+      "modos": ["Sandbox", "Live"],
+      "tipos_pago": ["Tarjeta crédito/débito", "PayPal wallet", "Mejoras financieras"],
+      "currencies": ["MXN", "USD"],
+      "documentacion": "https://developer.paypal.com/",
+      "webhook_eventos": ["CHECKOUT.ORDER.COMPLETED", "PAYMENT.AUTHORIZED", "PAYMENT.CAPTURED"],
+      "campos_mapeados": {
+        "provider_order_id": "order_id",
+        "provider_payment_id": "transaction_id",
+        "status_mapping": "CREATED→pending, APPROVED→in_process, COMPLETED→approved"
+      }
+    },
+    {
+      "nombre": "Brevo",
+      "tipo": "Email Service Provider",
+      "status": "Activo",
+      "limite_gratuito": "300 emails/día",
+      "integracion": "HTTP API vía django-anymail",
+      "tipos_email": [
+        "Confirmación de registro",
+        "Reset de contraseña",
+        "Cotización enviada",
+        "Confirmación de orden",
+        "Notificaciones de estado",
+        "Recordatorios"
+      ],
+      "templates_disponibles": [
+        "email_verification",
+        "password_reset",
+        "quote_sent",
+        "order_created",
+        "payment_confirmed",
+        "order_status_updated"
+      ],
+      "capacidades": ["Transactional", "Attachments (PDF)", "Open/click tracking"]
+    },
+    {
+      "nombre": "Cloudflare R2",
+      "tipo": "Object Storage (S3-compatible)",
+      "status": "Activo",
+      "uso": "Almacenamiento de media files",
+      "integracion": "django-storages + boto3",
+      "rutas": [
+        "/catalog/images/",
+        "/catalog/categories/",
+        "/quotes/pdf/",
+        "/content/carousel/",
+        "/users/avatars/"
+      ],
+      "caracteristicas": ["S3-compatible API", "CDN automático Cloudflare", "URLs presignadas", "Bajo costo"]
+    },
+    {
+      "nombre": "Google OAuth",
+      "tipo": "Social Login",
+      "status": "Activo",
+      "integracion": "django-allauth",
+      "flujo": "Redirect → Google Login → Token → Create/Update User",
+      "datos_sincronizados": ["email", "first_name", "last_name", "picture"],
+      "verificacion_email": "Automática"
+    },
+    {
+      "nombre": "Analytics (Interna)",
+      "tipo": "Tracking de eventos",
+      "status": "Activo",
+      "almacenamiento": "PostgreSQL (analytics_pageview, analytics_trackevent)",
+      "modelos": ["PageView", "TrackEvent"],
+      "privacidad": "Anónimo por defecto (session_id), User ID opcional",
+      "datos_capturados": [
+        "URLs visitadas",
+        "Referrer",
+        "UTM parameters",
+        "Device type/size",
+        "Geolocalización",
+        "Duración en página"
+      ]
+    }
+  ],
+  "estados_fsm": {
+    "QuoteRequest": {
+      "estados": [
+        "draft",
+        "pending",
+        "assigned",
+        "in_review",
+        "info_requested",
+        "quoted",
+        "accepted",
+        "rejected",
+        "expired",
+        "cancelled"
+      ],
+      "transiciones": {
+        "draft": ["pending"],
+        "pending": ["assigned"],
+        "assigned": ["in_review"],
+        "in_review": ["info_requested", "quoted"],
+        "info_requested": ["in_review"],
+        "quoted": ["accepted", "rejected", "cancelled"],
+        "accepted": [],
+        "rejected": [],
+        "expired": [],
+        "cancelled": []
+      }
+    },
+    "Order": {
+      "estados": [
+        "draft",
+        "pending_payment",
+        "paid",
+        "partially_paid",
+        "in_production",
+        "ready",
+        "completed",
+        "cancelled",
+        "refunded"
+      ],
+      "transiciones": {
+        "draft": ["pending_payment", "cancelled"],
+        "pending_payment": ["paid", "partially_paid", "cancelled"],
+        "paid": ["in_production"],
+        "partially_paid": ["paid", "in_production"],
+        "in_production": ["ready"],
+        "ready": ["completed"],
+        "completed": ["refunded"],
+        "cancelled": [],
+        "refunded": []
+      }
+    },
+    "Payment": {
+      "estados": [
+        "pending",
+        "approved",
+        "rejected",
+        "in_process",
+        "cancelled",
+        "refunded"
+      ],
+      "transiciones": {
+        "pending": ["approved", "rejected", "in_process", "cancelled"],
+        "approved": ["refunded"],
+        "rejected": [],
+        "in_process": ["approved", "rejected"],
+        "cancelled": [],
+        "refunded": []
+      }
+    },
+    "Lead": {
+      "estados": ["new", "contacted", "qualified", "converted", "lost"],
+      "transiciones": {
+        "new": ["contacted"],
+        "contacted": ["qualified", "lost"],
+        "qualified": ["converted", "lost"],
+        "converted": [],
+        "lost": []
+      }
+    }
+  },
+  "campos_auditados_por_entidad": {
+    "CatalogItem": [
+      "name", "price", "description", "category", "is_active"
+    ],
+    "Order": [
+      "status", "total", "address", "user"
+    ],
+    "Quote": [
+      "status", "total", "pdf_file", "validity_date"
+    ],
+    "Payment": [
+      "status", "amount", "provider_payment_id", "approved_at"
+    ],
+    "InventoryMovement": [
+      "quantity", "stock_before", "stock_after", "reason"
+    ],
+    "User": [
+      "email", "role", "is_active", "is_email_verified"
+    ]
+  },
+  "notificaciones_por_evento": [
+    {
+      "evento": "Nueva solicitud de cotización",
+      "tipo": "quote_request",
+      "destinatarios": ["Sales", "Admin"],
+      "trigger": "QuoteRequest.status = pending",
+      "campos": ["request_number", "customer_name", "product_name", "urgency"]
+    },
+    {
+      "evento": "Cotización enviada",
+      "tipo": "quote_sent",
+      "destinatarios": ["Customer"],
+      "trigger": "Quote.status = sent",
+      "campos": ["quote_number", "link_publico"]
+    },
+    {
+      "evento": "Cotización aceptada",
+      "tipo": "quote_accepted",
+      "destinatarios": ["Sales", "Admin"],
+      "trigger": "Quote.status = accepted",
+      "campos": ["quote_number", "order_id"]
+    },
+    {
+      "evento": "Pago recibido",
+      "tipo": "payment_received",
+      "destinatarios": ["Customer", "Admin"],
+      "trigger": "Payment.status = approved",
+      "campos": ["order_number", "amount", "provider"]
+    },
+    {
+      "evento": "Pedido creado",
+      "tipo": "order_created",
+      "destinatarios": ["Customer"],
+      "trigger": "Order.status = pending_payment",
+      "campos": ["order_number", "total"]
+    },
+    {
+      "evento": "Cambio de estado pedido",
+      "tipo": "order_status",
+      "destinatarios": ["Customer"],
+      "trigger": "Order.status changed",
+      "campos": ["order_number", "new_status"]
+    },
+    {
+      "evento": "Stock bajo",
+      "tipo": "low_stock_alert",
+      "destinatarios": ["Admin"],
+      "trigger": "stock ≤ stock_minimum",
+      "campos": ["product_name", "current_stock", "minimum_threshold"]
+    },
+    {
+      "evento": "Cotización expirando",
+      "tipo": "quote_expiring",
+      "destinatarios": ["Customer"],
+      "trigger": "validity_date - 2 días",
+      "campos": ["quote_number", "days_remaining"]
+    }
+  ]
+}
