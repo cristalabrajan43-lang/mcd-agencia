@@ -94,10 +94,15 @@ async function refreshAccessToken(): Promise<string | null> {
 
 /**
  * Build URL with query parameters.
+ * Ensures trailing slash for Django APPEND_SLASH compatibility (especially POST).
  */
 function buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
   const apiBaseUrl = getApiBaseUrl();
   const url = new URL(endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`);
+
+  if (!url.pathname.endsWith('/')) {
+    url.pathname = `${url.pathname}/`;
+  }
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
