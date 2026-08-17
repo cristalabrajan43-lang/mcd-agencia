@@ -1075,7 +1075,7 @@ class QuoteViewSet(viewsets.ModelViewSet):
             tuple(order, created)
         """
         from apps.orders.models import Order, OrderLine, OrderStatusHistory
-        from apps.orders.services.operations import build_operational_plan
+        from apps.orders.services.operations import ensure_order_in_production
 
         existing_order = Order.objects.filter(quote=quote).first()
         if existing_order:
@@ -1161,13 +1161,12 @@ class QuoteViewSet(viewsets.ModelViewSet):
                     changed_by=actor,
                     notes=_('Simulated online payment confirmation from quote conversion')
                 )
-                order.transition_to(
-                    Order.STATUS_IN_PRODUCTION,
-                    changed_by=actor,
-                    notes=_('Order moved to production after simulated online payment')
-                )
 
-            build_operational_plan(order)
+            ensure_order_in_production(
+                order,
+                changed_by=actor,
+                notes=_('Order moved to production from quote conversion'),
+            )
 
             quote.status = Quote.STATUS_CONVERTED
             quote.save(update_fields=['status', 'updated_at'])

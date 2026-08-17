@@ -46,8 +46,8 @@ def check_low_stock(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Order)
-def deduct_inventory_on_order_payment(sender, instance, **kwargs):
-    """Register salidas when a customer purchase is confirmed (paid or beyond)."""
+def deduct_inventory_on_order_shipment(sender, instance, **kwargs):
+    """Register salidas when the order is shipped or completed (not at payment)."""
     previous_status = getattr(instance, '_previous_status', None)
 
     if instance.status not in STOCK_DEDUCT_STATUSES:

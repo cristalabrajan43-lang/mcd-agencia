@@ -73,10 +73,11 @@ def _extract_routing(order: Order, line: OrderLine) -> LineRouting:
         order,
     )
 
-    # Direct catalog purchases skip production - go straight to logistics
-    # Quote-based orders require production workflow
     if order.origin == Order.ORIGIN_DIRECT_PURCHASE:
-        requires_production = False
+        requires_production = delivery_method not in {
+            Order.DELIVERY_DIGITAL,
+            Order.DELIVERY_NOT_APPLICABLE,
+        }
     else:
         requires_production = _parse_bool(
             metadata.get('requires_production'),
@@ -248,6 +249,26 @@ def sync_operational_rollup(order: Order) -> None:
     if order.operational_rollup != rollup:
         order.operational_rollup = rollup
         order.save(update_fields=['operational_rollup', 'updated_at'])
+
+
+def ensure_order_in_production(order: Order, *, changed_by=None, notes: str = '') -> None:
+    """Create production/logistics tracks and queue the order in production."""
+    from django.utils.translation import gettext as _
+
+    build_operational_plan(order)
+    order.refresh_from_db()
+
+    if order.status == Order.STATUS_IN_PRODUCTION:
+        return
+
+    transition_notes = notes or _('Order sent to production on creation')
+
+    if order.status == Order.STATUS_PAID and order.can_transition_to(Order.STATUS_IN_PRODUCTION):
+        order.transition_to(Order.STATUS_IN_PRODUCTION, changed_by=changed_by, notes=transition_notes)
+        return
+
+    if order.status == Order.STATUS_PENDING_PAYMENT and order.can_transition_to(Order.STATUS_IN_PRODUCTION):
+        order.transition_to(Order.STATUS_IN_PRODUCTION, changed_by=changed_by, notes=transition_notes)
 
 
 def maybe_auto_ready_order_from_production(order: Order, *, changed_by=None, notes: str = '') -> bool:

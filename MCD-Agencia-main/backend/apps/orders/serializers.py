@@ -608,13 +608,14 @@ class ProductionJobSerializer(serializers.ModelSerializer):
     customer = serializers.SerializerMethodField()
     product_name = serializers.SerializerMethodField()
     variant_name = serializers.SerializerMethodField()
+    quantity = serializers.SerializerMethodField()
     delivery_method = serializers.SerializerMethodField()
     estimated_delivery_date = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductionJob
         fields = [
-            'id', 'order_id', 'order_number', 'customer', 'product_name', 'variant_name',
+            'id', 'order_id', 'order_number', 'customer', 'product_name', 'variant_name', 'quantity',
             'order_line', 'status', 'status_display',
             'planned_start', 'planned_end', 'actual_start', 'actual_end',
             'requires_quality_check', 'delivery_method', 'estimated_delivery_date',
@@ -646,6 +647,11 @@ class ProductionJobSerializer(serializers.ModelSerializer):
         if obj.order_line:
             return obj.order_line.variant_name or ''
         return (obj.metadata or {}).get('variant_name') or ''
+
+    def get_quantity(self, obj):
+        if obj.order_line:
+            return obj.order_line.quantity
+        return (obj.metadata or {}).get('quantity')
 
     def get_delivery_method(self, obj):
         return obj.order.delivery_method if obj.order else ''

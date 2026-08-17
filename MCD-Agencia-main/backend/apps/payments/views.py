@@ -630,6 +630,11 @@ class MercadoPagoWebhookView(APIView):
                     notes='Payment completed via Mercado Pago'
                 )
                 order.paid_at = timezone.now()
+                from apps.orders.services.operations import ensure_order_in_production
+                ensure_order_in_production(
+                    order,
+                    notes='Order moved to production after payment confirmation',
+                )
             order.save()
 
             # In-app notification: payment received

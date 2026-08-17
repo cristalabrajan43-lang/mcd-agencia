@@ -57,7 +57,12 @@ from .serializers import (
     UpdateFieldOperationJobStatusSerializer,
     OrderTrackingUpdateSerializer,
 )
-from .services.operations import build_operational_plan, maybe_auto_ready_order_from_production, sync_operational_rollup
+from .services.operations import (
+    build_operational_plan,
+    ensure_order_in_production,
+    maybe_auto_ready_order_from_production,
+    sync_operational_rollup,
+)
 from .services.tracking import (
     build_order_tracking_timeline,
     maybe_sync_order_status_from_logistics,
@@ -627,7 +632,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 notes=_('Order created')
             )
 
-            # Temporary simulation: online methods are auto-confirmed as paid and moved to production.
+            # Temporary simulation: online methods are auto-confirmed as paid.
             if order.payment_method in ONLINE_PAYMENT_METHODS:
                 order.amount_paid = order.total
                 order.save(update_fields=['amount_paid', 'updated_at'])
@@ -637,13 +642,12 @@ class OrderViewSet(viewsets.ModelViewSet):
                     changed_by=request.user,
                     notes=_('Simulated payment confirmation from checkout')
                 )
-                order.transition_to(
-                    Order.STATUS_IN_PRODUCTION,
-                    changed_by=request.user,
-                    notes=_('Order moved to production after simulated payment')
-                )
 
-            build_operational_plan(order)
+            ensure_order_in_production(
+                order,
+                changed_by=request.user,
+                notes=_('Order moved to production after checkout'),
+            )
 
             # Log order creation
             AuditLog.log(
@@ -943,7 +947,7 @@ class OrderAdminViewSet(viewsets.ModelViewSet):
                 order.save(update_fields=['scheduled_date'])
 
             if order.status == Order.STATUS_IN_PRODUCTION:
-                build_operational_plan(order)
+                ensure_order_in_production(order)
                 order.refresh_from_db()
 
             AuditLog.log(
@@ -1293,6 +1297,10 @@ class OrderAdminViewSet(viewsets.ModelViewSet):
             changed_by=request.user,
             notes=notes,
         )
+
+        from apps.inventory.services import register_sale_movements_on_shipment
+        if new_status in {LogisticsJob.STATUS_IN_TRANSIT, LogisticsJob.STATUS_DELIVERED}:
+            register_sale_movements_on_shipment(order, created_by=request.user)
 
         sync_operational_rollup(order)
         order.refresh_from_db()

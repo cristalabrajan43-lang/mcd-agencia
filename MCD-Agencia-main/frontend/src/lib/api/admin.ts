@@ -122,6 +122,7 @@ export interface ProductionJob {
   } | null;
   product_name?: string;
   variant_name?: string;
+  quantity?: number;
   status: string;
   status_display: string;
   planned_start?: string | null;

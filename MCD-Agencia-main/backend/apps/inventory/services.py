@@ -7,9 +7,6 @@ from apps.orders.models import Order
 logger = logging.getLogger(__name__)
 
 STOCK_DEDUCT_STATUSES = frozenset({
-    Order.STATUS_PAID,
-    Order.STATUS_IN_PRODUCTION,
-    Order.STATUS_READY,
     Order.STATUS_IN_DELIVERY,
     Order.STATUS_COMPLETED,
 })
@@ -28,7 +25,7 @@ def order_already_has_sale_movements(order_id) -> bool:
 
 def register_sale_movements_for_order(order, created_by=None) -> dict:
     """
-    Register OUT movements for each inventory-tracked line on a paid order.
+    Register OUT movements for each inventory-tracked line on an order.
 
     Idempotent: skips if movements for this order already exist.
     """
@@ -58,7 +55,7 @@ def register_sale_movements_for_order(order, created_by=None) -> dict:
             reason='sale',
             reference_type='order',
             reference_id=str(order.id),
-            notes=f'Venta — pedido {order.order_number}',
+            notes=f'Salida por envío — pedido {order.order_number}',
             created_by=created_by,
         )
         created_count += 1
@@ -71,3 +68,8 @@ def register_sale_movements_for_order(order, created_by=None) -> dict:
         )
 
     return {'created': created_count}
+
+
+def register_sale_movements_on_shipment(order, created_by=None) -> dict:
+    """Deduct inventory when the order is shipped or delivered to the customer."""
+    return register_sale_movements_for_order(order, created_by=created_by)
