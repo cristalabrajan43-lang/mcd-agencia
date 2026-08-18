@@ -64,7 +64,8 @@ const REASON_LABELS: Record<string, string> = {
   return: 'Devolución de cliente',
   production: 'Producción interna',
   transfer_in: 'Transferencia entrante',
-  sale: 'Venta',
+  sale: 'Venta (legacy)',
+  shipment: 'Salida por envío',
   internal_use: 'Uso interno',
   damaged: 'Dañado/Defectuoso',
   expired: 'Expirado',
@@ -76,7 +77,7 @@ const REASON_LABELS: Record<string, string> = {
 };
 
 const IN_REASONS = ['purchase', 'return', 'production', 'transfer_in'];
-const OUT_REASONS = ['sale', 'internal_use', 'damaged', 'expired', 'lost', 'transfer_out'];
+const OUT_REASONS = ['sale', 'shipment', 'internal_use', 'damaged', 'expired', 'lost', 'transfer_out'];
 const ADJUSTMENT_REASONS = ['inventory_count', 'correction', 'initial'];
 
 function formatMoney(value: string | number | null | undefined): string {
@@ -1306,10 +1307,10 @@ function MovementsTab({ queryClient }: { queryClient: ReturnType<typeof useQuery
                       <td className={cn('px-4 py-3 text-sm text-right font-semibold', MOVEMENT_TYPE_COLORS[mov.movement_type])}>
                         {mov.movement_type === 'IN' ? '+' : mov.movement_type === 'OUT' ? '-' : '±'}{Math.abs(mov.quantity)}
                       </td>
-                      <td className="px-4 py-3 text-xs text-neutral-400">{REASON_LABELS[mov.reason] || mov.reason}</td>
+                      <td className="px-4 py-3 text-xs text-neutral-400">{mov.notes || REASON_LABELS[mov.reason] || mov.reason}</td>
                       <td className="px-4 py-3 text-xs text-right text-neutral-500">{mov.stock_before}</td>
                       <td className="px-4 py-3 text-xs text-right text-white font-medium">{mov.stock_after}</td>
-                      <td className="px-4 py-3 text-xs text-neutral-500 max-w-[200px] truncate">{mov.notes || '—'}</td>
+                      <td className="px-4 py-3 text-xs text-neutral-500 max-w-[200px] truncate">{mov.reference_id ? `#${mov.reference_id.slice(0, 8)}…` : '—'}</td>
                     </tr>
                   ))}
                 </tbody>

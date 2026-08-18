@@ -113,9 +113,70 @@ def _has_any_jobs(order: Order) -> bool:
     )
 
 
+def _sync_missing_production_jobs(order: Order) -> int:
+    """
+    Add production jobs for lines that require them but were skipped
+    (e.g. catalog orders planned before the production routing fix).
+    """
+    created = 0
+    existing_line_ids = set(
+        order.production_jobs.exclude(order_line__isnull=True).values_list('order_line_id', flat=True)
+    )
+
+    for line in order.lines.all():
+        route = _extract_routing(order, line)
+        if not route.requires_production or line.id in existing_line_ids:
+            continue
+
+        ProductionJob.objects.create(
+            order=order,
+            order_line=line,
+            status=ProductionJob.STATUS_QUEUED,
+            planned_end=route.estimated_date,
+            metadata={
+                'service_type': route.service_type,
+                'delivery_method': route.delivery_method,
+                'source': 'sync_missing_production',
+            },
+        )
+        created += 1
+
+    if created:
+        snapshot = list(order.service_snapshot or [])
+        for line in order.lines.all():
+            route = _extract_routing(order, line)
+            line_id = str(line.id)
+            updated = False
+            for entry in snapshot:
+                if entry.get('line_id') == line_id:
+                    entry['requires_production'] = route.requires_production
+                    updated = True
+                    break
+            if not updated:
+                snapshot.append({
+                    'line_id': line_id,
+                    'sku': line.sku,
+                    'name': line.name,
+                    'requires_production': route.requires_production,
+                    'delivery_method': route.delivery_method,
+                })
+        plan = dict(order.operation_plan or {})
+        tracks = set(plan.get('tracks_required') or [])
+        if created:
+            tracks.add('production')
+        plan['tracks_required'] = sorted(tracks)
+        plan['last_sync_at'] = timezone.now().isoformat()
+        order.service_snapshot = snapshot
+        order.operation_plan = plan
+        order.save(update_fields=['service_snapshot', 'operation_plan', 'updated_at'])
+
+    return created
+
+
 def build_operational_plan(order: Order) -> None:
     """Create operation tracks for an order if they do not exist yet."""
     if _has_any_jobs(order):
+        _sync_missing_production_jobs(order)
         sync_operational_rollup(order)
         return
 

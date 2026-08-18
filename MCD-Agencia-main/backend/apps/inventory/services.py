@@ -19,7 +19,7 @@ def order_already_has_sale_movements(order_id) -> bool:
         reference_type='order',
         reference_id=str(order_id),
         movement_type=InventoryMovement.MOVEMENT_OUT,
-        reason='sale',
+        reason__in=['sale', 'shipment'],
     ).exists()
 
 
@@ -52,7 +52,7 @@ def register_sale_movements_for_order(order, created_by=None) -> dict:
             variant=variant,
             movement_type=InventoryMovement.MOVEMENT_OUT,
             quantity=line.quantity,
-            reason='sale',
+            reason='shipment',
             reference_type='order',
             reference_id=str(order.id),
             notes=f'Salida por envío — pedido {order.order_number}',

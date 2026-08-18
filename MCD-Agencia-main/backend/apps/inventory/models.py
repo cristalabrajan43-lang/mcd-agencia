@@ -64,6 +64,7 @@ class InventoryMovement(TimeStampedModel):
 
         # OUT reasons
         ('sale', _('Sale')),
+        ('shipment', _('Shipment to Customer')),
         ('internal_use', _('Internal Use')),
         ('damaged', _('Damaged/Defective')),
         ('expired', _('Expired')),

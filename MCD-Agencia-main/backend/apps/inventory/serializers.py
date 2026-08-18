@@ -61,7 +61,7 @@ class InventoryMovementSerializer(serializers.ModelSerializer):
 
         # Validate reason matches movement type
         in_reasons = ['purchase', 'return', 'production', 'transfer_in']
-        out_reasons = ['sale', 'internal_use', 'damaged', 'expired', 'lost', 'transfer_out']
+        out_reasons = ['sale', 'shipment', 'internal_use', 'damaged', 'expired', 'lost', 'transfer_out']
         adjustment_reasons = ['inventory_count', 'correction', 'initial']
 
         if movement_type == InventoryMovement.MOVEMENT_IN and reason not in in_reasons:
