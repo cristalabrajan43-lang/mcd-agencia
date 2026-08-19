@@ -29,6 +29,14 @@ export interface CarouselSlide {
   position: number;
 }
 
+export type PromoBackgroundStyle = 'solid' | 'gradient';
+export type PromoGradientDirection = 'to right' | 'to left' | 'to bottom' | '135deg';
+export type PromoFontFamily = 'sans' | 'display' | 'mono';
+export type PromoTitleSize = 'sm' | 'base' | 'lg' | 'xl';
+export type PromoTitleWeight = 'medium' | 'semibold' | 'bold' | 'black';
+export type PromoTextTransform = 'none' | 'uppercase' | 'capitalize';
+export type PromoBadgeShape = 'pill' | 'rounded' | 'square';
+
 export interface PromoBanner {
   id: string;
   title: string;
@@ -38,7 +46,19 @@ export interface PromoBanner {
   badge_text: string;
   cta_url: string;
   background_color: string;
+  background_style: PromoBackgroundStyle;
+  background_color_secondary: string;
+  gradient_direction: PromoGradientDirection;
+  border_color: string;
   text_color: string;
+  subtitle_color: string;
+  badge_background_color: string;
+  badge_text_color: string;
+  badge_shape: PromoBadgeShape;
+  font_family: PromoFontFamily;
+  title_size: PromoTitleSize;
+  title_weight: PromoTitleWeight;
+  text_transform: PromoTextTransform;
   discount_percent: number;
   apply_to: 'all' | 'selected';
   position: number;

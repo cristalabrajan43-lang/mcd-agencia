@@ -17,10 +17,18 @@ import {
   createPromoBanner,
   updatePromoBanner,
   deletePromoBanner,
+  type PromoBadgeShape,
+  type PromoBackgroundStyle,
   type PromoBannerAdmin,
+  type PromoFontFamily,
+  type PromoGradientDirection,
+  type PromoTextTransform,
+  type PromoTitleSize,
+  type PromoTitleWeight,
 } from '@/lib/api/content';
 import { getProducts, type ProductListItem } from '@/lib/api/catalog';
 import { Card, Button, Input, Textarea, Modal, Badge } from '@/components/ui';
+import { resolvePromoBannerStyle } from '@/lib/promo-banner-style';
 import { cn } from '@/lib/utils';
 
 function getApiErrorMessage(error: unknown, fallback: string): string {
@@ -263,6 +271,203 @@ function CatalogProductPicker({
   );
 }
 
+interface PromoFormState {
+  title: string;
+  subtitle: string;
+  badge_text: string;
+  cta_url: string;
+  background_color: string;
+  background_style: PromoBackgroundStyle;
+  background_color_secondary: string;
+  gradient_direction: PromoGradientDirection;
+  border_color: string;
+  text_color: string;
+  subtitle_color: string;
+  badge_background_color: string;
+  badge_text_color: string;
+  badge_shape: PromoBadgeShape;
+  font_family: PromoFontFamily;
+  title_size: PromoTitleSize;
+  title_weight: PromoTitleWeight;
+  text_transform: PromoTextTransform;
+  discount_percent: number;
+  apply_to: 'all' | 'selected';
+  catalog_item_ids: string[];
+  position: number;
+  is_active: boolean;
+}
+
+function createEmptyForm(position: number): PromoFormState {
+  return {
+    title: '',
+    subtitle: '',
+    badge_text: '',
+    cta_url: '/catalogo',
+    background_color: '#00E5FF',
+    background_style: 'solid',
+    background_color_secondary: '',
+    gradient_direction: 'to right',
+    border_color: '',
+    text_color: '#000000',
+    subtitle_color: '',
+    badge_background_color: '',
+    badge_text_color: '',
+    badge_shape: 'rounded',
+    font_family: 'sans',
+    title_size: 'sm',
+    title_weight: 'semibold',
+    text_transform: 'none',
+    discount_percent: 0,
+    apply_to: 'all',
+    catalog_item_ids: [],
+    position,
+    is_active: true,
+  };
+}
+
+type PromoPreset = {
+  name: string;
+  background_color: string;
+  text_color: string;
+  background_style: PromoBackgroundStyle;
+  background_color_secondary: string;
+};
+
+const COLOR_PRESETS: PromoPreset[] = [
+  { name: 'Cian MCD', background_color: '#00E5FF', text_color: '#000000', background_style: 'solid', background_color_secondary: '' },
+  { name: 'Magenta', background_color: '#FF00A8', text_color: '#FFFFFF', background_style: 'solid', background_color_secondary: '' },
+  { name: 'Amarillo', background_color: '#FFE500', text_color: '#000000', background_style: 'solid', background_color_secondary: '' },
+  { name: 'Oferta roja', background_color: '#EF4444', text_color: '#FFFFFF', background_style: 'solid', background_color_secondary: '' },
+  { name: 'Verde', background_color: '#22C55E', text_color: '#052E16', background_style: 'solid', background_color_secondary: '' },
+  { name: 'Negro', background_color: '#111111', text_color: '#FFFFFF', background_style: 'solid', background_color_secondary: '' },
+  { name: 'Degradado CMYK', background_color: '#00E5FF', text_color: '#FFFFFF', background_style: 'gradient', background_color_secondary: '#FF00A8' },
+  { name: 'Atardecer', background_color: '#F97316', text_color: '#FFFFFF', background_style: 'gradient', background_color_secondary: '#DB2777' },
+  { name: 'Noche', background_color: '#1E3A8A', text_color: '#FFFFFF', background_style: 'gradient', background_color_secondary: '#7C3AED' },
+];
+
+function ColorField({
+  label,
+  value,
+  onChange,
+  optional = false,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  optional?: boolean;
+  hint?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-neutral-300 mb-1">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#000000'}
+          onChange={(e) => onChange(e.target.value.toUpperCase())}
+          className="h-9 w-10 flex-shrink-0 cursor-pointer rounded border border-neutral-700 bg-neutral-800 p-1"
+          aria-label={label}
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={optional ? 'Automático' : '#000000'}
+          className="w-full rounded-lg bg-neutral-800 border border-neutral-700 text-white px-3 py-2 text-sm font-mono"
+        />
+        {optional && value !== '' && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="flex-shrink-0 text-neutral-400 hover:text-white"
+            aria-label={`Restablecer ${label}`}
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
+    </div>
+  );
+}
+
+function SelectField<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: { value: T; label: string }[];
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-neutral-300 mb-1">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as T)}
+        className="w-full rounded-lg bg-neutral-800 border border-neutral-700 text-white px-3 py-2 text-sm"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function PromoBannerPreview({ form }: { form: PromoFormState }) {
+  const style = resolvePromoBannerStyle(form);
+  const badge =
+    form.badge_text ||
+    (form.discount_percent > 0 ? `-${Math.round(form.discount_percent)}%` : '');
+
+  return (
+    <div className="rounded-xl border border-neutral-700 bg-neutral-950 p-4">
+      <p className="mb-3 text-xs uppercase tracking-wider text-neutral-500">
+        Así se verá en la página de inicio
+      </p>
+      <div
+        className={cn(
+          'flex items-center gap-3 rounded-xl border px-4 py-3 min-w-[220px] max-w-[320px] shadow-lg',
+          style.containerClassName
+        )}
+        style={style.containerStyle}
+      >
+        {badge && (
+          <span
+            className={cn(
+              'inline-flex items-center justify-center px-2 py-1 text-xs font-bold whitespace-nowrap',
+              style.badgeClassName
+            )}
+            style={style.badgeStyle}
+          >
+            {badge}
+          </span>
+        )}
+        <div className="min-w-0">
+          <p className={cn('leading-tight truncate', style.titleClassName)} style={style.titleStyle}>
+            {form.title || 'Título del banner'}
+          </p>
+          {form.subtitle && (
+            <p
+              className={cn('leading-tight truncate mt-0.5', style.subtitleClassName)}
+              style={style.subtitleStyle}
+            >
+              {form.subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PromoBannersTab({
   promos,
   queryClient,
@@ -272,19 +477,7 @@ export function PromoBannersTab({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<PromoBannerAdmin | null>(null);
-  const [form, setForm] = useState({
-    title: '',
-    subtitle: '',
-    badge_text: '',
-    cta_url: '',
-    background_color: '#00E5FF',
-    text_color: '#000000',
-    discount_percent: 0,
-    apply_to: 'all' as 'all' | 'selected',
-    catalog_item_ids: [] as string[],
-    position: 0,
-    is_active: true,
-  });
+  const [form, setForm] = useState<PromoFormState>(() => createEmptyForm(0));
 
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['catalog-products-for-promos'],
@@ -349,35 +542,36 @@ export function PromoBannersTab({
 
   const openCreate = () => {
     setEditing(null);
-    setForm({
-      title: '',
-      subtitle: '',
-      badge_text: '',
-      cta_url: '/catalogo',
-      background_color: '#00E5FF',
-      text_color: '#000000',
-      discount_percent: 0,
-      apply_to: 'all',
-      catalog_item_ids: [],
-      position: promos.length,
-      is_active: true,
-    });
+    setForm(createEmptyForm(promos.length));
     setShowModal(true);
   };
 
   const openEdit = (promo: PromoBannerAdmin) => {
+    const defaults = createEmptyForm(promo.position);
     setEditing(promo);
     setForm({
+      ...defaults,
       title: promo.title,
       subtitle: promo.subtitle || '',
       badge_text: promo.badge_text || '',
       cta_url: promo.cta_url || '',
-      background_color: promo.background_color || '#00E5FF',
-      text_color: promo.text_color || '#000000',
+      background_color: promo.background_color || defaults.background_color,
+      background_style: promo.background_style || defaults.background_style,
+      background_color_secondary: promo.background_color_secondary || '',
+      gradient_direction: promo.gradient_direction || defaults.gradient_direction,
+      border_color: promo.border_color || '',
+      text_color: promo.text_color || defaults.text_color,
+      subtitle_color: promo.subtitle_color || '',
+      badge_background_color: promo.badge_background_color || '',
+      badge_text_color: promo.badge_text_color || '',
+      badge_shape: promo.badge_shape || defaults.badge_shape,
+      font_family: promo.font_family || defaults.font_family,
+      title_size: promo.title_size || defaults.title_size,
+      title_weight: promo.title_weight || defaults.title_weight,
+      text_transform: promo.text_transform || defaults.text_transform,
       discount_percent: Number(promo.discount_percent || 0),
       apply_to: promo.apply_to || 'all',
       catalog_item_ids: (promo.catalog_item_ids || []).filter((id) => productsById.has(id)),
-      position: promo.position,
       is_active: promo.is_active,
     });
     setShowModal(true);
@@ -406,6 +600,11 @@ export function PromoBannersTab({
     const invalidIds = form.catalog_item_ids.filter((id) => !productsById.has(id));
     if (invalidIds.length > 0) {
       toast.error('Hay productos seleccionados que ya no están en el catálogo.');
+      return;
+    }
+
+    if (form.background_style === 'gradient' && !form.background_color_secondary) {
+      toast.error('Elige el segundo color del degradado.');
       return;
     }
 
@@ -457,15 +656,29 @@ export function PromoBannersTab({
                     .filter(Boolean)
                 : [];
 
+            const promoStyle = resolvePromoBannerStyle(promo);
+
             return (
               <Card key={promo.id} className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div
-                    className="rounded-xl px-4 py-3 min-w-[180px] border border-white/10"
-                    style={{ backgroundColor: promo.background_color, color: promo.text_color }}
+                    className={cn(
+                      'rounded-xl px-4 py-3 min-w-[180px] border',
+                      promoStyle.containerClassName
+                    )}
+                    style={promoStyle.containerStyle}
                   >
-                    <p className="font-semibold text-sm">{promo.badge_text || promo.title}</p>
-                    {promo.subtitle && <p className="text-xs opacity-80 mt-1">{promo.subtitle}</p>}
+                    <p className={promoStyle.titleClassName} style={promoStyle.titleStyle}>
+                      {promo.badge_text || promo.title}
+                    </p>
+                    {promo.subtitle && (
+                      <p
+                        className={cn('mt-1', promoStyle.subtitleClassName)}
+                        style={promoStyle.subtitleStyle}
+                      >
+                        {promo.subtitle}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -533,26 +746,188 @@ export function PromoBannersTab({
             rows={2}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Input
-              label="Descuento (%)"
-              type="number"
-              min={0}
-              max={100}
-              value={form.discount_percent}
-              onChange={(e) => setForm({ ...form, discount_percent: Number(e.target.value) })}
-            />
-            <Input
-              label="Color fondo"
-              value={form.background_color}
-              onChange={(e) => setForm({ ...form, background_color: e.target.value })}
-            />
-            <Input
-              label="Color texto"
-              value={form.text_color}
-              onChange={(e) => setForm({ ...form, text_color: e.target.value })}
-            />
-          </div>
+          <Input
+            label="Descuento (%)"
+            type="number"
+            min={0}
+            max={100}
+            value={form.discount_percent}
+            onChange={(e) => setForm({ ...form, discount_percent: Number(e.target.value) })}
+          />
+
+          <Card className="p-4 bg-neutral-900/60 border-neutral-700 space-y-4">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-white">Apariencia</p>
+              <p className="text-xs text-neutral-500">
+                Los colores marcados como &quot;Automático&quot; se calculan a partir del color de
+                texto.
+              </p>
+            </div>
+
+            <PromoBannerPreview form={form} />
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-2">Paletas rápidas</label>
+              <div className="flex flex-wrap gap-2">
+                {COLOR_PRESETS.map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        background_color: preset.background_color,
+                        text_color: preset.text_color,
+                        background_style: preset.background_style,
+                        background_color_secondary: preset.background_color_secondary,
+                      })
+                    }
+                    className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
+                  >
+                    <span
+                      className="h-4 w-6 flex-shrink-0 rounded"
+                      style={{
+                        background:
+                          preset.background_style === 'gradient'
+                            ? `linear-gradient(to right, ${preset.background_color}, ${preset.background_color_secondary})`
+                            : preset.background_color,
+                      }}
+                    />
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SelectField
+                label="Estilo de fondo"
+                value={form.background_style}
+                onChange={(background_style) => setForm({ ...form, background_style })}
+                options={[
+                  { value: 'solid', label: 'Color sólido' },
+                  { value: 'gradient', label: 'Degradado' },
+                ]}
+              />
+              {form.background_style === 'gradient' && (
+                <SelectField
+                  label="Dirección del degradado"
+                  value={form.gradient_direction}
+                  onChange={(gradient_direction) => setForm({ ...form, gradient_direction })}
+                  options={[
+                    { value: 'to right', label: 'Izquierda a derecha' },
+                    { value: 'to left', label: 'Derecha a izquierda' },
+                    { value: 'to bottom', label: 'Arriba a abajo' },
+                    { value: '135deg', label: 'Diagonal' },
+                  ]}
+                />
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <ColorField
+                label="Color de fondo"
+                value={form.background_color}
+                onChange={(background_color) => setForm({ ...form, background_color })}
+              />
+              {form.background_style === 'gradient' && (
+                <ColorField
+                  label="Segundo color del degradado"
+                  value={form.background_color_secondary}
+                  onChange={(background_color_secondary) =>
+                    setForm({ ...form, background_color_secondary })
+                  }
+                />
+              )}
+              <ColorField
+                label="Color del título"
+                value={form.text_color}
+                onChange={(text_color) => setForm({ ...form, text_color })}
+              />
+              <ColorField
+                label="Color del subtítulo"
+                value={form.subtitle_color}
+                onChange={(subtitle_color) => setForm({ ...form, subtitle_color })}
+                optional
+              />
+              <ColorField
+                label="Color del borde"
+                value={form.border_color}
+                onChange={(border_color) => setForm({ ...form, border_color })}
+                optional
+              />
+              <ColorField
+                label="Fondo del badge"
+                value={form.badge_background_color}
+                onChange={(badge_background_color) => setForm({ ...form, badge_background_color })}
+                optional
+              />
+              <ColorField
+                label="Texto del badge"
+                value={form.badge_text_color}
+                onChange={(badge_text_color) => setForm({ ...form, badge_text_color })}
+                optional
+              />
+              <SelectField
+                label="Forma del badge"
+                value={form.badge_shape}
+                onChange={(badge_shape) => setForm({ ...form, badge_shape })}
+                options={[
+                  { value: 'pill', label: 'Redondeado completo' },
+                  { value: 'rounded', label: 'Esquinas suaves' },
+                  { value: 'square', label: 'Cuadrado' },
+                ]}
+              />
+            </div>
+
+            <div className="border-t border-neutral-800 pt-4">
+              <p className="text-sm font-medium text-white mb-3">Tipografía</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <SelectField
+                  label="Tipo de letra"
+                  value={form.font_family}
+                  onChange={(font_family) => setForm({ ...form, font_family })}
+                  options={[
+                    { value: 'sans', label: 'Inter (moderna)' },
+                    { value: 'display', label: 'Montserrat (títulos)' },
+                    { value: 'mono', label: 'Fira Code (monoespaciada)' },
+                  ]}
+                />
+                <SelectField
+                  label="Tamaño del texto"
+                  value={form.title_size}
+                  onChange={(title_size) => setForm({ ...form, title_size })}
+                  options={[
+                    { value: 'sm', label: 'Pequeño' },
+                    { value: 'base', label: 'Mediano' },
+                    { value: 'lg', label: 'Grande' },
+                    { value: 'xl', label: 'Muy grande' },
+                  ]}
+                />
+                <SelectField
+                  label="Grosor del título"
+                  value={form.title_weight}
+                  onChange={(title_weight) => setForm({ ...form, title_weight })}
+                  options={[
+                    { value: 'medium', label: 'Normal' },
+                    { value: 'semibold', label: 'Seminegrita' },
+                    { value: 'bold', label: 'Negrita' },
+                    { value: 'black', label: 'Extra negrita' },
+                  ]}
+                />
+                <SelectField
+                  label="Mayúsculas"
+                  value={form.text_transform}
+                  onChange={(text_transform) => setForm({ ...form, text_transform })}
+                  options={[
+                    { value: 'none', label: 'Como se escribió' },
+                    { value: 'uppercase', label: 'TODO EN MAYÚSCULAS' },
+                    { value: 'capitalize', label: 'Primera Letra Mayúscula' },
+                  ]}
+                />
+              </div>
+            </div>
+          </Card>
 
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">

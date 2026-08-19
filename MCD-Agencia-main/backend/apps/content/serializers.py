@@ -100,7 +100,11 @@ class PromoBannerSerializer(serializers.ModelSerializer):
         model = PromoBanner
         fields = [
             'id', 'title', 'title_en', 'subtitle', 'subtitle_en', 'badge_text',
-            'cta_url', 'background_color', 'text_color', 'discount_percent',
+            'cta_url', 'background_color', 'background_style',
+            'background_color_secondary', 'gradient_direction', 'border_color',
+            'text_color', 'subtitle_color', 'badge_background_color',
+            'badge_text_color', 'badge_shape', 'font_family', 'title_size',
+            'title_weight', 'text_transform', 'discount_percent',
             'apply_to', 'catalog_item_ids', 'position', 'is_active',
         ]
         read_only_fields = ['id']
@@ -133,6 +137,19 @@ class PromoBannerSerializer(serializers.ModelSerializer):
         if discount_percent and discount_percent > 100:
             raise serializers.ValidationError({'discount_percent': _('El descuento no puede ser mayor a 100%.')})
 
+        background_style = attrs.get(
+            'background_style',
+            getattr(self.instance, 'background_style', PromoBanner.BACKGROUND_SOLID),
+        )
+        secondary = attrs.get(
+            'background_color_secondary',
+            getattr(self.instance, 'background_color_secondary', ''),
+        )
+        if background_style == PromoBanner.BACKGROUND_GRADIENT and not secondary:
+            raise serializers.ValidationError({
+                'background_color_secondary': _('Elige el segundo color para el degradado.'),
+            })
+
         return attrs
 
 
@@ -143,7 +160,11 @@ class PromoBannerPublicSerializer(serializers.ModelSerializer):
         model = PromoBanner
         fields = [
             'id', 'title', 'title_en', 'subtitle', 'subtitle_en', 'badge_text',
-            'cta_url', 'background_color', 'text_color', 'discount_percent',
+            'cta_url', 'background_color', 'background_style',
+            'background_color_secondary', 'gradient_direction', 'border_color',
+            'text_color', 'subtitle_color', 'badge_background_color',
+            'badge_text_color', 'badge_shape', 'font_family', 'title_size',
+            'title_weight', 'text_transform', 'discount_percent',
             'apply_to', 'position',
         ]
         read_only_fields = ['id']

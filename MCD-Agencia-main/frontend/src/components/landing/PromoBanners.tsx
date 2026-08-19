@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TagIcon } from '@heroicons/react/24/solid';
 
 import { getPromoBanners, type PromoBanner } from '@/lib/api/content';
+import { resolvePromoBannerStyle } from '@/lib/promo-banner-style';
 import { cn } from '@/lib/utils';
 
 function buildPromoHref(banner: PromoBanner, locale: string): string {
@@ -35,26 +36,39 @@ function PromoBannerChip({ banner, locale }: { banner: PromoBanner; locale: stri
   const href = buildPromoHref(banner, locale);
   const isExternal = href.startsWith('http');
 
+  const style = resolvePromoBannerStyle(banner);
+
   const content = (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-xl border border-white/10 px-4 py-3 min-w-[220px] max-w-[320px]',
-        'shadow-lg backdrop-blur-sm transition-transform hover:scale-[1.02] cursor-pointer'
+        'flex items-center gap-3 rounded-xl border px-4 py-3 min-w-[220px] max-w-[320px]',
+        'shadow-lg backdrop-blur-sm transition-transform hover:scale-[1.02] cursor-pointer',
+        style.containerClassName
       )}
-      style={{
-        backgroundColor: banner.background_color || '#00E5FF',
-        color: banner.text_color || '#000000',
-      }}
+      style={style.containerStyle}
     >
       {badge && (
-        <span className="inline-flex items-center justify-center rounded-lg bg-black/15 px-2 py-1 text-xs font-bold whitespace-nowrap">
+        <span
+          className={cn(
+            'inline-flex items-center justify-center px-2 py-1 text-xs font-bold whitespace-nowrap',
+            style.badgeClassName
+          )}
+          style={style.badgeStyle}
+        >
           {badge}
         </span>
       )}
       <div className="min-w-0">
-        <p className="text-sm font-semibold leading-tight truncate">{title}</p>
+        <p className={cn('leading-tight truncate', style.titleClassName)} style={style.titleStyle}>
+          {title}
+        </p>
         {subtitle && (
-          <p className="text-xs opacity-80 leading-tight truncate mt-0.5">{subtitle}</p>
+          <p
+            className={cn('leading-tight truncate mt-0.5', style.subtitleClassName)}
+            style={style.subtitleStyle}
+          >
+            {subtitle}
+          </p>
         )}
       </div>
     </div>

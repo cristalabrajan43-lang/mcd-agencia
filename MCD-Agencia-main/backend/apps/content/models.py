@@ -13,10 +13,16 @@ This module defines CMS content models for the landing page:
 
 import uuid
 
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import TimeStampedModel, OrderedModel, SEOModel
+
+hex_color_validator = RegexValidator(
+    regex=r'^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$',
+    message=_('Use a hex color such as #00E5FF or #FFF.'),
+)
 
 
 class CarouselSlide(TimeStampedModel, OrderedModel):
@@ -131,6 +137,56 @@ class PromoBanner(TimeStampedModel, OrderedModel):
         (APPLY_SELECTED, _('Selected products')),
     ]
 
+    BACKGROUND_SOLID = 'solid'
+    BACKGROUND_GRADIENT = 'gradient'
+    BACKGROUND_STYLE_CHOICES = [
+        (BACKGROUND_SOLID, _('Solid color')),
+        (BACKGROUND_GRADIENT, _('Gradient')),
+    ]
+
+    # Values are CSS gradient directions, used verbatim in linear-gradient().
+    GRADIENT_DIRECTION_CHOICES = [
+        ('to right', _('Left to right')),
+        ('to left', _('Right to left')),
+        ('to bottom', _('Top to bottom')),
+        ('135deg', _('Diagonal')),
+    ]
+
+    FONT_SANS = 'sans'
+    FONT_DISPLAY = 'display'
+    FONT_MONO = 'mono'
+    FONT_FAMILY_CHOICES = [
+        (FONT_SANS, _('Inter (sans)')),
+        (FONT_DISPLAY, _('Montserrat (display)')),
+        (FONT_MONO, _('Fira Code (mono)')),
+    ]
+
+    TITLE_SIZE_CHOICES = [
+        ('sm', _('Small')),
+        ('base', _('Medium')),
+        ('lg', _('Large')),
+        ('xl', _('Extra large')),
+    ]
+
+    TITLE_WEIGHT_CHOICES = [
+        ('medium', _('Medium')),
+        ('semibold', _('Semibold')),
+        ('bold', _('Bold')),
+        ('black', _('Black')),
+    ]
+
+    TEXT_TRANSFORM_CHOICES = [
+        ('none', _('As typed')),
+        ('uppercase', _('UPPERCASE')),
+        ('capitalize', _('Capitalized')),
+    ]
+
+    BADGE_SHAPE_CHOICES = [
+        ('pill', _('Pill')),
+        ('rounded', _('Rounded')),
+        ('square', _('Square')),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(_('title'), max_length=120, help_text=_('Main banner text, e.g. "20% OFF".'))
     title_en = models.CharField(_('title (English)'), max_length=120, blank=True)
@@ -143,8 +199,102 @@ class PromoBanner(TimeStampedModel, OrderedModel):
         help_text=_('Short badge label, e.g. "-20%" or "HOT".'),
     )
     cta_url = models.CharField(_('CTA URL'), max_length=255, blank=True)
-    background_color = models.CharField(_('background color'), max_length=20, default='#00E5FF')
-    text_color = models.CharField(_('text color'), max_length=20, default='#000000')
+
+    # --- Appearance -------------------------------------------------------
+    # Colors left blank fall back to a value derived from the base colors, so
+    # existing banners keep their current look without any data migration.
+    background_color = models.CharField(
+        _('background color'),
+        max_length=20,
+        default='#00E5FF',
+        validators=[hex_color_validator],
+    )
+    background_style = models.CharField(
+        _('background style'),
+        max_length=20,
+        choices=BACKGROUND_STYLE_CHOICES,
+        default=BACKGROUND_SOLID,
+    )
+    background_color_secondary = models.CharField(
+        _('second background color'),
+        max_length=20,
+        blank=True,
+        validators=[hex_color_validator],
+        help_text=_('Second gradient color. Only used when the background style is a gradient.'),
+    )
+    gradient_direction = models.CharField(
+        _('gradient direction'),
+        max_length=20,
+        choices=GRADIENT_DIRECTION_CHOICES,
+        default='to right',
+    )
+    border_color = models.CharField(
+        _('border color'),
+        max_length=20,
+        blank=True,
+        validators=[hex_color_validator],
+        help_text=_('Leave empty for the default subtle border.'),
+    )
+    text_color = models.CharField(
+        _('text color'),
+        max_length=20,
+        default='#000000',
+        validators=[hex_color_validator],
+    )
+    subtitle_color = models.CharField(
+        _('subtitle color'),
+        max_length=20,
+        blank=True,
+        validators=[hex_color_validator],
+        help_text=_('Leave empty to reuse the title color at reduced opacity.'),
+    )
+    badge_background_color = models.CharField(
+        _('badge background color'),
+        max_length=20,
+        blank=True,
+        validators=[hex_color_validator],
+        help_text=_('Leave empty for a translucent dark badge.'),
+    )
+    badge_text_color = models.CharField(
+        _('badge text color'),
+        max_length=20,
+        blank=True,
+        validators=[hex_color_validator],
+        help_text=_('Leave empty to reuse the title color.'),
+    )
+    badge_shape = models.CharField(
+        _('badge shape'),
+        max_length=20,
+        choices=BADGE_SHAPE_CHOICES,
+        default='rounded',
+    )
+
+    # --- Typography -------------------------------------------------------
+    font_family = models.CharField(
+        _('font family'),
+        max_length=20,
+        choices=FONT_FAMILY_CHOICES,
+        default=FONT_SANS,
+    )
+    title_size = models.CharField(
+        _('title size'),
+        max_length=10,
+        choices=TITLE_SIZE_CHOICES,
+        default='sm',
+    )
+    title_weight = models.CharField(
+        _('title weight'),
+        max_length=20,
+        choices=TITLE_WEIGHT_CHOICES,
+        default='semibold',
+    )
+    text_transform = models.CharField(
+        _('text transform'),
+        max_length=20,
+        choices=TEXT_TRANSFORM_CHOICES,
+        default='none',
+    )
+
     discount_percent = models.DecimalField(
         _('discount percent'),
         max_digits=5,
