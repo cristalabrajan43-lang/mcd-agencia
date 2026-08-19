@@ -68,8 +68,19 @@ else:
 # CORS CONFIGURATION (Development)
 # =============================================================================
 
-# Allow all origins in development
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS + CORS_ALLOW_CREDENTIALS is invalid in browsers
+# (cannot send Authorization with Access-Control-Allow-Origin: *).
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = list({
+    *[o.strip() for o in CORS_ALLOWED_ORIGINS if o and o.strip()],
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+})
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = list({
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+})
 
 
 # =============================================================================

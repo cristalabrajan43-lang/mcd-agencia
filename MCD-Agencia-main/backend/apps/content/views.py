@@ -254,7 +254,7 @@ class PromoBannerViewSet(viewsets.ModelViewSet):
         return PromoBannerSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'metadata']:
             return [permissions.AllowAny()]
         return [IsRoleAdmin()]
 

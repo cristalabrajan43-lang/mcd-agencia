@@ -21,38 +21,60 @@ interface ApiError {
   data?: Record<string, unknown>;
 }
 
-/**
- * Get stored access token.
- */
+let memoryAccessToken: string | null = null;
+let memoryRefreshToken: string | null = null;
+let refreshInFlight: Promise<string | null> | null = null;
+
+function readStorage(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const value = localStorage.getItem(key);
+    return value && value !== 'undefined' && value !== 'null' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('accessToken');
+  if (memoryAccessToken) return memoryAccessToken;
+  memoryAccessToken = readStorage('accessToken');
+  return memoryAccessToken;
 }
 
-/**
- * Get stored refresh token.
- */
 function getRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('refreshToken');
+  if (memoryRefreshToken) return memoryRefreshToken;
+  memoryRefreshToken = readStorage('refreshToken');
+  return memoryRefreshToken;
 }
 
 /**
- * Store tokens in localStorage.
+ * Store tokens in memory and localStorage.
  */
 export function setTokens(accessToken: string, refreshToken: string): void {
+  memoryAccessToken = accessToken;
+  memoryRefreshToken = refreshToken;
   if (typeof window === 'undefined') return;
-  localStorage.setItem('accessToken', accessToken);
-  localStorage.setItem('refreshToken', refreshToken);
+  try {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+  } catch {
+    // Private mode can block localStorage; memory tokens still work this session.
+  }
 }
 
 /**
  * Clear stored tokens.
  */
 export function clearTokens(reason: 'manual' | 'expired' | 'unauthorized' = 'manual'): void {
+  memoryAccessToken = null;
+  memoryRefreshToken = null;
   if (typeof window === 'undefined') return;
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+  try {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  } catch {
+    // ignore
+  }
 
   window.dispatchEvent(
     new CustomEvent('auth:tokens-cleared', {
@@ -61,35 +83,76 @@ export function clearTokens(reason: 'manual' | 'expired' | 'unauthorized' = 'man
   );
 }
 
+function readTokenPair(data: Record<string, unknown>): { access?: string; refresh?: string } {
+  const nested = data.data && typeof data.data === 'object' ? (data.data as Record<string, unknown>) : undefined;
+  const access = (data.access || nested?.access) as string | undefined;
+  const refresh = (data.refresh || nested?.refresh) as string | undefined;
+  return { access, refresh };
+}
+
 /**
  * Refresh access token using refresh token.
+ *
+ * SIMPLE_JWT rotates refresh tokens. Parallel 401s (notifications + banners)
+ * used to blacklist the old refresh and then wipe the new access token.
  */
 async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
-  const apiBaseUrl = getApiBaseUrl();
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = (async () => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) return null;
+    const apiBaseUrl = getApiBaseUrl();
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/token/refresh/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+
+      if (!response.ok) {
+        if (getRefreshToken() === refreshToken) {
+          clearTokens('expired');
+        }
+        return getAccessToken();
+      }
+
+      const data = readTokenPair((await response.json()) as Record<string, unknown>);
+      if (!data.access) {
+        return getAccessToken();
+      }
+      setTokens(data.access, data.refresh || refreshToken);
+      return data.access;
+    } catch {
+      if (getRefreshToken() === refreshToken) {
+        clearTokens('expired');
+      }
+      return getAccessToken();
+    }
+  })();
 
   try {
-    const response = await fetch(`${apiBaseUrl}/auth/token/refresh/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh: refreshToken }),
-    });
-
-    if (!response.ok) {
-      clearTokens('expired');
-      return null;
-    }
-
-    const data = await response.json();
-    localStorage.setItem('accessToken', data.access);
-    return data.access;
-  } catch {
-    clearTokens('expired');
-    return null;
+    return await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
   }
+}
+
+function sessionExpiredMessage(status: number, message: string): string {
+  if (status !== 401) return message;
+  const lower = message.toLowerCase();
+  if (
+    message === 'Authentication credentials were not provided.' ||
+    lower.includes('not valid') ||
+    lower.includes('expired') ||
+    lower.includes('token')
+  ) {
+    return 'Tu sesión expiró. Recarga la página e inicia sesión de nuevo.';
+  }
+  return message;
 }
 
 /**
@@ -127,6 +190,10 @@ async function request<T>(
   const url = buildUrl(endpoint, params);
   let accessToken = getAccessToken();
 
+  if (!accessToken && getRefreshToken()) {
+    accessToken = await refreshAccessToken();
+  }
+
   // Build headers — skip Content-Type for FormData (browser sets it with boundary)
   const isFormData = restConfig.body instanceof FormData;
   const requestHeaders: HeadersInit = {
@@ -155,11 +222,11 @@ async function request<T>(
     throw error;
   }
 
-  // If 401, try to refresh token and retry
-  if (response.status === 401 && accessToken) {
+  // If 401, try to refresh token and retry (even when the first request had no access token)
+  if (response.status === 401) {
     const newToken = await refreshAccessToken();
 
-    if (newToken) {
+    if (newToken && newToken !== accessToken) {
       (requestHeaders as Record<string, string>)['Authorization'] = `Bearer ${newToken}`;
       try {
         response = await fetch(url, {
@@ -191,13 +258,14 @@ async function request<T>(
     // Unwrap our custom error envelope: {success, error: {code, message, details}}
     const envelope = errorData?.error as Record<string, unknown> | undefined;
     const fieldErrors = (envelope?.details ?? errorData) as Record<string, unknown> | undefined;
+    const rawMessage =
+      (envelope?.message as string) ||
+      (errorData?.detail as string) ||
+      (errorData?.message as string) ||
+      'Error en el servidor';
 
     const error: ApiError = {
-      message:
-        (envelope?.message as string) ||
-        (errorData?.detail as string) ||
-        (errorData?.message as string) ||
-        'Error en el servidor',
+      message: sessionExpiredMessage(response.status, rawMessage),
       status: response.status,
       data: fieldErrors,
     };
