@@ -4,7 +4,7 @@ Catalog Signals for MCD-Agencia.
 Signal handlers for catalog-related events.
 """
 
-import uuid
+from django.db import transaction
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
@@ -12,36 +12,24 @@ from .models import CatalogItem, ProductVariant
 
 
 @receiver(post_save, sender=CatalogItem)
-def create_default_variant(sender, instance, created, **kwargs):
+def sync_catalog_item_inventory(sender, instance, created, **kwargs):
     """
-    Auto-create a default variant for products that can be purchased directly.
+    After a catalog product is saved, make sure it has an inventory variant.
 
-    This ensures products with sale_mode BUY or HYBRID always have at least
-    one variant, which is required for the cart functionality.
-
-    Args:
-        sender: The CatalogItem model
-        instance: The CatalogItem instance
-        created: Whether this is a new instance
-        **kwargs: Additional arguments
+    Runs on commit so a serializer that creates the variant in the same
+    transaction is visible before we decide whether to create another one.
     """
-    # Only create default variant for products that can be purchased
-    if instance.sale_mode in ['BUY', 'HYBRID'] and not instance.track_inventory:
-        # Check if product has any variants
-        if not instance.variants.exists():
-            # Generate a unique SKU
-            sku = f"{instance.slug}-default-{str(uuid.uuid4())[:8]}"
+    from apps.inventory.sync import is_syncing, sync_catalog_item_to_inventory
 
-            # Create default variant with base price
-            ProductVariant.objects.create(
-                catalog_item=instance,
-                sku=sku,
-                name='Default',
-                price=instance.base_price,
-                compare_at_price=instance.compare_at_price,
-                stock=100 if not instance.track_inventory else 0,
-                is_active=True
-            )
+    if is_syncing():
+        return
+
+    def _after_commit():
+        if is_syncing():
+            return
+        sync_catalog_item_to_inventory(instance)
+
+    transaction.on_commit(_after_commit)
 
 
 @receiver(m2m_changed, sender=ProductVariant.attribute_values.through)

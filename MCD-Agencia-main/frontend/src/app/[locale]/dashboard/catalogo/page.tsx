@@ -222,6 +222,9 @@ export default function AdminCatalogPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-low-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-value'] });
       closeModal();
     },
     onError: (error: { message?: string; data?: Record<string, unknown> }) => {
@@ -289,6 +292,9 @@ export default function AdminCatalogPage() {
     },
     onSuccess: (_, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ['admin-products', filters] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-low-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-value'] });
 
       if (context?.pendingImages?.length) {
         void uploadProductImages(variables.id, context.pendingImages)
@@ -317,6 +323,9 @@ export default function AdminCatalogPage() {
     mutationFn: deleteProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-low-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-value'] });
       setDeleteConfirm(null);
       setDeleteConfirmText('');
       toast.success('Producto eliminado del catálogo e inventario');
@@ -353,7 +362,9 @@ export default function AdminCatalogPage() {
     onSuccess: () => {
       setDeleteConfirm(null);
       setDeleteConfirmText('');
-      toast.success('Producto desactivado. Permanece en inventario y se oculta del catálogo.');
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-low-stock'] });
+      toast.success('Producto desactivado en catálogo e inventario');
     },
     onError: (error: { message?: string; data?: Record<string, unknown> } | null, _, context: any) => {
       // Rollback on error
@@ -1149,7 +1160,7 @@ export default function AdminCatalogPage() {
             <div className="border border-neutral-700 rounded-lg p-4 space-y-3 bg-neutral-900/50">
               <h3 className="text-sm font-semibold text-neutral-200">Inventario</h3>
               <p className="text-xs text-neutral-400">
-                La gestión de inventario no se edita desde catálogo para evitar inconsistencias. Usa el módulo de inventario para entradas, salidas y ajustes.
+                El nombre, el precio y el estado se copian solos al inventario. Las entradas, salidas y el SKU se editan en el módulo de inventario.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <div className="rounded-md border border-neutral-700 bg-neutral-800/40 p-3">

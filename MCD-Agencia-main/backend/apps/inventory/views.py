@@ -261,7 +261,8 @@ class StockSummaryView(APIView):
         variants = ProductVariant.objects.filter(
             is_active=True,
             is_deleted=False,
-            catalog_item__track_inventory=True
+            catalog_item__track_inventory=True,
+            catalog_item__is_deleted=False,
         ).select_related('catalog_item').annotate(
             total_in=Coalesce(
                 Sum(
@@ -361,6 +362,7 @@ class LowStockReportView(APIView):
             is_active=True,
             is_deleted=False,
             catalog_item__track_inventory=True,
+            catalog_item__is_deleted=False,
             stock__lte=F('low_stock_threshold')
         ).select_related('catalog_item').order_by('stock')
 

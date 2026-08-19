@@ -964,6 +964,7 @@ function InventoryItemModal({
       queryClient.invalidateQueries({ queryKey: ['inventory-movements-by-variant', item.variant_id] });
       queryClient.invalidateQueries({ queryKey: ['inventory-alert-counts'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-product-detail', item.product_id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       setNotes('');
       setQuantity(0);
     },

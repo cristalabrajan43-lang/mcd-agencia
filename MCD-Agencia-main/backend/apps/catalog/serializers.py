@@ -185,7 +185,15 @@ class ProductVariantSerializer(serializers.ModelSerializer):
             'weight', 'dimensions', 'barcode', 'is_active',
             'is_low_stock', 'is_out_of_stock', 'images'
         ]
-        read_only_fields = ['id', 'name', 'is_low_stock', 'is_out_of_stock']
+        # Stock is owned by inventory movements; writing it here would skip the audit trail.
+        read_only_fields = ['id', 'name', 'stock', 'is_low_stock', 'is_out_of_stock']
+
+    def update(self, instance, validated_data):
+        variant = super().update(instance, validated_data)
+        from apps.inventory.sync import sync_variant_to_catalog_item
+
+        sync_variant_to_catalog_item(variant)
+        return variant
 
 
 class CatalogItemListSerializer(serializers.ModelSerializer):
@@ -383,60 +391,39 @@ class CatalogItemAdminSerializer(CatalogItemDetailSerializer):
                 'name': _('No se pudo generar un slug unico para este nombre. Intenta con un nombre diferente.')
             })
 
-        with transaction.atomic():
+        request = self.context.get('request')
+        created_by = getattr(request, 'user', None) if request else None
+        from apps.inventory.sync import sync_catalog_item_to_inventory
 
-            if item.type == 'product' and item.track_inventory:
-                sku = (initial_sku or f"{item.slug}-001").strip().upper()
-                if not sku:
-                    sku = f"{item.slug}-001"
+        sync_catalog_item_to_inventory(
+            item,
+            sku=initial_sku,
+            initial_stock=initial_stock,
+            threshold=initial_low_stock_threshold,
+            cost=initial_cost,
+            created_by=created_by,
+        )
+        return item
 
-                # Keep SKU unique even when admins reuse a code by mistake.
-                if ProductVariant.objects.filter(sku=sku).exists():
-                    base_sku = sku
-                    suffix = 2
-                    while ProductVariant.objects.filter(sku=f"{base_sku}-{suffix:02d}").exists():
-                        suffix += 1
-                    sku = f"{base_sku}-{suffix:02d}"
+    def update(self, instance, validated_data):
+        """Keep the inventory variant aligned when the catalog product changes."""
+        initial_sku = validated_data.pop('initial_sku', None)
+        initial_stock = validated_data.pop('initial_stock', None)
+        initial_low_stock_threshold = validated_data.pop('initial_low_stock_threshold', None)
+        initial_cost = validated_data.pop('initial_cost', None)
 
-                variant_cost = initial_cost if initial_cost is not None else (item.base_price or 0)
-                variant = ProductVariant.objects.create(
-                    catalog_item=item,
-                    sku=sku,
-                    name='Default',
-                    cost=variant_cost,
-                    price=item.base_price or 0,
-                    compare_at_price=item.compare_at_price,
-                    stock=0,
-                    low_stock_threshold=max(0, initial_low_stock_threshold),
-                    is_active=True,
-                )
+        item = super().update(instance, validated_data)
 
-                if initial_stock > 0:
-                    from apps.inventory.models import InventoryMovement
-                    stock_before = variant.stock if variant.stock is not None else 0
-                    target_stock = max(0, initial_stock)
+        request = self.context.get('request')
+        created_by = getattr(request, 'user', None) if request else None
+        from apps.inventory.sync import sync_catalog_item_to_inventory
 
-                    try:
-                        # Use an inner savepoint so movement failures don't abort product creation.
-                        with transaction.atomic():
-                            InventoryMovement.objects.create(
-                                variant=variant,
-                                movement_type=InventoryMovement.MOVEMENT_ADJUSTMENT,
-                                quantity=target_stock - stock_before,
-                                reason='initial',
-                                notes='Stock inicial al crear producto desde catálogo admin',
-                                created_by=self.context.get('request').user if self.context.get('request') else None,
-                                stock_before=stock_before,
-                                stock_after=target_stock,
-                            )
-                    except IntegrityError as exc:
-                        logger.warning(
-                            'Initial inventory movement failed for item %s / variant %s. Applying direct stock fallback. Error: %s',
-                            item.id,
-                            variant.id,
-                            exc,
-                        )
-                        variant.stock = target_stock
-                        variant.save(update_fields=['stock', 'updated_at'])
-
+        sync_catalog_item_to_inventory(
+            item,
+            sku=initial_sku,
+            initial_stock=initial_stock,
+            threshold=initial_low_stock_threshold,
+            cost=initial_cost,
+            created_by=created_by,
+        )
         return item
