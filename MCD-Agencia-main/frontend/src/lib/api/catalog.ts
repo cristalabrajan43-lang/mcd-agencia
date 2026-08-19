@@ -155,6 +155,7 @@ export interface ProductListItem {
   has_discount: boolean;
   discount_percentage?: number;
   primary_image?: ProductImage;
+  track_inventory?: boolean;
   is_active: boolean;
   is_featured: boolean;
 }

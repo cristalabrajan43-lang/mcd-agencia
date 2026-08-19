@@ -412,6 +412,10 @@ class CatalogItemAdminSerializer(CatalogItemDetailSerializer):
         initial_low_stock_threshold = validated_data.pop('initial_low_stock_threshold', None)
         initial_cost = validated_data.pop('initial_cost', None)
 
+        # Catalog edits used to send track_inventory=false and drop the row from inventory.
+        if instance.variants.filter(is_deleted=False).exists():
+            validated_data['track_inventory'] = True
+
         item = super().update(instance, validated_data)
 
         request = self.context.get('request')

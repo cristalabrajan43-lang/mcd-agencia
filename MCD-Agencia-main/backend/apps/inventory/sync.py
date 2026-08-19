@@ -165,15 +165,7 @@ def sync_item_fields_to_primary_variant(item) -> None:
 
     if item.track_inventory:
         live_variants = item.variants.filter(is_deleted=False)
-        if not item.is_active:
-            for other in live_variants.filter(is_active=True):
-                if other.pk != variant.pk:
-                    with skip_sync():
-                        other.is_active = False
-                        other.save(update_fields=['is_active', 'updated_at'])
-            if variant.is_active:
-                updates['is_active'] = False
-        elif not live_variants.filter(is_active=True).exists() and not variant.is_active:
+        if not live_variants.filter(is_active=True).exists() and not variant.is_active:
             updates['is_active'] = True
 
     if not updates:
@@ -253,12 +245,6 @@ def sync_variant_to_catalog_item(variant) -> None:
     if item.compare_at_price != variant.compare_at_price:
         updates['compare_at_price'] = variant.compare_at_price
 
-    has_active = item.variants.filter(is_deleted=False, is_active=True).exists()
-    if variant.is_active and not item.is_active:
-        updates['is_active'] = True
-    elif not has_active and item.is_active:
-        updates['is_active'] = False
-
     if not updates:
         return
 
@@ -284,3 +270,34 @@ def backfill_missing_inventory_variants() -> int:
         ensure_inventory_variant(item)
         created += 1
     return created
+
+
+def restore_inventory_visibility() -> int:
+    """
+    Put products back in the inventory list after a catalog edit turned off tracking.
+
+    Any surviving variant means the product still belongs in inventory.
+    """
+    from apps.catalog.models import CatalogItem
+
+    restored = 0
+    items = CatalogItem.objects.filter(type='product', is_deleted=False)
+    for item in items:
+        variants = list(item.variants.filter(is_deleted=False))
+        if not variants:
+            continue
+        changed = False
+        if not item.track_inventory:
+            with skip_sync():
+                item.track_inventory = True
+                item.save(update_fields=['track_inventory', 'updated_at'])
+            changed = True
+        if not any(variant.is_active for variant in variants):
+            primary = get_primary_variant(item) or variants[0]
+            with skip_sync():
+                primary.is_active = True
+                primary.save(update_fields=['is_active', 'updated_at'])
+            changed = True
+        if changed:
+            restored += 1
+    return restored

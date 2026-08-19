@@ -405,7 +405,7 @@ export default function AdminCatalogPage() {
       payment_mode: 'FULL',
       base_price: product.base_price,
       compare_at_price: product.compare_at_price || '',
-      track_inventory: false,
+      track_inventory: product.track_inventory !== false,
       sku: '',
       initial_stock: '0',
       low_stock_threshold: '10',
@@ -558,10 +558,14 @@ export default function AdminCatalogPage() {
       payment_mode: formData.payment_mode,
       base_price: formData.base_price || undefined,
       compare_at_price: formData.compare_at_price || undefined,
-      track_inventory: formData.type === 'product' ? formData.track_inventory : false,
       is_active: formData.is_active,
       is_featured: formData.is_featured,
-      ...(formData.type === 'product' && formData.track_inventory && !editingProduct
+      ...(isCreate
+        ? {
+            track_inventory: formData.type === 'product' ? formData.track_inventory : false,
+          }
+        : {}),
+      ...(formData.type === 'product' && formData.track_inventory && isCreate
         ? {
             initial_sku: formData.sku.trim().toUpperCase(),
             initial_stock: Number(formData.initial_stock || '0'),
@@ -1160,7 +1164,7 @@ export default function AdminCatalogPage() {
             <div className="border border-neutral-700 rounded-lg p-4 space-y-3 bg-neutral-900/50">
               <h3 className="text-sm font-semibold text-neutral-200">Inventario</h3>
               <p className="text-xs text-neutral-400">
-                El nombre, el precio y el estado se copian solos al inventario. Las entradas, salidas y el SKU se editan en el módulo de inventario.
+                El nombre y el precio se copian al inventario. El producto no se quita de inventario al editarlo aquí; las existencias se mueven en el módulo de inventario.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <div className="rounded-md border border-neutral-700 bg-neutral-800/40 p-3">
