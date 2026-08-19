@@ -24,6 +24,7 @@ import {
   deleteProductImage,
   createCategory,
   type CreateProductData,
+  type UploadImagesResponse,
 } from '@/lib/api/admin';
 import toast from 'react-hot-toast';
 import { Card, Badge, Button, Input, Select, Modal, Pagination, LoadingPage } from '@/components/ui';
@@ -113,6 +114,21 @@ const initialCategoryFormData: CategoryFormData = {
   name: '',
 };
 
+function getUploadErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = String((error as { message?: string }).message ?? '').trim();
+    if (message) return message;
+  }
+  return 'Revisa el formato y el peso de las imágenes.';
+}
+
+/** The endpoint answers 207 when only some files fail, so name those files. */
+function reportRejectedImages(result: UploadImagesResponse): void {
+  if (!result.errors?.length) return;
+  const rejected = result.errors.map((item) => item.file).join(', ');
+  toast.error(`No se pudieron subir: ${rejected}`);
+}
+
 export default function AdminCatalogPage() {
   const queryClient = useQueryClient();
   const locale = useLocale();
@@ -191,10 +207,13 @@ export default function AdminCatalogPage() {
       // Upload images if any
       if (selectedImages.length > 0) {
         try {
-          await uploadProductImages(product.id, selectedImages);
-          toast.success('Producto e imágenes creados');
-        } catch {
-          toast.error('Producto creado, pero hubo error al subir imágenes');
+          const result = await uploadProductImages(product.id, selectedImages);
+          reportRejectedImages(result);
+          if (result.uploaded > 0) {
+            toast.success('Producto e imágenes creados');
+          }
+        } catch (error) {
+          toast.error(`Producto creado, pero falló la subida: ${getUploadErrorMessage(error)}`);
         }
       } else {
         toast.success('Producto creado');
@@ -273,8 +292,14 @@ export default function AdminCatalogPage() {
 
       if (context?.pendingImages?.length) {
         void uploadProductImages(variables.id, context.pendingImages)
-          .then(() => undefined)
-          .catch(() => toast.error('Producto actualizado, pero hubo error al subir imágenes'));
+          .then((result) => {
+            reportRejectedImages(result);
+            // Refresh so the freshly uploaded images show up in the list.
+            queryClient.invalidateQueries({ queryKey: ['admin-products', filters] });
+          })
+          .catch((error) =>
+            toast.error(`Producto actualizado, pero falló la subida: ${getUploadErrorMessage(error)}`)
+          );
         return;
       }
     },

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+import warnings
 from datetime import timedelta
 from pathlib import Path
 
@@ -356,28 +357,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Django 5.0+ uses STORAGES dict (replaces deprecated STATICFILES_STORAGE
-# and DEFAULT_FILE_STORAGE which are silently ignored).
-# If R2/S3 credentials are present, use cloud storage even in development.
-if os.getenv('AWS_ACCESS_KEY_ID') and os.getenv('AWS_STORAGE_BUCKET_NAME'):
-    STORAGES = {
-        'default': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-        },
-        'staticfiles': {
-            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-        },
-    }
-else:
-    STORAGES = {
-        'default': {
-            'BACKEND': 'django.core.files.storage.FileSystemStorage',
-        },
-        'staticfiles': {
-            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-        },
-    }
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -394,11 +373,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 #   AWS_SECRET_ACCESS_KEY  = R2 Secret Access Key
 #   AWS_STORAGE_BUCKET_NAME = your-bucket-name
 #   AWS_S3_ENDPOINT_URL    = https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+# On plain AWS S3 the endpoint is the regional host, e.g.
+#   AWS_S3_ENDPOINT_URL    = https://s3.us-east-1.amazonaws.com
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', '')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'auto')  # 'auto' for R2
-AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', '')  # R2/B2/DO endpoint
+# boto3 raises "Invalid endpoint" on an empty string, so keep it unset as None.
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', '').strip() or None
 AWS_S3_CUSTOM_DOMAIN = ''  # Must be empty — presigned URLs must use the S3 endpoint
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None  # R2 doesn't support ACLs
@@ -409,6 +391,40 @@ AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 604800  # Presigned URLs valid for 7 days (max for S3v4)
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',  # CDN cache 1 day
+}
+
+# Cloud storage needs the whole set. Checking only the key and the bucket used
+# to select S3 with no endpoint configured, which let the app boot and then
+# fail every upload deep inside boto3 instead of falling back to local media.
+_S3_REQUIRED_SETTINGS = {
+    'AWS_ACCESS_KEY_ID': AWS_ACCESS_KEY_ID,
+    'AWS_SECRET_ACCESS_KEY': AWS_SECRET_ACCESS_KEY,
+    'AWS_STORAGE_BUCKET_NAME': AWS_STORAGE_BUCKET_NAME,
+    'AWS_S3_ENDPOINT_URL': AWS_S3_ENDPOINT_URL,
+}
+_MISSING_S3_SETTINGS = sorted(name for name, value in _S3_REQUIRED_SETTINGS.items() if not value)
+USE_S3_STORAGE = not _MISSING_S3_SETTINGS
+
+if _MISSING_S3_SETTINGS and len(_MISSING_S3_SETTINGS) < len(_S3_REQUIRED_SETTINGS):
+    warnings.warn(
+        'Cloud storage is only partially configured, so uploads will be saved to '
+        'local media instead. Missing: {}.'.format(', '.join(_MISSING_S3_SETTINGS)),
+        stacklevel=2,
+    )
+
+# Django 5.0+ uses STORAGES dict (replaces deprecated STATICFILES_STORAGE
+# and DEFAULT_FILE_STORAGE which are silently ignored).
+STORAGES = {
+    'default': {
+        'BACKEND': (
+            'storages.backends.s3boto3.S3Boto3Storage'
+            if USE_S3_STORAGE
+            else 'django.core.files.storage.FileSystemStorage'
+        ),
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
 }
 
 

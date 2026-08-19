@@ -145,7 +145,9 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # Without these vars, Django falls back to local filesystem (files lost on deploy).
 # =============================================================================
 
-if os.getenv('AWS_ACCESS_KEY_ID') and os.getenv('AWS_STORAGE_BUCKET_NAME'):
+# USE_S3_STORAGE comes from base settings and requires the endpoint too, so an
+# incomplete config falls back here instead of failing on the first upload.
+if USE_S3_STORAGE:
     # Django 5.0+ uses STORAGES dict (DEFAULT_FILE_STORAGE is ignored!)
     STORAGES = {
         'default': {
@@ -162,7 +164,8 @@ else:
     import logging
     logging.getLogger('django').warning(
         '⚠️  Using EPHEMERAL FileSystemStorage — uploaded files will be LOST on deploy! '
-        'Set AWS_ACCESS_KEY_ID + AWS_STORAGE_BUCKET_NAME for persistent R2 storage.'
+        'Missing for persistent R2 storage: %s.',
+        ', '.join(_MISSING_S3_SETTINGS),
     )
     STORAGES = {
         'default': {

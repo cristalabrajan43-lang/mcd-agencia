@@ -477,42 +477,17 @@ export async function uploadProductImages(
     formData.append('images', image);
   });
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/catalog/items/${productId}/upload-images/`,
-    {
-      method: 'POST',
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-      },
-    }
+  return apiClient.upload<UploadImagesResponse>(
+    `/catalog/items/${productId}/upload-images/`,
+    formData
   );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to upload images');
-  }
-
-  return response.json();
 }
 
 export async function deleteProductImage(
   productId: string,
   imageId: string
 ): Promise<void> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/catalog/items/${productId}/delete-image/${imageId}/`,
-    {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-      },
-    }
-  );
-
-  if (!response.ok && response.status !== 204) {
-    throw new Error('Failed to delete image');
-  }
+  await apiClient.delete(`/catalog/items/${productId}/delete-image/${imageId}/`);
 }
 
 // Inventory Admin
