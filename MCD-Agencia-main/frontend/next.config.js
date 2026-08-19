@@ -184,11 +184,13 @@ const nextConfig = {
   },
 
   // ==========================================================================
-  // Webpack Configuration
+  // Dev Server Page Cache
   // ==========================================================================
-  webpack: (config, { isServer }) => {
-    // Add custom webpack configurations here if needed
-    return config;
+  // Dev compiles routes on demand, so keep compiled pages in memory long
+  // enough that switching between dashboard modules doesn't recompile them.
+  onDemandEntries: {
+    maxInactiveAge: 60 * 60 * 1000,
+    pagesBufferLength: 25,
   },
 
   // ==========================================================================

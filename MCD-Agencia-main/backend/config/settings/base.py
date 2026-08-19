@@ -179,7 +179,11 @@ CACHES = {
         'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/0'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # Sessions hit the cache on every request; short timeouts keep the
+            # site responsive when Redis is unreachable instead of hanging.
             'IGNORE_EXCEPTIONS': True,
+            'SOCKET_CONNECT_TIMEOUT': 1,
+            'SOCKET_TIMEOUT': 1,
         },
     }
 }
