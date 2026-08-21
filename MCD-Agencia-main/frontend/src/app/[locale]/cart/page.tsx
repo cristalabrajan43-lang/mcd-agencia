@@ -31,6 +31,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, Spinner } from '@/components/ui';
 import { formatPrice } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 export default function CartPage() {
   const locale = useLocale();
@@ -143,7 +144,7 @@ export default function CartPage() {
                         {/* Image */}
                         <div className="relative h-24 w-24 md:h-32 md:w-32 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
                           <Image
-                            src={item.product_image || item.variant.images?.[0]?.image || '/images/logo.png'}
+                            src={resolveMediaUrl(item.product_image || item.variant.images?.[0]?.image || '/images/logo.png')}
                             alt={item.product_name}
                             fill
                             className="object-cover"

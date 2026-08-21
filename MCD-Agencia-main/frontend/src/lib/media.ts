@@ -12,6 +12,15 @@ const FALLBACK_CAROUSEL_IMAGES = [
   'https://images.unsplash.com/photo-1557825835-70d97c4aa567?w=1920&q=80',
 ];
 
+/** Hosts that the Next.js image optimizer cannot reach from Docker. */
+const INTERNAL_MEDIA_HOSTS = new Set([
+  'localhost',
+  '127.0.0.1',
+  '0.0.0.0',
+  'backend',
+  'host.docker.internal',
+]);
+
 export function getFallbackCarouselImages(): string[] {
   return FALLBACK_CAROUSEL_IMAGES;
 }
@@ -23,14 +32,22 @@ export function resolveMediaUrl(url?: string | null): string {
   if (!trimmed) return PRODUCT_PLACEHOLDER;
 
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.pathname.startsWith('/media/') && INTERNAL_MEDIA_HOSTS.has(parsed.hostname)) {
+        // Django returns http://localhost:8000/media/... next/image then fetches
+        // that URL from inside the frontend container (ECONNREFUSED ::1:8000).
+        // Same-origin /media/* is rewritten to the backend.
+        return trimmed.slice(parsed.origin.length) || parsed.pathname;
+      }
+    } catch {
+      return trimmed;
+    }
     return trimmed;
   }
 
   if (trimmed.startsWith('/media/')) {
-    if (typeof window !== 'undefined') {
-      return trimmed;
-    }
-    return `${getBackendOrigin()}${trimmed}`;
+    return trimmed;
   }
 
   if (trimmed.startsWith('/')) {

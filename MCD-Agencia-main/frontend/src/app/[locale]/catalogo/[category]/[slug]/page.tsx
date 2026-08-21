@@ -23,6 +23,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Button, Badge, LoadingPage, Modal } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { resolveMediaUrl } from '@/lib/media';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -99,7 +100,7 @@ export default function ProductDetailPage() {
 
   const images =
     product.images?.length > 0
-      ? product.images
+      ? product.images.map((img) => ({ ...img, image: resolveMediaUrl(img.image) }))
       : [{ id: '0', image: '/images/logo.png', alt_text: name }];
 
   const nextImage = () => {

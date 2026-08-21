@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button, Spinner } from '@/components/ui';
 import { formatPrice } from '@/lib/utils';
 import { apiClient } from '@/lib/api/client';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface GuestCartItemDetail {
   variant_id: string;
@@ -202,7 +203,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                               {/* Image */}
                               <div className="relative h-24 w-24 rounded-lg overflow-hidden bg-neutral-900 flex-shrink-0">
                                 <Image
-                                  src={item.product_image || item.variant.images?.[0]?.image || '/images/logo.png'}
+                                  src={resolveMediaUrl(item.product_image || item.variant.images?.[0]?.image || '/images/logo.png')}
                                   alt={item.product_name}
                                   fill
                                   className="object-cover"
@@ -268,7 +269,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                               {/* Image */}
                               <div className="relative h-24 w-24 rounded-lg overflow-hidden bg-neutral-900 flex-shrink-0">
                                 <Image
-                                  src={item.image}
+                                  src={resolveMediaUrl(item.image)}
                                   alt={item.product_name}
                                   fill
                                   className="object-cover"

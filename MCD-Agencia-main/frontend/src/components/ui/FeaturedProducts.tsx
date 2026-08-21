@@ -12,6 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingCartIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { resolveProductImageUrl } from '@/lib/media';
 
 interface ProductVariant {
   id: string;
@@ -134,7 +135,7 @@ export default function FeaturedProducts({
                     <div className="aspect-square relative overflow-hidden bg-gray-100">
                       {product.primary_image ? (
                         <Image
-                          src={product.primary_image.image}
+                          src={resolveProductImageUrl(product.primary_image)}
                           alt={product.primary_image.alt_text || name}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -27,6 +27,7 @@ import { getUserAddresses, type UserAddress } from '@/lib/api/auth';
 import { getBranches, type Branch } from '@/lib/api/content';
 import { Button, Input, Card, LoadingPage, Modal } from '@/components/ui';
 import { formatPrice, cn } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 const addressSchema = z.object({
   name: z.string().min(2, 'Nombre requerido'),
@@ -642,7 +643,7 @@ export default function CheckoutPage() {
                   <div key={item.id} className="flex gap-3">
                     <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
                       <Image
-                        src={item.product_image || item.variant.images?.[0]?.image || '/images/logo.png'}
+                        src={resolveMediaUrl(item.product_image || item.variant.images?.[0]?.image || '/images/logo.png')}
                         alt={item.product_name}
                         fill
                         className="object-cover"

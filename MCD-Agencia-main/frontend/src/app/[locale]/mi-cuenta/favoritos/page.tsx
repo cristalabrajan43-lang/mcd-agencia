@@ -10,6 +10,7 @@ import { HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { getProductById, type Product } from '@/lib/api/catalog';
 import { Button, Card, Spinner } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 const SAVED_PRODUCTS_KEY = 'savedProducts';
 
@@ -94,7 +95,7 @@ export default function FavoritesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {products.map((product) => {
           const href = `/${locale}/catalogo/${product.category?.slug || 'productos'}/${product.slug}`;
-          const image = product.images?.[0]?.image || '/images/logo.png';
+          const image = resolveMediaUrl(product.images?.[0]?.image || '/images/logo.png');
 
           return (
             <Card key={product.id} className="overflow-hidden">
