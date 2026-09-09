@@ -12,7 +12,8 @@ def get_promo_targets(banner: PromoBanner):
         is_active=True,
         is_deleted=False,
         sale_mode__in=['BUY', 'HYBRID'],
-    )
+        vendor__isnull=True,
+    ).exclude(specifications__has_key='source_vendor_item_id')
     if banner.apply_to == PromoBanner.APPLY_SELECTED:
         return queryset.filter(promo_banners=banner)
     return queryset

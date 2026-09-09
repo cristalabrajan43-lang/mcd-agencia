@@ -21,6 +21,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.audit.models import AuditLog
 from apps.core.pagination import StandardPagination, LargePagination
 from apps.core.permissions import IsRoleAdmin, IsRoleStaff, IsRoleStaffOrVendor, is_role_staff_user, is_role_vendor_user
+
+SOURCE_VENDOR_ITEM_KEY = 'source_vendor_item_id'
+
+
+def _without_vendor_catalog(qs):
+    """Public store catalog: agency products only, never vendor listings or warehouse clones."""
+    return qs.filter(vendor__isnull=True).exclude(
+        specifications__has_key=SOURCE_VENDOR_ITEM_KEY
+    )
 from .models import (
     Category,
     Tag,
@@ -238,9 +247,7 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
                 if vendor_id and is_staff:
                     qs = qs.filter(vendor_id=vendor_id)
             else:
-                qs = qs.filter(vendor__isnull=True).exclude(
-                    specifications__has_key='source_vendor_item_id'
-                )
+                qs = _without_vendor_catalog(qs)
                 if not is_staff:
                     qs = qs.filter(is_active=True, is_deleted=False)
         elif self.action in ('retrieve', 'by_slug'):
@@ -248,11 +255,9 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
                 pass
             elif is_vendor:
                 qs = qs.filter(Q(vendor=user) | Q(vendor__isnull=True, is_active=True, is_deleted=False))
-                qs = qs.exclude(specifications__has_key='source_vendor_item_id')
+                qs = qs.exclude(specifications__has_key=SOURCE_VENDOR_ITEM_KEY)
             else:
-                qs = qs.filter(vendor__isnull=True, is_active=True, is_deleted=False).exclude(
-                    specifications__has_key='source_vendor_item_id'
-                )
+                qs = _without_vendor_catalog(qs).filter(is_active=True, is_deleted=False)
         else:
             if is_vendor:
                 qs = qs.filter(vendor=user)
@@ -497,7 +502,9 @@ class ProductVariantViewSet(viewsets.ModelViewSet):
         if is_role_vendor_user(user):
             return qs.filter(catalog_item__vendor=user)
         if not is_role_staff_user(user):
-            return qs.filter(catalog_item__vendor__isnull=True)
+            return qs.filter(catalog_item__vendor__isnull=True).exclude(
+                catalog_item__specifications__has_key=SOURCE_VENDOR_ITEM_KEY
+            )
         return qs
 
     def get_permissions(self):
