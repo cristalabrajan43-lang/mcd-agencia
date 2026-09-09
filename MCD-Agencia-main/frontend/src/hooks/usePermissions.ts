@@ -12,8 +12,10 @@
  */
 
 import { useAuth } from '@/contexts/AuthContext';
+import type { RoleName } from '@/lib/roles';
 
-export type RoleName = 'admin' | 'sales' | 'production' | 'customer';
+export type { RoleName };
+export { hasAnyRole, getRoleDisplayName, getPostLoginPath, getRoleBadgeVariant } from '@/lib/roles';
 
 export interface Permissions {
   // Role info
@@ -146,32 +148,4 @@ export function usePermissions(): Permissions {
     canViewSettings: isAdmin,
     canEditSettings: isAdmin,
   };
-}
-
-/**
- * Check if user has any of the specified roles
- */
-export function hasAnyRole(userRole: string | undefined, allowedRoles: RoleName[]): boolean {
-  if (!userRole) return false;
-  return allowedRoles.includes(userRole as RoleName);
-}
-
-/**
- * Get display name for role
- */
-export function getRoleDisplayName(role: RoleName | null): string {
-  const names: Record<RoleName, string> = {
-    admin: 'Administrador',
-    sales: 'Ventas',
-    production: 'Producción',
-    customer: 'Cliente',
-  };
-  return role ? names[role] : 'Sin rol';
-}
-
-export function getRoleBadgeVariant(role?: string | null): 'cyan' | 'warning' | 'success' | 'default' {
-  if (role === 'admin') return 'cyan';
-  if (role === 'sales') return 'warning';
-  if (role === 'production') return 'success';
-  return 'default';
 }

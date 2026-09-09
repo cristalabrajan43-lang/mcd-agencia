@@ -18,7 +18,7 @@ import { getAdminUsers, activateUser, deactivateUser, changeUserRole, assignUser
 import { apiClient } from '@/lib/api/client';
 import { Card, Badge, Button, Input, Select, Pagination, LoadingPage, Modal } from '@/components/ui';
 import { formatDate, getInitials } from '@/lib/utils';
-import { getRoleBadgeVariant } from '@/hooks/usePermissions';
+import { getRoleBadgeVariant } from '@/lib/roles';
 
 interface Role {
   id: number;
