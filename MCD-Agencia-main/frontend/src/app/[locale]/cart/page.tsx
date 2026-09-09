@@ -14,7 +14,6 @@
  */
 
 import { useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -31,7 +30,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, Spinner } from '@/components/ui';
 import { formatPrice } from '@/lib/utils';
-import { resolveMediaUrl } from '@/lib/media';
+import { MediaImage } from '@/components/ui/MediaImage';
 
 export default function CartPage() {
   const locale = useLocale();
@@ -143,8 +142,8 @@ export default function CartPage() {
                       <div className="flex gap-4 md:gap-6">
                         {/* Image */}
                         <div className="relative h-24 w-24 md:h-32 md:w-32 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-                          <Image
-                            src={resolveMediaUrl(item.product_image || item.variant.images?.[0]?.image || '/images/logo.png')}
+                          <MediaImage
+                            src={item.product_image || item.variant.images?.[0]?.image || '/images/logo.png'}
                             alt={item.product_name}
                             fill
                             className="object-cover"

@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -21,6 +20,7 @@ import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { getProductBySlug, ProductVariant } from '@/lib/api/catalog';
 import { useCart } from '@/contexts/CartContext';
 import { Button, Badge, LoadingPage, Modal } from '@/components/ui';
+import { MediaImage } from '@/components/ui/MediaImage';
 import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { resolveMediaUrl } from '@/lib/media';
@@ -225,13 +225,11 @@ export default function ProductDetailPage() {
           <div className="border border-neutral-700 rounded-xl bg-neutral-900/50 overflow-hidden">
             <div className="flex flex-col lg:flex-row h-auto">
               <div className="lg:w-2/5 relative h-[350px] md:h-[550px] bg-neutral-800 flex-shrink-0">
-                <Image
+                <MediaImage
                   src={images[selectedImage]?.image || '/images/logo.png'}
                   alt={images[selectedImage]?.alt_text || name}
                   fill
                   className="object-contain p-4"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 40vw"
                 />
 
                 <button
@@ -468,13 +466,11 @@ export default function ProductDetailPage() {
         size="full"
       >
         <div className="relative w-full h-[600px] bg-black flex items-center justify-center">
-          <Image
+          <MediaImage
             src={images[selectedImage]?.image || '/images/logo.png'}
             alt={images[selectedImage]?.alt_text || name}
             fill
             className="object-contain p-4"
-            priority
-            sizes="100vw"
           />
 
           {images.length > 1 && (
@@ -513,12 +509,11 @@ export default function ProductDetailPage() {
                     selectedImage === index ? 'ring-2 ring-cyan-400 opacity-100' : 'opacity-50 hover:opacity-75'
                   )}
                 >
-                  <Image
+                  <MediaImage
                     src={img.image}
                     alt={`Miniatura ${index + 1}`}
                     fill
                     className="object-cover"
-                    sizes="64px"
                   />
                 </button>
               ))}

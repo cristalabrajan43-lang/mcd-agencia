@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
@@ -10,7 +9,7 @@ import toast from 'react-hot-toast';
 
 import { getProductBySlug, ProductListItem } from '@/lib/api/catalog';
 import { useCart } from '@/contexts/CartContext';
-import { resolveProductImageUrl } from '@/lib/media';
+import { MediaImage } from '@/components/ui/MediaImage';
 import { Button } from '@/components/ui';
 
 interface ProductCardProps {
@@ -26,7 +25,6 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
 
   const name = locale === 'en' && product.name_en ? product.name_en : product.name;
 
-  const imageUrl = resolveProductImageUrl(product.primary_image);
   const productPath = `/${locale}/catalogo/${product.category?.slug || 'productos'}/${product.slug}`;
   const isDirectPurchase = product.sale_mode === 'BUY' || product.sale_mode === 'HYBRID';
   const comparePrice = Number(product.compare_at_price || 0);
@@ -154,12 +152,11 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
         <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden hover:border-cmyk-yellow/50 hover:shadow-lg hover:shadow-cmyk-yellow/10 transition-all duration-200 h-40 flex flex-row">
           {/* Image Container - Left side, square and small */}
           <div className="relative w-40 h-40 flex-shrink-0 overflow-hidden bg-neutral-800">
-            <Image
-              src={imageUrl}
+            <MediaImage
+              src={product.primary_image?.image}
               alt={name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-300"
-              sizes="160px"
             />
           </div>
 
@@ -256,12 +253,11 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
               OFERTA
             </span>
           )}
-          <Image
-            src={imageUrl}
+          <MediaImage
+            src={product.primary_image?.image}
             alt={name}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
 
         </div>

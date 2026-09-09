@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
@@ -27,7 +26,7 @@ import { getUserAddresses, type UserAddress } from '@/lib/api/auth';
 import { getBranches, type Branch } from '@/lib/api/content';
 import { Button, Input, Card, LoadingPage, Modal } from '@/components/ui';
 import { formatPrice, cn } from '@/lib/utils';
-import { resolveMediaUrl } from '@/lib/media';
+import { MediaImage } from '@/components/ui/MediaImage';
 
 const addressSchema = z.object({
   name: z.string().min(2, 'Nombre requerido'),
@@ -642,8 +641,8 @@ export default function CheckoutPage() {
                 {cart.items.map((item) => (
                   <div key={item.id} className="flex gap-3">
                     <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-                      <Image
-                        src={resolveMediaUrl(item.product_image || item.variant.images?.[0]?.image || '/images/logo.png')}
+                      <MediaImage
+                        src={item.product_image || item.variant.images?.[0]?.image || '/images/logo.png'}
                         alt={item.product_name}
                         fill
                         className="object-cover"

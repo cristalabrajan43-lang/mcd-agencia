@@ -14,6 +14,7 @@ export { SuccessModal } from './SuccessModal';
 export { Badge } from './Badge';
 export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
 export { Spinner, LoadingOverlay, LoadingPage } from './Spinner';
+export { MediaImage } from './MediaImage';
 export { Breadcrumb } from './Breadcrumb';
 export { Pagination } from './Pagination';
 

@@ -1,16 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import toast from 'react-hot-toast';
 import { HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 import { getProductById, type Product } from '@/lib/api/catalog';
-import { Button, Card, Spinner } from '@/components/ui';
+import { Button, Card, Spinner, MediaImage } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
-import { resolveMediaUrl } from '@/lib/media';
 
 const SAVED_PRODUCTS_KEY = 'savedProducts';
 
@@ -95,18 +93,17 @@ export default function FavoritesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {products.map((product) => {
           const href = `/${locale}/catalogo/${product.category?.slug || 'productos'}/${product.slug}`;
-          const image = resolveMediaUrl(product.images?.[0]?.image || '/images/logo.png');
+          const image = product.images?.[0]?.image || '/images/logo.png';
 
           return (
             <Card key={product.id} className="overflow-hidden">
               <Link href={href} className="block">
                 <div className="relative h-44 w-full bg-neutral-900">
-                  <Image
+                  <MediaImage
                     src={image}
                     alt={product.name}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
                 </div>
               </Link>
