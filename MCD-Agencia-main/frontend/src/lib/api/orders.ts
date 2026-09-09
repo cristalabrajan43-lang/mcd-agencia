@@ -290,6 +290,25 @@ export async function createOrder(data: CreateOrderData): Promise<Order> {
   return apiClient.post<Order>('/orders/create_order/', data);
 }
 
+export interface ShippingQuoteResponse {
+  fee: string;
+  is_free: boolean;
+  is_acapulco: boolean;
+  state_key: string;
+  state_label: string;
+  zone_key: string;
+  label: string;
+}
+
+export async function getShippingQuote(params: {
+  address_id?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+}): Promise<ShippingQuoteResponse> {
+  return apiClient.get<ShippingQuoteResponse>('/orders/shipping-quote/', params);
+}
+
 /**
  * Cancel an order.
  */

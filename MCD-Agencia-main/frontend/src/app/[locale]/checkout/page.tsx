@@ -24,9 +24,10 @@ import { useLegalModal } from '@/contexts/LegalModalContext';
 import { getAddresses, createAddress, createOrder, Address } from '@/lib/api/orders';
 import { getUserAddresses, type UserAddress } from '@/lib/api/auth';
 import { getBranches, type Branch } from '@/lib/api/content';
-import { Button, Input, Card, LoadingPage, Modal } from '@/components/ui';
+import { Button, Input, Card, LoadingPage, Modal, Select } from '@/components/ui';
 import { formatPrice, cn } from '@/lib/utils';
 import { MediaImage } from '@/components/ui/MediaImage';
+import { calculateShippingQuote, MEXICO_STATE_OPTIONS } from '@/lib/shipping';
 
 const addressSchema = z.object({
   name: z.string().min(2, 'Nombre requerido'),
@@ -78,9 +79,6 @@ export default function CheckoutPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [zeroQuantityConfirmOpen, setZeroQuantityConfirmOpen] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
-
-  const LOCAL_SHIPPING_FEE = 120;
-  const OUTSIDE_SHIPPING_FEE = 260;
 
   const { data: addressesData, refetch: refetchAddresses } = useQuery({
     queryKey: ['addresses'],
@@ -247,9 +245,14 @@ export default function CheckoutPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
+    defaultValues: {
+      state: '',
+    },
   });
 
   // Redirect if not authenticated
@@ -276,16 +279,17 @@ export default function CheckoutPage() {
 
   const selectedAddress = checkoutAddresses.find((address) => address.id === selectedAddressId) || null;
 
-  const isLocalShipping =
-    !!selectedAddress &&
-    checkoutBranches.some((branch) => branch.city?.trim().toLowerCase() === selectedAddress.city?.trim().toLowerCase());
+  const getAddressShippingQuote = (address: Address) =>
+    calculateShippingQuote({
+      city: address.city,
+      state: address.state,
+      postal_code: address.postal_code,
+    });
+
+  const shippingQuote = selectedAddress ? getAddressShippingQuote(selectedAddress) : null;
 
   const shippingFee =
-    deliveryMethod === 'pickup'
-      ? 0
-      : isLocalShipping
-      ? LOCAL_SHIPPING_FEE
-      : OUTSIDE_SHIPPING_FEE;
+    deliveryMethod === 'pickup' ? 0 : shippingQuote?.fee ?? 0;
 
   const checkoutTotal = Number(cart?.total ?? 0) + shippingFee;
 
@@ -469,7 +473,7 @@ export default function CheckoutPage() {
                   )}
                 >
                   <p className="text-white font-medium">Envío a domicilio</p>
-                  <p className="text-sm text-neutral-400 mt-1">Costo de envío calculado por zona</p>
+                  <p className="text-sm text-neutral-400 mt-1">Gratis en Acapulco, tarifa por estado en el resto del país</p>
                 </button>
 
                 <button
@@ -537,7 +541,9 @@ export default function CheckoutPage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {checkoutAddresses.map((address) => (
+                      {checkoutAddresses.map((address) => {
+                        const addressQuote = getAddressShippingQuote(address);
+                        return (
                         <button
                           key={address.id}
                           onClick={() => setSelectedAddressId(address.id)}
@@ -559,6 +565,16 @@ export default function CheckoutPage() {
                           <p className="text-sm text-neutral-400">
                             {address.state}, CP {address.postal_code}
                           </p>
+                          {deliveryMethod === 'shipping' && (
+                            <p className={cn(
+                              'text-sm mt-2 font-medium',
+                              addressQuote.isFree ? 'text-emerald-400' : 'text-cyan-400'
+                            )}>
+                              {addressQuote.isFree
+                                ? 'Envío gratis'
+                                : `Envío ${formatPrice(addressQuote.fee)}`}
+                            </p>
+                          )}
                           {getAddressCardReference(address) && (
                             <p className="text-sm text-neutral-400 mt-1">
                               Referencia: {getAddressCardReference(address)}
@@ -566,7 +582,8 @@ export default function CheckoutPage() {
                           )}
                           <p className="text-sm text-neutral-400 mt-1">{address.phone}</p>
                         </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </>
@@ -710,9 +727,13 @@ export default function CheckoutPage() {
               <p className="text-xs text-neutral-500 mt-3">
                 {deliveryMethod === 'pickup'
                   ? 'Recogida en sucursal: sin costo de envío.'
-                  : isLocalShipping
-                  ? `Envío local: ${formatPrice(LOCAL_SHIPPING_FEE)}.`
-                  : `Envío fuera de zona local: ${formatPrice(OUTSIDE_SHIPPING_FEE)}.`}
+                  : !selectedAddress
+                  ? 'Selecciona una dirección para calcular el envío.'
+                  : shippingQuote?.isFree
+                  ? 'Envío gratis a Acapulco.'
+                  : shippingQuote
+                  ? `${shippingQuote.label}: ${formatPrice(shippingQuote.fee)}.`
+                  : 'Selecciona una dirección para calcular el envío.'}
               </p>
 
               {/* Place Order */}
@@ -802,15 +823,18 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Ciudad"
-                placeholder="Acapulco"
+                placeholder="Acapulco de Juárez"
                 error={errors.city?.message}
                 {...register('city')}
               />
-              <Input
+              <Select
                 label="Estado"
-                placeholder="Guerrero"
+                value={watch('state') || ''}
+                onChange={(value) => setValue('state', value, { shouldValidate: true })}
+                options={[...MEXICO_STATE_OPTIONS]}
+                placeholder="Selecciona un estado"
                 error={errors.state?.message}
-                {...register('state')}
+                required
               />
             </div>
 

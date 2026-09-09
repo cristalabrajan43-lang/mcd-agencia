@@ -63,6 +63,7 @@ from .services.operations import (
     maybe_auto_ready_order_from_production,
     sync_operational_rollup,
 )
+from .services.shipping import calculate_shipping_quote
 from .services.tracking import (
     build_order_tracking_timeline,
     maybe_sync_order_status_from_logistics,
@@ -589,9 +590,19 @@ class OrderViewSet(viewsets.ModelViewSet):
             tax_rate = Decimal(str(settings.TAX_RATE))
             tax_amount = subtotal * tax_rate
             delivery_method = serializer.validated_data.get('delivery_method', Order.DELIVERY_SHIPPING)
-            shipping_fee = serializer.validated_data.get('shipping_fee', Decimal('0'))
+            shipping_quote = calculate_shipping_quote(
+                city=shipping_address.city,
+                state=shipping_address.state,
+                postal_code=shipping_address.postal_code,
+            )
             if delivery_method == Order.DELIVERY_PICKUP:
                 shipping_fee = Decimal('0')
+                shipping_label = 'Recogida en sucursal: sin costo de envío'
+                shipping_zone = 'pickup'
+            else:
+                shipping_fee = shipping_quote.fee
+                shipping_label = shipping_quote.label
+                shipping_zone = shipping_quote.zone_key
             total = subtotal + tax_amount + shipping_fee
 
             pickup_branch = None
@@ -616,6 +627,11 @@ class OrderViewSet(viewsets.ModelViewSet):
                 delivery_address={
                     'shipping_fee': str(shipping_fee),
                     'shipping_address_id': str(shipping_address.id),
+                    'shipping_zone': shipping_zone,
+                    'shipping_label': shipping_label,
+                    'destination_city': shipping_address.city,
+                    'destination_state': shipping_address.state,
+                    'is_acapulco': shipping_quote.is_acapulco,
                 },
             )
 
@@ -693,6 +709,28 @@ class OrderViewSet(viewsets.ModelViewSet):
             OrderSerializer(order).data,
             status=status.HTTP_201_CREATED
         )
+
+    @action(detail=False, methods=['get'], url_path='shipping-quote')
+    def shipping_quote(self, request):
+        """Return the shipping fee for a saved address or city/state."""
+        address_id = (request.query_params.get('address_id') or '').strip()
+        city = (request.query_params.get('city') or '').strip()
+        state = (request.query_params.get('state') or '').strip()
+        postal_code = (request.query_params.get('postal_code') or '').strip()
+
+        if address_id:
+            address = Address.objects.filter(id=address_id, user=request.user).first()
+            if not address:
+                return Response(
+                    {'error': _('Invalid shipping address.')},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            city = address.city
+            state = address.state
+            postal_code = address.postal_code
+
+        quote = calculate_shipping_quote(city=city, state=state, postal_code=postal_code)
+        return Response(quote.to_dict())
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
@@ -989,7 +1027,7 @@ class OrderAdminViewSet(viewsets.ModelViewSet):
 
                 STATUS_LABELS = {
                     'paid': 'Pagado', 'partially_paid': 'Pago parcial',
-                    'in_production': 'En producción', 'ready': 'Listo',
+                    'in_production': 'En producción', 'ready': 'Pedido realizado',
                     'in_delivery': 'En entrega', 'completed': 'Completado',
                     'cancelled': 'Cancelado', 'refunded': 'Reembolsado',
                 }
