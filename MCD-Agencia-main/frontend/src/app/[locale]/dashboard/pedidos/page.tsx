@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Card, LoadingPage } from '@/components/ui';
 import { getStaffOrders, updateOrderStatus, OrderListItem } from '@/lib/api/orders';
 import { PaginatedResponse } from '@/lib/api/catalog';
@@ -76,17 +77,24 @@ const nextStatusOptions: Record<string, { value: string; label: string }[]> = {
   ],
 };
 
-const getAvailableTransitions = (status: string, paymentMethod?: string) => {
+const getAvailableTransitions = (
+  status: string,
+  paymentMethod?: string,
+  canConfirmPayments = false,
+) => {
   if (status === 'pending_payment' && !requiresManualPayment(paymentMethod)) {
     return [];
   }
-  return nextStatusOptions[status] || [];
+  const options = nextStatusOptions[status] || [];
+  if (canConfirmPayments) return options;
+  return options.filter((option) => !['paid', 'partially_paid', 'refunded'].includes(option.value));
 };
 
 export default function SalesOrdersPage() {
   const router = useRouter();
   const locale = useLocale();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const permissions = usePermissions();
 
   const [orders, setOrders] = useState<OrderListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,20 +104,20 @@ export default function SalesOrdersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
-  const isSalesOrAdmin = user?.role?.name && ['admin', 'sales'].includes(user.role.name);
+  const canManageOrders = permissions.canViewAllOrders;
 
   useEffect(() => {
     if (!authLoading) {
       if (!isAuthenticated) {
         router.push(`/${locale}/login?redirect=/${locale}/dashboard/pedidos`);
-      } else if (!isSalesOrAdmin) {
+      } else if (!canManageOrders) {
         router.push(`/${locale}`);
       }
     }
-  }, [authLoading, isAuthenticated, isSalesOrAdmin, router, locale]);
+  }, [authLoading, isAuthenticated, canManageOrders, router, locale]);
 
   const fetchOrders = useCallback(async () => {
-    if (!isAuthenticated || !isSalesOrAdmin) return;
+    if (!isAuthenticated || !canManageOrders) return;
     setIsLoading(true);
     try {
       const params: Record<string, string | number> = { page };
@@ -125,7 +133,7 @@ export default function SalesOrdersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, isSalesOrAdmin, page, statusFilter, searchTerm]);
+  }, [isAuthenticated, canManageOrders, page, statusFilter, searchTerm]);
 
   useEffect(() => {
     fetchOrders();
@@ -177,7 +185,7 @@ export default function SalesOrdersPage() {
     return <LoadingPage message="Cargando..." />;
   }
 
-  if (!isAuthenticated || !isSalesOrAdmin) {
+  if (!isAuthenticated || !canManageOrders) {
     return null;
   }
 
@@ -338,7 +346,11 @@ export default function SalesOrdersPage() {
                 {orders.map((order) => {
                   const customer = (order as unknown as { customer?: { full_name: string; email: string } }).customer;
                   const workflowStatus = getWorkflowStatus(order.status, order.payment_method);
-                  const availableTransitions = getAvailableTransitions(workflowStatus, order.payment_method);
+                  const availableTransitions = getAvailableTransitions(
+                    workflowStatus,
+                    order.payment_method,
+                    permissions.isAdmin,
+                  );
 
                   return (
                     <tr key={order.id} className="hover:bg-neutral-800/30">

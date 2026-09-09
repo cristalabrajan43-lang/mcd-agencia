@@ -32,10 +32,11 @@ export function Header() {
   const { itemCount } = useCart();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Check user role - 3 roles: admin, sales, customer
+  // Check user role
   const isAdmin = user?.role?.name === 'admin';
   const isSales = user?.role?.name === 'sales';
-  const isStaff = isAdmin || isSales;
+  const isProduction = user?.role?.name === 'production';
+  const isStaff = isAdmin || isSales || isProduction;
 
   // Language switcher
   const otherLocale = locale === 'es' ? 'en' : 'es';
@@ -214,14 +215,16 @@ export function Header() {
                           <Cog6ToothIcon className="w-4 h-4" />
                           Panel de Control
                         </Link>
-                        <Link
-                          href={`/${locale}/dashboard/cotizaciones`}
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800 hover:text-white transition-colors"
-                        >
-                          <ClipboardDocumentListIcon className="w-4 h-4" />
-                          Cotizaciones
-                        </Link>
+                        {(isAdmin || isSales) && (
+                          <Link
+                            href={`/${locale}/dashboard/cotizaciones`}
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800 hover:text-white transition-colors"
+                          >
+                            <ClipboardDocumentListIcon className="w-4 h-4" />
+                            Cotizaciones
+                          </Link>
+                        )}
                         <Link
                           href={`/${locale}/dashboard/pedidos`}
                           onClick={() => setIsUserMenuOpen(false)}
@@ -230,14 +233,26 @@ export function Header() {
                           <ClipboardDocumentListIcon className="w-4 h-4" />
                           Pedidos
                         </Link>
-                        <Link
-                          href={`/${locale}/dashboard/clientes`}
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800 hover:text-white transition-colors"
-                        >
-                          <UserIcon className="w-4 h-4" />
-                          Clientes
-                        </Link>
+                        {isProduction && (
+                          <Link
+                            href={`/${locale}/dashboard/produccion`}
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800 hover:text-white transition-colors"
+                          >
+                            <ClipboardDocumentListIcon className="w-4 h-4" />
+                            Producción
+                          </Link>
+                        )}
+                        {(isAdmin || isSales) && (
+                          <Link
+                            href={`/${locale}/dashboard/clientes`}
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800 hover:text-white transition-colors"
+                          >
+                            <UserIcon className="w-4 h-4" />
+                            Clientes
+                          </Link>
+                        )}
                       </>
                     )}
 
@@ -379,14 +394,16 @@ export function Header() {
                         <Cog6ToothIcon className="w-5 h-5" />
                         Panel de Control
                       </Link>
-                      <Link
-                        href={`/${locale}/dashboard/cotizaciones`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-white"
-                      >
-                        <ClipboardDocumentListIcon className="w-5 h-5" />
-                        Cotizaciones
-                      </Link>
+                      {(isAdmin || isSales) && (
+                        <Link
+                          href={`/${locale}/dashboard/cotizaciones`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-white"
+                        >
+                          <ClipboardDocumentListIcon className="w-5 h-5" />
+                          Cotizaciones
+                        </Link>
+                      )}
                       <Link
                         href={`/${locale}/dashboard/pedidos`}
                         onClick={() => setIsMobileMenuOpen(false)}
@@ -395,14 +412,26 @@ export function Header() {
                         <ClipboardDocumentListIcon className="w-5 h-5" />
                         Pedidos
                       </Link>
-                      <Link
-                        href={`/${locale}/dashboard/clientes`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-white"
-                      >
-                        <UserIcon className="w-5 h-5" />
-                        Clientes
-                      </Link>
+                      {isProduction && (
+                        <Link
+                          href={`/${locale}/dashboard/produccion`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-white"
+                        >
+                          <ClipboardDocumentListIcon className="w-5 h-5" />
+                          Producción
+                        </Link>
+                      )}
+                      {(isAdmin || isSales) && (
+                        <Link
+                          href={`/${locale}/dashboard/clientes`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-white"
+                        >
+                          <UserIcon className="w-5 h-5" />
+                          Clientes
+                        </Link>
+                      )}
                     </>
                   )}
 

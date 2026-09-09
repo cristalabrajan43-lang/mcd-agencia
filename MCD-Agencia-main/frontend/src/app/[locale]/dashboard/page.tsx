@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Card, LoadingPage } from '@/components/ui';
 import {
   getSalesRepDashboard,
@@ -41,21 +42,18 @@ export default function DashboardPage() {
   const router = useRouter();
   const locale = useLocale();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const permissions = usePermissions();
 
   const [dashboard, setDashboard] = useState<SalesRepDashboard | null>(null);
   const [pendingRequests, setPendingRequests] = useState<QuoteRequest[]>([]);
   const [pendingChangeRequests, setPendingChangeRequests] = useState<QuoteChangeRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const groups = user?.groups || [];
-  const isSalesOrAdmin = user?.role?.name && ['admin', 'sales'].includes(user.role.name);
-  const isProduction = groups.includes('production_supervisors');
-  const isLogistics = groups.includes('operations_supervisors');
-  const dashboardTarget = isSalesOrAdmin
+  const dashboardTarget = permissions.canViewOperationsPanel
     ? `/${locale}/dashboard/operaciones`
-    : isProduction
+    : permissions.canViewProductionPanel
       ? `/${locale}/dashboard/produccion`
-      : isLogistics
+      : permissions.canViewLogisticsPanel
         ? `/${locale}/dashboard/logistica`
         : `/${locale}`;
 
@@ -73,7 +71,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!isAuthenticated || !isSalesOrAdmin) return;
+      if (!isAuthenticated || !permissions.isStaff) return;
 
       setIsLoading(true);
       try {
@@ -97,13 +95,13 @@ export default function DashboardPage() {
     };
 
     fetchDashboardData();
-  }, [isAuthenticated, isSalesOrAdmin]);
+  }, [isAuthenticated, permissions.isStaff]);
 
   if (authLoading) {
     return <LoadingPage message="Cargando..." />;
   }
 
-  if (!isAuthenticated || !isSalesOrAdmin) {
+  if (!isAuthenticated || !permissions.isStaff) {
     return null;
   }
 

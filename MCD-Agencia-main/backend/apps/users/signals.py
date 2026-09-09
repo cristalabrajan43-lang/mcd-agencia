@@ -7,6 +7,7 @@ This module contains signal handlers for user-related events:
     - Send notifications
 """
 
+from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -41,8 +42,8 @@ def sync_is_staff_with_role(sender, instance, **kwargs):
     """
     Automatically sync is_staff based on the user's role.
 
-    Admin and Sales roles require is_staff=True for Django permissions
-    and staff-only views. Customer role sets is_staff=False.
+    Admin, Sales, and Production roles require is_staff=True for Django
+    permissions and staff-only views. Customer role sets is_staff=False.
     """
     if instance.role_id:
         try:
@@ -50,7 +51,7 @@ def sync_is_staff_with_role(sender, instance, **kwargs):
         except Role.DoesNotExist:
             role_name = None
 
-        if role_name in (Role.ADMIN, Role.SALES):
+        if role_name in (Role.ADMIN, Role.SALES, Role.PRODUCTION):
             instance.is_staff = True
         elif role_name == Role.CUSTOMER:
             # Don't demote superusers
@@ -72,3 +73,25 @@ def normalize_email(sender, instance, **kwargs):
     """
     if instance.email:
         instance.email = instance.email.lower().strip()
+
+
+@receiver(post_save, sender=User)
+def sync_production_group_with_role(sender, instance, **kwargs):
+    """Keep production_supervisors in sync with the production role."""
+    if not instance.role_id:
+        return
+
+    try:
+        group = Group.objects.get(name='production_supervisors')
+    except Group.DoesNotExist:
+        return
+
+    try:
+        role_name = instance.role.name if instance.role else None
+    except Role.DoesNotExist:
+        return
+
+    if role_name == Role.PRODUCTION:
+        instance.groups.add(group)
+    elif role_name == Role.CUSTOMER:
+        instance.groups.remove(group)

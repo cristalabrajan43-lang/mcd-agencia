@@ -43,7 +43,7 @@ echo "=== Creating default roles ==="
 python manage.py shell -c "
 from apps.users.models import Role
 
-# Define the 3 active roles with their permissions
+# Define the active roles with their permissions
 roles_data = [
     {
         'name': 'admin',
@@ -86,6 +86,18 @@ roles_data = [
             'catalog': {'view': True},
             'orders': {'view': True, 'create': True},
             'quotes': {'view': True, 'create': True},
+        },
+    },
+    {
+        'name': 'production',
+        'display_name': 'Production',
+        'description': 'Production floor: manage orders and production jobs.',
+        'is_system': True,
+        'permissions': {
+            'catalog': {'view': True},
+            'orders': {'view': True, 'edit': True, 'manage': True},
+            'inventory': {'view': True},
+            'production': {'view': True, 'edit': True, 'manage': True},
         },
     },
 ]
@@ -146,13 +158,13 @@ echo "=== Syncing is_staff flag with user roles ==="
 python manage.py shell -c "
 from apps.users.models import User, Role
 
-# Sales and admin users must have is_staff=True
+# Sales, admin, and production users must have is_staff=True
 staff_updated = User.objects.filter(
-    role__name__in=['admin', 'sales'],
+    role__name__in=['admin', 'sales', 'production'],
     is_staff=False,
     is_active=True,
 ).update(is_staff=True)
-print(f'Set is_staff=True for {staff_updated} admin/sales users')
+print(f'Set is_staff=True for {staff_updated} admin/sales/production users')
 
 # Customer users should have is_staff=False (except superusers)
 customer_updated = User.objects.filter(

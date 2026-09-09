@@ -18,6 +18,7 @@ import { getAdminUsers, activateUser, deactivateUser, changeUserRole, assignUser
 import { apiClient } from '@/lib/api/client';
 import { Card, Badge, Button, Input, Select, Pagination, LoadingPage, Modal } from '@/components/ui';
 import { formatDate, getInitials } from '@/lib/utils';
+import { getRoleBadgeVariant } from '@/hooks/usePermissions';
 
 interface Role {
   id: number;
@@ -25,11 +26,12 @@ interface Role {
   display_name: string;
 }
 
-// Only 3 roles: admin, sales, customer
+// Active roles: admin, sales, production, customer
 const ROLE_OPTIONS = [
   { value: '', label: 'Todos los roles' },
   { value: 'customer', label: 'Cliente' },
   { value: 'sales', label: 'Ventas' },
+  { value: 'production', label: 'Producción' },
   { value: 'admin', label: 'Administrador' },
 ];
 
@@ -50,6 +52,7 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
   const [userToPromote, setUserToPromote] = useState<{ id: string; name: string } | null>(null);
+  const [promoteRoleName, setPromoteRoleName] = useState<'sales' | 'production'>('production');
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [showTemporaryPasswordModal, setShowTemporaryPasswordModal] = useState(false);
   const [temporaryPassword, setTemporaryPassword] = useState('');
@@ -83,30 +86,31 @@ export default function AdminUsersPage() {
   });
 
   const salesRole = rolesData?.results?.find((r) => r.name === 'sales');
+  const productionRole = rolesData?.results?.find((r) => r.name === 'production');
 
   const activateMutation = useMutation({
     mutationFn: activateUser,
     onSuccess: () => {
-      toast.success('Vendedor activado');
+      toast.success('Usuario activado');
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: () => toast.error('Error al activar vendedor'),
+    onError: () => toast.error('Error al activar usuario'),
   });
 
   const deactivateMutation = useMutation({
     mutationFn: deactivateUser,
     onSuccess: () => {
-      toast.success('Vendedor desactivado');
+      toast.success('Usuario desactivado');
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: () => toast.error('Error al desactivar vendedor'),
+    onError: () => toast.error('Error al desactivar usuario'),
   });
 
   const promoteToSalesMutation = useMutation({
     mutationFn: ({ userId, roleId }: { userId: string; roleId: string }) =>
       changeUserRole(userId, roleId),
     onSuccess: () => {
-      toast.success('Usuario promovido a Vendedor');
+      toast.success('Usuario promovido');
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setShowPromoteModal(false);
       setUserToPromote(null);
@@ -158,11 +162,12 @@ export default function AdminUsersPage() {
     onError: () => toast.error('Error al eliminar usuario'),
   });
 
-  const handlePromoteToSales = () => {
-    if (userToPromote && salesRole) {
+  const handlePromoteUser = () => {
+    const targetRole = promoteRoleName === 'production' ? productionRole : salesRole;
+    if (userToPromote && targetRole) {
       promoteToSalesMutation.mutate({
         userId: userToPromote.id,
-        roleId: salesRole.id.toString(),
+        roleId: targetRole.id.toString(),
       });
     }
   };
@@ -266,7 +271,7 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <Badge variant={user.role?.name === 'admin' ? 'cyan' : user.role?.name === 'sales' ? 'warning' : 'default'}>
+                      <Badge variant={getRoleBadgeVariant(user.role?.name)}>
                         {user.role?.display_name || 'Cliente'}
                       </Badge>
                     </td>
@@ -292,7 +297,7 @@ export default function AdminUsersPage() {
                           <EyeIcon className="h-5 w-5" />
                         </Button>
 
-                        {['sales', 'admin', 'superadmin'].includes(user.role?.name || '') && (
+                        {['sales', 'admin', 'superadmin', 'production'].includes(user.role?.name || '') && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -320,7 +325,7 @@ export default function AdminUsersPage() {
                         </Button>
 
                         {/* Solo mostrar activar/desactivar para vendedores */}
-                        {user.role?.name === 'sales' && (
+                        {['sales', 'production'].includes(user.role?.name || '') && (
                           user.is_active ? (
                             <Button
                               variant="ghost"
@@ -351,7 +356,7 @@ export default function AdminUsersPage() {
                               setUserToPromote({ id: user.id, name: user.full_name || user.email });
                               setShowPromoteModal(true);
                             }}
-                            title="Promover a Vendedor"
+                            title="Promover a rol interno"
                           >
                             <ArrowPathIcon className="h-5 w-5 text-yellow-400" />
                           </Button>
@@ -381,7 +386,7 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <Badge variant={user.role?.name === 'admin' ? 'cyan' : user.role?.name === 'sales' ? 'warning' : 'default'}>
+                  <Badge variant={getRoleBadgeVariant(user.role?.name)}>
                     {user.role?.display_name || 'Cliente'}
                   </Badge>
                   <span className="text-neutral-500">{user.orders_count} pedidos</span>
@@ -392,7 +397,7 @@ export default function AdminUsersPage() {
                     <EyeIcon className="h-5 w-5" />
                   </Button>
 
-                  {['sales', 'admin', 'superadmin'].includes(user.role?.name || '') && (
+                  {['sales', 'admin', 'superadmin', 'production'].includes(user.role?.name || '') && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -418,7 +423,7 @@ export default function AdminUsersPage() {
                     <TrashIcon className="h-5 w-5 text-red-400" />
                   </Button>
 
-                  {user.role?.name === 'sales' && (
+                  {['sales', 'production'].includes(user.role?.name || '') && (
                     user.is_active ? (
                       <Button variant="ghost" size="sm" onClick={() => deactivateMutation.mutate(user.id)} title="Desactivar vendedor">
                         <XCircleIcon className="h-5 w-5 text-red-400" />
@@ -438,7 +443,7 @@ export default function AdminUsersPage() {
                         setUserToPromote({ id: user.id, name: user.full_name || user.email });
                         setShowPromoteModal(true);
                       }}
-                      title="Promover a vendedor"
+                      title="Promover a rol interno"
                     >
                       <ArrowPathIcon className="h-5 w-5 text-yellow-400" />
                     </Button>
@@ -459,21 +464,34 @@ export default function AdminUsersPage() {
         </>
       )}
 
-      {/* Modal para promover a vendedor */}
+      {/* Modal para promover a rol interno */}
       <Modal
         isOpen={showPromoteModal}
         onClose={() => {
           setShowPromoteModal(false);
           setUserToPromote(null);
         }}
-        title="Promover a Vendedor"
+        title="Promover usuario"
       >
         <div className="space-y-4">
           <p className="text-neutral-300">
-            ¿Estás seguro de que deseas promover a <strong className="text-white">{userToPromote?.name}</strong> al rol de Vendedor?
+            Promover a <strong className="text-white">{userToPromote?.name}</strong> a un rol interno.
           </p>
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">Rol</label>
+            <select
+              value={promoteRoleName}
+              onChange={(e) => setPromoteRoleName(e.target.value as 'sales' | 'production')}
+              className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white"
+            >
+              <option value="production">Producción</option>
+              <option value="sales">Ventas</option>
+            </select>
+          </div>
           <p className="text-sm text-neutral-400">
-            Esta acción le dará acceso al panel de ventas y la capacidad de gestionar cotizaciones y pedidos.
+            {promoteRoleName === 'production'
+              ? 'Tendrá acceso al panel de producción y podrá gestionar pedidos y trabajos de fabricación.'
+              : 'Tendrá acceso al panel de ventas y podrá gestionar cotizaciones y pedidos.'}
           </p>
           <div className="flex justify-end gap-3 pt-4">
             <Button
@@ -486,10 +504,10 @@ export default function AdminUsersPage() {
               Cancelar
             </Button>
             <Button
-              onClick={handlePromoteToSales}
+              onClick={handlePromoteUser}
               isLoading={promoteToSalesMutation.isPending}
             >
-              Promover a Vendedor
+              Promover
             </Button>
           </div>
         </div>
@@ -544,7 +562,9 @@ export default function AdminUsersPage() {
               onChange={(value) => setCreateUserForm({ ...createUserForm, role_id: value })}
               options={[
                 { value: '', label: 'Selecciona un rol' },
-                ...(rolesData?.results?.map((role) => ({ value: role.id.toString(), label: role.display_name })) || []),
+                ...(rolesData?.results
+                  ?.filter((role) => ['admin', 'sales', 'production', 'customer'].includes(role.name))
+                  .map((role) => ({ value: role.id.toString(), label: role.display_name })) || []),
               ]}
             />
           </div>

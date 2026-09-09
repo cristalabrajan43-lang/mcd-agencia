@@ -7,12 +7,13 @@
  * Roles:
  * - admin: Full access to all features
  * - sales: Commercial operations (quotes, orders, customers, catalog view)
+ * - production: Production floor (orders + production jobs)
  * - customer: End-user access (own orders, quotes, profile)
  */
 
 import { useAuth } from '@/contexts/AuthContext';
 
-export type RoleName = 'admin' | 'sales' | 'customer';
+export type RoleName = 'admin' | 'sales' | 'production' | 'customer';
 
 export interface Permissions {
   // Role info
@@ -22,7 +23,7 @@ export interface Permissions {
   isProduction: boolean;
   isLogistics: boolean;
   isCustomer: boolean;
-  isStaff: boolean; // admin or sales
+  isStaff: boolean; // admin or sales (commercial)
 
   // Admin panel access
   canAccessDashboard: boolean;
@@ -81,7 +82,8 @@ export function usePermissions(): Permissions {
 
   const isAdmin = role === 'admin';
   const isSales = role === 'sales';
-  const isProduction = groups.includes('production_supervisors');
+  const isProductionRole = role === 'production';
+  const isProduction = isProductionRole || groups.includes('production_supervisors');
   const isLogistics = groups.includes('operations_supervisors');
   const isCustomer = role === 'customer';
   const isStaff = isAdmin || isSales;
@@ -96,7 +98,7 @@ export function usePermissions(): Permissions {
     isCustomer,
     isStaff,
 
-    // Admin panel access - staff only
+    // Admin panel access
     canAccessDashboard: isStaff || isProduction || isLogistics,
     canAccessAdmin: isStaff,
     canViewOperationsPanel: isStaff,
@@ -108,9 +110,9 @@ export function usePermissions(): Permissions {
     canEditCatalog: isAdmin,
     canDeleteCatalog: isAdmin,
 
-    // Orders - admin full control, sales can view and edit
-    canViewAllOrders: isStaff,
-    canEditOrders: isStaff,
+    // Orders - admin/sales/production can view and edit
+    canViewAllOrders: isStaff || isProduction,
+    canEditOrders: isStaff || isProduction,
     canDeleteOrders: isAdmin,
 
     // Quotes - both admin and sales can manage
@@ -161,7 +163,15 @@ export function getRoleDisplayName(role: RoleName | null): string {
   const names: Record<RoleName, string> = {
     admin: 'Administrador',
     sales: 'Ventas',
+    production: 'Producción',
     customer: 'Cliente',
   };
   return role ? names[role] : 'Sin rol';
+}
+
+export function getRoleBadgeVariant(role?: string | null): 'cyan' | 'warning' | 'success' | 'default' {
+  if (role === 'admin') return 'cyan';
+  if (role === 'sales') return 'warning';
+  if (role === 'production') return 'success';
+  return 'default';
 }

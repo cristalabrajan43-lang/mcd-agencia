@@ -104,18 +104,24 @@ const nextStatusOptions: Record<string, { value: string; label: string }[]> = {
   ],
 };
 
-const getAvailableTransitions = (workflowStatus: string, paymentMethod?: string) => {
+const getAvailableTransitions = (
+  workflowStatus: string,
+  paymentMethod?: string,
+  canConfirmPayments = false,
+) => {
   if (workflowStatus === 'pending_payment' && !requiresManualPayment(paymentMethod)) {
     return [];
   }
-  return nextStatusOptions[workflowStatus] || [];
+  const options = nextStatusOptions[workflowStatus] || [];
+  if (canConfirmPayments) return options;
+  return options.filter((option) => !['paid', 'partially_paid', 'refunded'].includes(option.value));
 };
 
 export default function StaffOrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const locale = useLocale();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const permissions = usePermissions();
 
   const [order, setOrder] = useState<Order | null>(null);
@@ -133,17 +139,17 @@ export default function StaffOrderDetailPage() {
   const [isSavingTracking, setIsSavingTracking] = useState(false);
 
   const orderId = params.id as string;
-  const isSalesOrAdmin = user?.role?.name && ['admin', 'sales'].includes(user.role.name);
+  const canManageOrders = permissions.canViewAllOrders;
 
   useEffect(() => {
     if (!authLoading) {
       if (!isAuthenticated) {
         router.push(`/${locale}/login?redirect=/${locale}/dashboard/pedidos/${orderId}`);
-      } else if (!isSalesOrAdmin) {
+      } else if (!canManageOrders) {
         router.push(`/${locale}`);
       }
     }
-  }, [authLoading, isAuthenticated, isSalesOrAdmin, router, locale, orderId]);
+  }, [authLoading, isAuthenticated, canManageOrders, router, locale, orderId]);
 
   const fetchOperationalTracks = async () => {
     if (!orderId) return;
@@ -172,7 +178,7 @@ export default function StaffOrderDetailPage() {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!orderId || !isAuthenticated || !isSalesOrAdmin) return;
+      if (!orderId || !isAuthenticated || !canManageOrders) return;
 
       setIsLoading(true);
       try {
@@ -191,7 +197,7 @@ export default function StaffOrderDetailPage() {
     };
 
     fetchOrder();
-  }, [orderId, isAuthenticated, isSalesOrAdmin, router, locale]);
+  }, [orderId, isAuthenticated, canManageOrders, router, locale]);
 
   useEffect(() => {
     if (!order?.lines) return;
@@ -407,13 +413,17 @@ export default function StaffOrderDetailPage() {
     return <LoadingPage message="Cargando pedido..." />;
   }
 
-  if (!isAuthenticated || !isSalesOrAdmin || !order) {
+  if (!isAuthenticated || !canManageOrders || !order) {
     return null;
   }
 
   const workflowStatus = getWorkflowStatus(order.status, order.payment_method);
   const StatusIcon = statusIcons[workflowStatus] || ClockIcon;
-  const availableTransitions = getAvailableTransitions(workflowStatus, order.payment_method);
+  const availableTransitions = getAvailableTransitions(
+    workflowStatus,
+    order.payment_method,
+    permissions.isAdmin,
+  );
   const canManualConfirmPayment = workflowStatus === 'pending_payment' && requiresManualPayment(order.payment_method);
   const workflowSteps = [
     { key: 'created', label: 'Creación', active: true, date: order.created_at },

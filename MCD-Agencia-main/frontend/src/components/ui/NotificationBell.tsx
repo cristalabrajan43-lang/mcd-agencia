@@ -13,19 +13,21 @@ import {
   Notification,
 } from '@/lib/api/notifications';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export default function NotificationBell() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const permissions = usePermissions();
   const locale = useLocale();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isStaff = user?.role?.name && ['admin', 'sales'].includes(user.role.name);
+  const canViewNotifications = permissions.canAccessDashboard;
 
   useEffect(() => {
-    if (!isAuthenticated || !isStaff) return;
+    if (!isAuthenticated || !canViewNotifications) return;
 
     const fetchData = async () => {
       try {
@@ -43,7 +45,7 @@ export default function NotificationBell() {
     fetchData();
     const interval = setInterval(fetchData, 60000); // Poll every 60s
     return () => clearInterval(interval);
-  }, [isAuthenticated, isStaff]);
+  }, [isAuthenticated, canViewNotifications]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -77,7 +79,7 @@ export default function NotificationBell() {
     }
   };
 
-  if (!isAuthenticated || !isStaff) return null;
+  if (!isAuthenticated || !canViewNotifications) return null;
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);

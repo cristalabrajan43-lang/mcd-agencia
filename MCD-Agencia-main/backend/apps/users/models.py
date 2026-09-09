@@ -94,9 +94,10 @@ class Role(TimeStampedModel):
     Roles define what actions a user can perform in the system.
     Each role has a set of permissions defined as a JSON field.
 
-    Active roles (3 roles):
+    Active roles:
         - admin: Full administrative access
         - sales: Commercial operations (quotes, orders, customers)
+        - production: Production floor (orders, production jobs)
         - customer: End-user access (own orders/quotes)
 
     Deprecated roles (kept for migration compatibility):
@@ -111,9 +112,9 @@ class Role(TimeStampedModel):
         is_system: Whether this is a system role (cannot be deleted)
     """
 
-    # Role type choices - only 3 active roles
     ADMIN = 'admin'
     SALES = 'sales'
+    PRODUCTION = 'production'
     CUSTOMER = 'customer'
 
     # Deprecated roles - kept for migration compatibility
@@ -123,6 +124,7 @@ class Role(TimeStampedModel):
     ROLE_CHOICES = [
         (ADMIN, _('Administrator')),
         (SALES, _('Sales')),
+        (PRODUCTION, _('Production')),
         (CUSTOMER, _('Customer')),
         # Deprecated choices - kept for existing data
         (SUPERADMIN, _('Super Administrator (Deprecated)')),
@@ -409,11 +411,17 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel, SoftDeleteModel
             return False
         return self.role.name == Role.SALES
 
-    def is_staff_member(self):
-        """Check if user is staff (admin or sales)."""
+    def is_production(self):
+        """Check if user has production role."""
         if not self.role:
             return False
-        return self.role.name in [Role.ADMIN, Role.SUPERADMIN, Role.SALES]
+        return self.role.name == Role.PRODUCTION
+
+    def is_staff_member(self):
+        """Check if user is staff (admin, sales, or production)."""
+        if not self.role:
+            return False
+        return self.role.name in [Role.ADMIN, Role.SUPERADMIN, Role.SALES, Role.PRODUCTION]
 
     def is_operations(self):
         """DEPRECATED: Check if user has operations role. Use is_admin() instead."""

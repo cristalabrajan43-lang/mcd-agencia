@@ -33,7 +33,14 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Check user role
-  const isStaff = user?.role?.name === 'sales' || user?.role?.name === 'admin';
+  const isStaff = permissions.canAccessDashboard;
+  const dashboardHome = permissions.canViewOperationsPanel
+    ? `/${locale}/dashboard/operaciones`
+    : permissions.canViewProductionPanel
+      ? `/${locale}/dashboard/produccion`
+      : permissions.canViewLogisticsPanel
+        ? `/${locale}/dashboard/logistica`
+        : `/${locale}/dashboard`;
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -52,7 +59,7 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       // Staff users: account + dashboard access only
       return [
         { href: `/${locale}/mi-cuenta`, label: 'Mi Perfil', icon: UserIcon, exact: true },
-        { href: `/${locale}/dashboard/operaciones`, label: 'Panel de Control', icon: Cog6ToothIcon },
+        { href: dashboardHome, label: 'Panel de Control', icon: Cog6ToothIcon },
       ];
     }
     // Customers: account + own orders/quotes
@@ -62,7 +69,7 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       { href: `/${locale}/mi-cuenta/favoritos`, label: 'Mis Favoritos', icon: HeartIcon },
       { href: `/${locale}/mi-cuenta/cotizaciones`, label: 'Mis Cotizaciones', icon: DocumentTextIcon },
     ];
-  }, [locale, isStaff]);
+  }, [locale, isStaff, dashboardHome]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

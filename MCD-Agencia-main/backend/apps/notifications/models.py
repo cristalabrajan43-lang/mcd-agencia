@@ -147,6 +147,31 @@ class Notification(models.Model):
         return cls.objects.bulk_create(notifications)
 
     @classmethod
+    def notify_production(cls, notification_type, title, message='',
+                          entity_type='', entity_id='', action_url=''):
+        """Create a notification for production users and supervisors."""
+        from django.contrib.auth import get_user_model
+        from django.db.models import Q
+        User = get_user_model()
+        production_users = User.objects.filter(
+            is_active=True,
+        ).filter(
+            Q(role__name='production') | Q(groups__name='production_supervisors')
+        ).distinct()
+        notifications = []
+        for user in production_users:
+            notifications.append(cls(
+                recipient=user,
+                notification_type=notification_type,
+                title=title,
+                message=message,
+                entity_type=entity_type,
+                entity_id=str(entity_id) if entity_id else '',
+                action_url=action_url,
+            ))
+        return cls.objects.bulk_create(notifications)
+
+    @classmethod
     def notify_assigned_seller_and_admins(cls, assigned_to, notification_type,
                                           title, message='', entity_type='',
                                           entity_id='', action_url=''):

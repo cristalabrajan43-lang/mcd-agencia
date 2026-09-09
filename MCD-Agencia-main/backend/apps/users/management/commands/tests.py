@@ -28,6 +28,12 @@ class PromoteToAdminCommandTest(TestCase):
             description='Sales access'
         )
 
+        self.production_role = Role.objects.create(
+            name='production',
+            display_name='Production',
+            description='Production access'
+        )
+
         # Create test user
         self.test_user = User.objects.create_user(
             email='test@example.com',
@@ -73,6 +79,22 @@ class PromoteToAdminCommandTest(TestCase):
         self.test_user.refresh_from_db()
         self.assertTrue(self.test_user.is_staff)
         self.assertEqual(self.test_user.role, self.sales_role)
+
+    def test_promote_user_to_production(self):
+        """Test promotion to production role"""
+        out = StringIO()
+
+        call_command(
+            'promote_to_admin',
+            'test@example.com',
+            '--role', 'production',
+            '--no-input',
+            stdout=out
+        )
+
+        self.test_user.refresh_from_db()
+        self.assertTrue(self.test_user.is_staff)
+        self.assertEqual(self.test_user.role, self.production_role)
 
     def test_user_not_found(self):
         """Test error when user doesn't exist"""

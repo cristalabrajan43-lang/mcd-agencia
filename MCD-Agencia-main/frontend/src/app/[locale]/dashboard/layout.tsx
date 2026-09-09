@@ -47,7 +47,7 @@ interface OperationBranchItem {
 const MENU_ITEMS: MenuItem[] = [
   // ── Common dashboard access ──────────────────────────────────────────────
   { href: '/dashboard/operaciones', label: 'Operaciones', icon: CalendarDaysIcon, permission: 'canAccessDashboard' },
-  { href: '/dashboard/clientes', label: 'Clientes', icon: UsersIcon, permission: 'canViewAllOrders' },
+  { href: '/dashboard/clientes', label: 'Clientes', icon: UsersIcon, permission: 'canViewUsers' },
 
   // ── Admin-only ──────────────────────────────────────────────────────────
   { href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon, permission: 'canEditCatalog', separator: true },
@@ -72,6 +72,14 @@ const ADMIN_ONLY_PATHS = [
   '/dashboard/contenido',
   '/dashboard/analytics',
   '/dashboard/auditoria',
+];
+
+const COMMERCIAL_ONLY_PATHS = [
+  '/dashboard/operaciones',
+  '/dashboard/solicitudes',
+  '/dashboard/cotizaciones',
+  '/dashboard/clientes',
+  '/dashboard/inventario',
 ];
 
 // ---------------------------------------------------------------------------
@@ -127,10 +135,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     if (!isLoading && isAuthenticated && permissions.canAccessDashboard && !permissions.isAdmin) {
       const isAdminOnlyPath = ADMIN_ONLY_PATHS.some((path) => pathname.startsWith(`/${locale}${path}`));
       if (isAdminOnlyPath) {
-        router.replace(`/${locale}/dashboard/operaciones`);
+        const fallback = permissions.canViewOperationsPanel
+          ? `/${locale}/dashboard/operaciones`
+          : permissions.canViewProductionPanel
+            ? `/${locale}/dashboard/produccion`
+            : `/${locale}/dashboard`;
+        router.replace(fallback);
+        return;
+      }
+
+      if (!permissions.isStaff) {
+        const isCommercialPath = COMMERCIAL_ONLY_PATHS.some((path) => pathname.startsWith(`/${locale}${path}`));
+        if (isCommercialPath) {
+          const fallback = permissions.canViewProductionPanel
+            ? `/${locale}/dashboard/produccion`
+            : permissions.canViewLogisticsPanel
+              ? `/${locale}/dashboard/logistica`
+              : `/${locale}/dashboard`;
+          router.replace(fallback);
+        }
       }
     }
-  }, [isLoading, isAuthenticated, permissions.canAccessDashboard, permissions.isAdmin, pathname, router, locale]);
+  }, [isLoading, isAuthenticated, permissions.canAccessDashboard, permissions.isAdmin, permissions.isStaff, permissions.canViewOperationsPanel, permissions.canViewProductionPanel, permissions.canViewLogisticsPanel, pathname, router, locale]);
 
   if (isLoading) {
     return <LoadingPage message="Cargando..." />;
@@ -142,8 +168,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const isBlockedAdminPath = !permissions.isAdmin
     && ADMIN_ONLY_PATHS.some((path) => pathname.startsWith(`/${locale}${path}`));
+  const isBlockedCommercialPath = !permissions.isStaff
+    && COMMERCIAL_ONLY_PATHS.some((path) => pathname.startsWith(`/${locale}${path}`));
 
-  if (isBlockedAdminPath) {
+  if (isBlockedAdminPath || isBlockedCommercialPath) {
     return <LoadingPage message="Redirigiendo..." />;
   }
 
@@ -239,7 +267,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     )}
                   >
                     <item.icon className="h-5 w-5" />
-                    {item.label}
+                    {isOperationsParent && !permissions.canViewOperationsPanel
+                      ? permissions.canViewProductionPanel
+                        ? 'Producción'
+                        : permissions.canViewLogisticsPanel
+                          ? 'Logística'
+                          : item.label
+                      : item.label}
                   </Link>
 
                   {isOperationsParent && (

@@ -93,9 +93,12 @@ def normalize_payment_method(value: str | None) -> str:
 
 # Permission helpers for operation groups
 def user_has_production_permission(user) -> bool:
-    """Check if user is production supervisor or admin."""
+    """Check if user is production role, production supervisor, or staff."""
     if not user or not user.is_authenticated:
         return False
+    role_name = getattr(getattr(user, 'role', None), 'name', None)
+    if role_name == 'production':
+        return True
     return user.groups.filter(name='production_supervisors').exists() or is_internal_user(user)
 
 
@@ -104,6 +107,17 @@ def user_has_operations_permission(user) -> bool:
     if not user or not user.is_authenticated:
         return False
     return user.groups.filter(name='operations_supervisors').exists() or is_internal_user(user)
+
+
+def user_can_access_admin_orders(user) -> bool:
+    """Staff, production, and logistics supervisors can access admin orders."""
+    if not user or not user.is_authenticated:
+        return False
+    return (
+        is_internal_user(user)
+        or user_has_production_permission(user)
+        or user_has_operations_permission(user)
+    )
 
 
 class CartView(APIView):
@@ -875,9 +889,14 @@ class OrderAdminViewSet(viewsets.ModelViewSet):
         )
 
     def check_permissions(self, request):
-        """Only admin and sales staff can access."""
+        """Admin, sales, production, and logistics supervisors can access."""
         super().check_permissions(request)
-        if not is_internal_user(request.user):
+        if not user_can_access_admin_orders(request.user):
+            self.permission_denied(request)
+        if (
+            self.action in ('create', 'update', 'partial_update', 'destroy')
+            and not is_internal_user(request.user)
+        ):
             self.permission_denied(request)
 
     def get_serializer_class(self):
@@ -1000,6 +1019,16 @@ class OrderAdminViewSet(viewsets.ModelViewSet):
                     # Generic status change
                     Notification.notify_owner_and_admins(
                         owner=owner,
+                        notification_type=Notification.TYPE_ORDER_STATUS,
+                        title=f'Pedido #{order.order_number} → {label}',
+                        message=f'Cliente: {order.user.full_name if order.user else "N/A"}',
+                        entity_type='Order',
+                        entity_id=order.id,
+                        action_url=order_url,
+                    )
+
+                if new_status in ('in_production', 'ready'):
+                    Notification.notify_production(
                         notification_type=Notification.TYPE_ORDER_STATUS,
                         title=f'Pedido #{order.order_number} → {label}',
                         message=f'Cliente: {order.user.full_name if order.user else "N/A"}',

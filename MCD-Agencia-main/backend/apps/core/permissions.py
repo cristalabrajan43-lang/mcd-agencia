@@ -23,6 +23,21 @@ def is_role_staff_user(user) -> bool:
     return role_name in {'admin', 'superadmin', 'sales'}
 
 
+def is_role_production_user(user) -> bool:
+    """Return True for the production role (not the supervisor group)."""
+    if not user or not user.is_authenticated:
+        return False
+    if getattr(user, 'is_superuser', False):
+        return True
+    role_name = getattr(getattr(user, 'role', None), 'name', None)
+    return role_name == 'production'
+
+
+def is_order_manager_user(user) -> bool:
+    """Return True for commercial staff or production users who manage orders."""
+    return is_role_staff_user(user) or is_role_production_user(user)
+
+
 class IsRoleStaff(BasePermission):
     """Allow access to admin and sales staff."""
 

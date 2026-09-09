@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import NotificationBell from '@/components/ui/NotificationBell';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   ShoppingCartIcon,
   UserIcon,
@@ -32,6 +33,7 @@ import {
   ChartBarIcon,
   ArchiveBoxIcon,
   CalendarDaysIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 export function UnifiedHeader() {
@@ -46,6 +48,7 @@ export function UnifiedHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const permissions = usePermissions();
     useEffect(() => {
       const handleResize = () => {
         setIsMobile(window.innerWidth < 1024);
@@ -58,10 +61,47 @@ export function UnifiedHeader() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
 
-  // Check user role - only 3 roles: admin, sales, customer
-  const isAdmin = user?.role?.name === 'admin';
-  const isSales = user?.role?.name === 'sales';
-  const isStaff = isAdmin || isSales;
+  // Check user role
+  const isAdmin = permissions.isAdmin;
+  const isSales = permissions.isSales;
+  const canAccessDashboard = permissions.canAccessDashboard;
+  const dashboardHome = permissions.canViewOperationsPanel
+    ? `/${locale}/dashboard/operaciones`
+    : permissions.canViewProductionPanel
+      ? `/${locale}/dashboard/produccion`
+      : permissions.canViewLogisticsPanel
+        ? `/${locale}/dashboard/logistica`
+        : `/${locale}/dashboard`;
+  const dashboardNavItems = useMemo(() => {
+    const items: { href: string; label: string; icon: typeof CalendarDaysIcon }[] = [];
+    if (permissions.canViewOperationsPanel) {
+      items.push({ href: '/dashboard/operaciones', label: 'Operaciones', icon: CalendarDaysIcon });
+      items.push({ href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardDocumentListIcon });
+      items.push({ href: '/dashboard/cotizaciones', label: 'Cotizaciones', icon: DocumentTextIcon });
+    }
+    if (permissions.canViewAllOrders) {
+      items.push({ href: '/dashboard/pedidos', label: 'Pedidos', icon: ShoppingBagIcon });
+    }
+    if (permissions.canViewProductionPanel) {
+      items.push({ href: '/dashboard/produccion', label: 'Producción', icon: WrenchScrewdriverIcon });
+    }
+    if (permissions.canViewUsers) {
+      items.push({ href: '/dashboard/clientes', label: 'Clientes', icon: UsersIcon });
+    }
+    if (permissions.canViewInventory) {
+      items.push({ href: '/dashboard/inventario', label: 'Inventario', icon: ArchiveBoxIcon });
+    }
+    if (isAdmin) {
+      items.push(
+        { href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon },
+        { href: '/dashboard/usuarios', label: 'Usuarios', icon: UsersIcon },
+        { href: '/dashboard/contenido', label: 'Contenido', icon: PhotoIcon },
+        { href: '/dashboard/analytics', label: 'Analítica', icon: ChartBarIcon },
+        { href: '/dashboard/auditoria', label: 'Auditoría', icon: ClipboardDocumentListIcon },
+      );
+    }
+    return items;
+  }, [permissions, isAdmin]);
 
   // Language switcher
   const otherLocale = locale === 'es' ? 'en' : 'es';
@@ -257,8 +297,8 @@ export function UnifiedHeader() {
               <span className="hidden xl:inline text-sm font-medium uppercase">{otherLocale}</span>
             </button>
 
-            {/* Cart - Hidden for sales users */}
-            {!isSales && (
+            {/* Cart - Hidden for internal commercial/production users */}
+            {!isSales && !permissions.isProduction && (
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative text-neutral-600 hover:text-cmyk-cyan dark:text-gray-300 dark:hover:text-cmyk-cyan transition-colors"
@@ -281,8 +321,8 @@ export function UnifiedHeader() {
               {t('quote')}
             </Link>
 
-            {/* Buy Button - Hidden for sales users */}
-            {!isSales && (
+            {/* Buy Button - Hidden for internal commercial/production users */}
+            {!isSales && !permissions.isProduction && (
               <Link
                 href={`/${locale}/catalogo`}
                 className="hidden xl:inline-flex px-3 py-1.5 text-sm bg-yellow-400 text-neutral-900 font-semibold rounded-lg hover:bg-yellow-500 transition-all hover:shadow-lg"
@@ -295,7 +335,7 @@ export function UnifiedHeader() {
             <ThemeToggle />
 
             {/* Notifications - Staff only (desktop) */}
-            {isStaff && <NotificationBell />}
+            {canAccessDashboard && <NotificationBell />}
 
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
@@ -357,13 +397,13 @@ export function UnifiedHeader() {
                       </button>
 
                       {/* Panel de Control - accordion style */}
-                      {isStaff && (
+                      {canAccessDashboard && (
                         <div
                           onMouseEnter={() => setOpenSubmenu('dashboard')}
                           onMouseLeave={() => setOpenSubmenu(null)}
                         >
                           <Link
-                            href={`/${locale}/dashboard/operaciones`}
+                            href={dashboardHome}
                             onClick={() => { setIsUserMenuOpen(false); setOpenSubmenu(null); }}
                             className="w-full px-4 py-3 text-cmyk-cyan hover:bg-cmyk-cyan/10 transition-colors flex items-center gap-3"
                           >
@@ -374,21 +414,7 @@ export function UnifiedHeader() {
                           {/* Submenu inline */}
                           {openSubmenu === 'dashboard' && (
                             <div className="bg-cmyk-black/50 border-t border-cmyk-cyan/10">
-                              {[
-                                { href: '/dashboard/operaciones', label: 'Operaciones', icon: CalendarDaysIcon },
-                                { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardDocumentListIcon },
-                                { href: '/dashboard/cotizaciones', label: 'Cotizaciones', icon: DocumentTextIcon },
-                                { href: '/dashboard/pedidos', label: 'Pedidos', icon: ShoppingBagIcon },
-                                { href: '/dashboard/clientes', label: 'Clientes', icon: UsersIcon },
-                                { href: '/dashboard/inventario', label: 'Inventario', icon: ArchiveBoxIcon },
-                                ...(isAdmin ? [
-                                  { href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon },
-                                  { href: '/dashboard/usuarios', label: 'Usuarios', icon: UsersIcon },
-                                  { href: '/dashboard/contenido', label: 'Contenido', icon: PhotoIcon },
-                                  { href: '/dashboard/analytics', label: 'Analítica', icon: ChartBarIcon },
-                                  { href: '/dashboard/auditoria', label: 'Auditoría', icon: ClipboardDocumentListIcon },
-                                ] : []),
-                              ].map((item) => (
+                              {dashboardNavItems.map((item) => (
                                 <Link
                                   key={item.href}
                                   href={`/${locale}${item.href}`}
@@ -413,7 +439,7 @@ export function UnifiedHeader() {
           {/* Mobile: Theme + Notification Bell + Hamburger */}
           <div className={mobileControlsClassName}>
             <ThemeToggle />
-            {isStaff && <NotificationBell />}
+            {canAccessDashboard && <NotificationBell />}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -489,7 +515,7 @@ export function UnifiedHeader() {
                   </Link>
 
                   {/* Panel de Control - unified on mobile */}
-                  {isStaff && (
+                  {canAccessDashboard && (
                     <details className="group">
                       <summary className="px-4 py-2 text-white hover:text-cmyk-cyan transition-colors flex items-center gap-2 cursor-pointer list-none">
                         <Cog6ToothIcon className="w-5 h-5" />
@@ -497,21 +523,7 @@ export function UnifiedHeader() {
                         <ChevronRightIcon className="w-4 h-4 transition-transform group-open:rotate-90" />
                       </summary>
                       <div className="ml-6 space-y-1 pb-1">
-                        {[
-                          { href: '/dashboard/operaciones', label: 'Operaciones', icon: CalendarDaysIcon },
-                          { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardDocumentListIcon },
-                          { href: '/dashboard/cotizaciones', label: 'Cotizaciones', icon: DocumentTextIcon },
-                          { href: '/dashboard/pedidos', label: 'Pedidos', icon: ShoppingBagIcon },
-                          { href: '/dashboard/clientes', label: 'Clientes', icon: UsersIcon },
-                          { href: '/dashboard/inventario', label: 'Inventario', icon: ArchiveBoxIcon },
-                          ...(isAdmin ? [
-                            { href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon },
-                            { href: '/dashboard/usuarios', label: 'Usuarios', icon: UsersIcon },
-                            { href: '/dashboard/contenido', label: 'Contenido', icon: PhotoIcon },
-                            { href: '/dashboard/analytics', label: 'Analítica', icon: ChartBarIcon },
-                            { href: '/dashboard/auditoria', label: 'Auditoría', icon: ClipboardDocumentListIcon },
-                          ] : []),
-                        ].map((item) => (
+                        {dashboardNavItems.map((item) => (
                           <Link
                             key={item.href}
                             href={`/${locale}${item.href}`}
