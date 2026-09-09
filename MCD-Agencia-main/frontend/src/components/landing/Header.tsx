@@ -36,7 +36,7 @@ export function Header() {
   const isAdmin = user?.role?.name === 'admin';
   const isSales = user?.role?.name === 'sales';
   const isProduction = user?.role?.name === 'production';
-  const isStaff = isAdmin || isSales || isProduction;
+  const isStaff = isAdmin || isSales || isProduction || user?.role?.name === 'wholesale';
 
   // Language switcher
   const otherLocale = locale === 'es' ? 'en' : 'es';

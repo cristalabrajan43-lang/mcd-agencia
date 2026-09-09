@@ -30,6 +30,7 @@ import toast from 'react-hot-toast';
 import { Card, Badge, Button, Input, Select, Modal, Pagination, LoadingPage } from '@/components/ui';
 import { Textarea } from '@/components/ui/Textarea';
 import { formatCurrency } from '@/lib/utils';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const SALE_MODE_OPTIONS = [
   { value: '', label: 'Todos los modos' },
@@ -133,6 +134,7 @@ export default function AdminCatalogPage() {
   const queryClient = useQueryClient();
   const locale = useLocale();
   const router = useRouter();
+  const { isWholesale } = usePermissions();
   const searchParams = useSearchParams();
   const editProductId = searchParams.get('edit');
   const [filters, setFilters] = useState({
@@ -154,13 +156,14 @@ export default function AdminCatalogPage() {
 
   // Fetch products
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ['admin-products', filters],
+    queryKey: ['admin-products', filters, isWholesale],
     queryFn: () => getProducts({
       sale_mode: filters.sale_mode as 'BUY' | 'QUOTE' | undefined,
       type: filters.type as 'product' | 'service' | undefined,
       search: filters.search || undefined,
       page: filters.page,
       page_size: 20,
+      scope: isWholesale ? 'mine' : undefined,
     }),
   });
 
@@ -559,7 +562,7 @@ export default function AdminCatalogPage() {
       base_price: formData.base_price || undefined,
       compare_at_price: formData.compare_at_price || undefined,
       is_active: formData.is_active,
-      is_featured: formData.is_featured,
+      is_featured: isWholesale ? false : formData.is_featured,
       ...(isCreate
         ? {
             track_inventory: formData.type === 'product' ? formData.track_inventory : false,
@@ -643,9 +646,11 @@ export default function AdminCatalogPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Catálogo</h1>
+          <h1 className="text-2xl font-bold text-white">{isWholesale ? 'Mi catálogo' : 'Catálogo'}</h1>
           <p className="text-neutral-400">
-            Administra productos y servicios del catálogo
+            {isWholesale
+              ? 'Productos e insumos que le vendes a la agencia'
+              : 'Administra productos y servicios del catálogo'}
           </p>
         </div>
         <Button onClick={openCreateModal}>
@@ -786,7 +791,7 @@ export default function AdminCatalogPage() {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center justify-end gap-2">
-                        {product.type === 'product' && (
+                        {product.type === 'product' && !isWholesale && (
                           <Link href={`/${locale}/dashboard/inventario`}>
                             <Button
                               variant="ghost"
@@ -868,7 +873,7 @@ export default function AdminCatalogPage() {
                   </span>
                 </div>
                 <div className="mt-2 flex items-center justify-end gap-1 border-t border-neutral-800 pt-2">
-                  {product.type === 'product' && (
+                  {product.type === 'product' && !isWholesale && (
                     <Link href={`/${locale}/dashboard/inventario`}>
                       <Button variant="ghost" size="sm" title="Ir a inventario">
                         <ArchiveBoxIcon className="h-5 w-5" />
@@ -1007,7 +1012,9 @@ export default function AdminCatalogPage() {
                 {categoryOptionsForForm.map((cat) => (
                   <option key={cat.value} value={cat.value}>{cat.label}</option>
                 ))}
+                {!isWholesale && (
                 <option value="__create_new__">+ Crear nueva categoría</option>
+                )}
               </select>
               {categoryOptionsForForm.length === 0 && (
                 <p className="text-xs text-amber-400 mt-2">
@@ -1180,6 +1187,7 @@ export default function AdminCatalogPage() {
                   <p className="text-white">{editingProductDetail?.variants?.[0]?.low_stock_threshold ?? 0}</p>
                 </div>
               </div>
+              {!isWholesale && (
               <div>
                 <Link
                   href={`/${locale}/dashboard/inventario${editingProductDetail?.variants?.[0]?.id ? `?variant=${editingProductDetail.variants[0].id}` : ''}`}
@@ -1190,6 +1198,7 @@ export default function AdminCatalogPage() {
                   </Button>
                 </Link>
               </div>
+              )}
             </div>
           )}
 
@@ -1204,6 +1213,7 @@ export default function AdminCatalogPage() {
               />
               <span className="text-sm text-neutral-300">Activo</span>
             </label>
+            {!isWholesale && (
             <label className={`flex items-center gap-2 ${formData.is_active ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
               <input
                 type="checkbox"
@@ -1216,6 +1226,7 @@ export default function AdminCatalogPage() {
                 Destacado {!formData.is_active && '(requiere activo)'}
               </span>
             </label>
+            )}
           </div>
 
           {/* Actions */}

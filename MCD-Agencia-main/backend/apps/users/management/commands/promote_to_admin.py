@@ -46,8 +46,8 @@ class Command(BaseCommand):
             '--role',
             type=str,
             default='admin',
-            choices=['admin', 'sales', 'production'],
-            help='Role to assign: admin (full access), sales (commercial), or production (orders + production floor)'
+            choices=['admin', 'sales', 'production', 'wholesale'],
+            help='Role to assign: admin, sales, production, or wholesale vendor'
         )
 
     def handle(self, *args, **options):

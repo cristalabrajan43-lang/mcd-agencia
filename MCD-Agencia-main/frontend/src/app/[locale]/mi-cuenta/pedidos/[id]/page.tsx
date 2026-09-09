@@ -49,7 +49,7 @@ const STATUS_LABELS_ES: Record<string, string> = {
   paid: 'Pagado',
   partially_paid: 'Pago parcial',
   in_production: 'En producción',
-  ready: 'Listo',
+  ready: 'Pedido realizado',
   in_delivery: 'Enviado',
   completed: 'Entregado',
   cancelled: 'Cancelado',

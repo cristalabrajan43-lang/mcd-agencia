@@ -12,7 +12,7 @@ import { useCart } from '@/contexts/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import NotificationBell from '@/components/ui/NotificationBell';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions, getRoleDisplayName } from '@/hooks/usePermissions';
 import {
   ShoppingCartIcon,
   UserIcon,
@@ -34,6 +34,7 @@ import {
   ArchiveBoxIcon,
   CalendarDaysIcon,
   WrenchScrewdriverIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 
 export function UnifiedHeader() {
@@ -71,9 +72,17 @@ export function UnifiedHeader() {
       ? `/${locale}/dashboard/produccion`
       : permissions.canViewLogisticsPanel
         ? `/${locale}/dashboard/logistica`
-        : `/${locale}/dashboard`;
+        : permissions.isWholesale
+          ? `/${locale}/dashboard/catalogo`
+          : `/${locale}/dashboard`;
   const dashboardNavItems = useMemo(() => {
     const items: { href: string; label: string; icon: typeof CalendarDaysIcon }[] = [];
+    if (permissions.canEditCatalog) {
+      items.push({ href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon });
+    }
+    if (permissions.canViewVendorCatalog) {
+      items.push({ href: '/dashboard/proveedores', label: 'Proveedores', icon: BuildingStorefrontIcon });
+    }
     if (permissions.canViewOperationsPanel) {
       items.push({ href: '/dashboard/operaciones', label: 'Operaciones', icon: CalendarDaysIcon });
       items.push({ href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardDocumentListIcon });
@@ -93,7 +102,6 @@ export function UnifiedHeader() {
     }
     if (isAdmin) {
       items.push(
-        { href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon },
         { href: '/dashboard/usuarios', label: 'Usuarios', icon: UsersIcon },
         { href: '/dashboard/contenido', label: 'Contenido', icon: PhotoIcon },
         { href: '/dashboard/analytics', label: 'Analítica', icon: ChartBarIcon },
@@ -298,7 +306,7 @@ export function UnifiedHeader() {
             </button>
 
             {/* Cart - Hidden for internal commercial/production users */}
-            {!isSales && !permissions.isProduction && (
+            {!isSales && !permissions.isProduction && !permissions.isWholesale && (
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative text-neutral-600 hover:text-cmyk-cyan dark:text-gray-300 dark:hover:text-cmyk-cyan transition-colors"
@@ -322,7 +330,7 @@ export function UnifiedHeader() {
             </Link>
 
             {/* Buy Button - Hidden for internal commercial/production users */}
-            {!isSales && !permissions.isProduction && (
+            {!isSales && !permissions.isProduction && !permissions.isWholesale && (
               <Link
                 href={`/${locale}/catalogo`}
                 className="hidden xl:inline-flex px-3 py-1.5 text-sm bg-yellow-400 text-neutral-900 font-semibold rounded-lg hover:bg-yellow-500 transition-all hover:shadow-lg"
@@ -331,11 +339,26 @@ export function UnifiedHeader() {
               </Link>
             )}
 
+            {permissions.isWholesale && (
+              <span className="hidden lg:inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg bg-cmyk-magenta/15 text-cmyk-magenta">
+                Vendedor
+              </span>
+            )}
+
             {/* Theme toggle — visible for all users */}
             <ThemeToggle />
 
             {/* Notifications - Staff only (desktop) */}
             {canAccessDashboard && <NotificationBell />}
+
+            {canAccessDashboard && (
+              <Link
+                href={dashboardHome}
+                className="hidden lg:inline-flex px-3 py-1.5 text-sm font-semibold rounded-lg bg-cmyk-cyan/15 text-cmyk-cyan hover:bg-cmyk-cyan/25 transition-colors"
+              >
+                Panel
+              </Link>
+            )}
 
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
@@ -371,17 +394,21 @@ export function UnifiedHeader() {
                       <div className="px-4 py-3 border-b border-cmyk-cyan/10">
                         <p className="text-sm text-gray-300">{t('welcome')}</p>
                         <p className="text-white font-semibold truncate">{user?.full_name || user?.first_name || user?.email}</p>
+                        {permissions.role && permissions.role !== 'customer' && (
+                          <p className="text-xs text-cmyk-cyan mt-1">{getRoleDisplayName(permissions.role)}</p>
+                        )}
                       </div>
 
-                      {/* Mi Cuenta */}
-                      <Link
-                        href={`/${locale}/mi-cuenta`}
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="px-4 py-3 text-white hover:bg-cmyk-cyan/10 transition-colors flex items-center gap-3"
-                      >
-                        <UserCircleIcon className="w-5 h-5" />
-                        {t('myAccount')}
-                      </Link>
+                      {!canAccessDashboard && (
+                        <Link
+                          href={`/${locale}/mi-cuenta`}
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="px-4 py-3 text-white hover:bg-cmyk-cyan/10 transition-colors flex items-center gap-3"
+                        >
+                          <UserCircleIcon className="w-5 h-5" />
+                          {t('myAccount')}
+                        </Link>
+                      )}
 
                       {/* Cerrar Sesión */}
                       <button

@@ -52,7 +52,7 @@ class InventoryMovementViewSet(viewsets.ModelViewSet):
 
     queryset = InventoryMovement.objects.select_related(
         'variant__catalog_item', 'created_by'
-    )
+    ).filter(variant__catalog_item__vendor__isnull=True)
     serializer_class = InventoryMovementSerializer
     permission_classes = [IsRoleStaff]
     pagination_class = StandardPagination
@@ -263,6 +263,7 @@ class StockSummaryView(APIView):
             is_deleted=False,
             catalog_item__track_inventory=True,
             catalog_item__is_deleted=False,
+            catalog_item__vendor__isnull=True,
         ).select_related('catalog_item').annotate(
             total_in=Coalesce(
                 Sum(
@@ -363,6 +364,7 @@ class LowStockReportView(APIView):
             is_deleted=False,
             catalog_item__track_inventory=True,
             catalog_item__is_deleted=False,
+            catalog_item__vendor__isnull=True,
             stock__lte=F('low_stock_threshold')
         ).select_related('catalog_item').order_by('stock')
 
@@ -396,7 +398,8 @@ class InventoryValueReportView(APIView):
         variants = ProductVariant.objects.filter(
             is_active=True,
             is_deleted=False,
-            catalog_item__track_inventory=True
+            catalog_item__track_inventory=True,
+            catalog_item__vendor__isnull=True,
         ).select_related('catalog_item')
 
         total_value = 0

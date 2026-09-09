@@ -20,6 +20,7 @@ The catalog is designed to be "future-proof" supporting:
 import uuid
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -386,6 +387,7 @@ class CatalogItem(TimeStampedModel, SoftDeleteModel, SEOModel, ERPIntegrationMod
         base_price: Base price (for items without variants)
         deposit_percentage/amount: Deposit configuration
         track_inventory: Whether to track stock
+        vendor: Supplier user when this item belongs to a vendor catalog
         is_active: Whether item is visible
         is_featured: Whether to feature on homepage
     """
@@ -474,6 +476,15 @@ class CatalogItem(TimeStampedModel, SoftDeleteModel, SEOModel, ERPIntegrationMod
         blank=True,
         related_name='items',
         help_text=_('Associated tags.')
+    )
+    vendor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name='vendor_catalog_items',
+        help_text=_('Vendor owner. Empty for the public agency catalog.'),
     )
 
     # Sale & Payment Configuration

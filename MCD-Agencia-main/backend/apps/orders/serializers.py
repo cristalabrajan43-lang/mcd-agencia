@@ -133,10 +133,15 @@ class CartItemSerializer(serializers.ModelSerializer):
     def validate_variant_id(self, value):
         """Validate variant exists and is active."""
         from apps.catalog.models import ProductVariant
+        from apps.core.permissions import is_role_staff_user
         try:
-            variant = ProductVariant.objects.get(id=value, is_active=True)
+            variant = ProductVariant.objects.select_related('catalog_item').get(id=value, is_active=True)
         except ProductVariant.DoesNotExist:
             raise serializers.ValidationError(_('Product variant not found.'))
+        if variant.catalog_item.vendor_id:
+            user = getattr(self.context.get('request'), 'user', None)
+            if not is_role_staff_user(user):
+                raise serializers.ValidationError(_('This product is only available to the agency.'))
         return value
 
     def validate_quantity(self, value):
@@ -207,6 +212,13 @@ class AddToCartSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     _('This item requires a quote request.')
                 )
+            if variant.catalog_item.vendor_id:
+                from apps.core.permissions import is_role_staff_user
+                user = getattr(self.context.get('request'), 'user', None)
+                if not is_role_staff_user(user):
+                    raise serializers.ValidationError(
+                        _('This product is only available to the agency.')
+                    )
         except ProductVariant.DoesNotExist:
             raise serializers.ValidationError(_('Product variant not found.'))
         return value

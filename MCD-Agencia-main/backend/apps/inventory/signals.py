@@ -11,7 +11,12 @@ from apps.catalog.models import ProductVariant
 from apps.orders.models import Order
 
 from .models import StockAlert
-from .services import STOCK_DEDUCT_STATUSES, register_sale_movements_for_order
+from .services import (
+    STOCK_DEDUCT_STATUSES,
+    VENDOR_RECEIPT_STATUSES,
+    register_sale_movements_for_order,
+    register_vendor_purchase_receipts,
+)
 
 
 @receiver(post_save, sender=ProductVariant)
@@ -58,3 +63,13 @@ def deduct_inventory_on_order_shipment(sender, instance, **kwargs):
         return
 
     register_sale_movements_for_order(instance)
+
+
+@receiver(post_save, sender=Order)
+def receive_vendor_purchases_on_payment(sender, instance, **kwargs):
+    """Add inventory IN entries when the agency pays a vendor catalog order."""
+    if instance.status not in VENDOR_RECEIPT_STATUSES:
+        return
+    if not instance.lines.exists():
+        return
+    register_vendor_purchase_receipts(instance, created_by=instance.user)

@@ -338,7 +338,9 @@ export default function ProductDetailPage() {
                           <span className="text-xs text-neutral-500 line-through">
                             ${parseFloat(product.compare_at_price).toLocaleString('es-MX')}
                           </span>
-                          <Badge variant="success">Oferta</Badge>
+                          <Badge variant="success">
+                            Oferta
+                          </Badge>
                         </div>
                       )}
                       <div className="flex items-baseline justify-between">

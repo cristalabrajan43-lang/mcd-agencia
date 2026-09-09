@@ -38,6 +38,14 @@ def is_order_manager_user(user) -> bool:
     return is_role_staff_user(user) or is_role_production_user(user)
 
 
+def is_role_vendor_user(user) -> bool:
+    """Return True for the wholesale/vendor role."""
+    if not user or not user.is_authenticated:
+        return False
+    role_name = getattr(getattr(user, 'role', None), 'name', None)
+    return role_name == 'wholesale'
+
+
 class IsRoleStaff(BasePermission):
     """Allow access to admin and sales staff."""
 
@@ -54,3 +62,12 @@ class IsRoleAdmin(BasePermission):
 
     def has_permission(self, request, view):
         return is_role_admin_user(request.user)
+
+
+class IsRoleStaffOrVendor(BasePermission):
+    """Allow access to commercial staff or vendor accounts."""
+
+    message = 'Staff or vendor role required.'
+
+    def has_permission(self, request, view):
+        return is_role_staff_user(request.user) or is_role_vendor_user(request.user)

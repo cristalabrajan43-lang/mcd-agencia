@@ -14,6 +14,7 @@ import { Button, Input, Card } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { resendVerification } from '@/lib/api/auth';
 import { useRecaptcha } from '@/hooks';
+import { getPostLoginPath } from '@/hooks/usePermissions';
 import { getBackendOrigin } from '@/lib/api/base-url';
 
 const loginSchema = z.object({
@@ -34,8 +35,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
-
-  const redirectTo = searchParams.get('redirect') || `/${locale}`;
 
   const {
     register,
@@ -60,7 +59,7 @@ export default function LoginPage() {
       }
 
       // Include recaptcha token with login data
-      await login({ ...data, recaptcha_token: recaptchaToken });
+      const loggedInUser = await login({ ...data, recaptcha_token: recaptchaToken });
       toast.success('¡Bienvenido de nuevo!');
 
       // Si hay un producto pendiente, redirigir a su página de detalle
@@ -77,7 +76,7 @@ export default function LoginPage() {
         }
       }
 
-      router.push(redirectTo);
+      router.push(getPostLoginPath(locale, loggedInUser, searchParams.get('redirect')));
     } catch (error: unknown) {
       const err = error as { message?: string; data?: Record<string, unknown> };
 

@@ -25,8 +25,6 @@ from .models import (
     ProductVariant,
     CatalogImage,
 )
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -208,6 +206,8 @@ class CatalogItemListSerializer(serializers.ModelSerializer):
     price_range = serializers.SerializerMethodField()
     has_discount = serializers.BooleanField(read_only=True)
     discount_percentage = serializers.IntegerField(read_only=True)
+    vendor_id = serializers.UUIDField(read_only=True, allow_null=True)
+    vendor_name = serializers.SerializerMethodField()
 
     class Meta:
         model = CatalogItem
@@ -215,9 +215,17 @@ class CatalogItemListSerializer(serializers.ModelSerializer):
             'id', 'type', 'name', 'name_en', 'slug', 'short_description',
             'short_description_en', 'category', 'sale_mode', 'base_price',
             'compare_at_price', 'price_range', 'has_discount',
-            'discount_percentage', 'primary_image', 'is_active', 'is_featured'
+            'discount_percentage', 'primary_image', 'is_active', 'is_featured',
+            'vendor_id', 'vendor_name',
         ]
         read_only_fields = ['id', 'slug']
+
+    def get_vendor_name(self, obj):
+        vendor = getattr(obj, 'vendor', None)
+        if not vendor:
+            return None
+        name = (getattr(vendor, 'full_name', None) or '').strip()
+        return name or vendor.email
 
     def get_primary_image(self, obj):
         """Get primary image URL."""
@@ -269,6 +277,8 @@ class CatalogItemDetailSerializer(serializers.ModelSerializer):
     total_stock = serializers.IntegerField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
     available_attributes = serializers.SerializerMethodField()
+    vendor_id = serializers.UUIDField(read_only=True, allow_null=True)
+    vendor_name = serializers.SerializerMethodField()
 
     class Meta:
         model = CatalogItem
@@ -286,6 +296,7 @@ class CatalogItemDetailSerializer(serializers.ModelSerializer):
             'specifications', 'installation_info', 'installation_info_en',
             'meta_title', 'meta_description', 'og_image',
             'variants', 'images', 'available_attributes',
+            'vendor_id', 'vendor_name',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
@@ -325,6 +336,13 @@ class CatalogItemDetailSerializer(serializers.ModelSerializer):
                 if value_data not in attributes[attr.id]['values']:
                     attributes[attr.id]['values'].append(value_data)
         return list(attributes.values())
+
+    def get_vendor_name(self, obj):
+        vendor = getattr(obj, 'vendor', None)
+        if not vendor:
+            return None
+        name = (getattr(vendor, 'full_name', None) or '').strip()
+        return name or vendor.email
 
 
 class CatalogItemAdminSerializer(CatalogItemDetailSerializer):

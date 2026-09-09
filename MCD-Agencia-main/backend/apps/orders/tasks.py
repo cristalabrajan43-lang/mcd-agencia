@@ -99,7 +99,7 @@ def send_order_status_update_email(self, order_id: str, old_status: str, new_sta
             'pending': 'Pendiente',
             'confirmed': 'Confirmado',
             'processing': 'En proceso',
-            'ready': 'Listo para envío',
+            'ready': 'Pedido realizado',
             'shipped': 'Enviado',
             'delivered': 'Entregado',
             'cancelled': 'Cancelado',

@@ -98,6 +98,7 @@ class Role(TimeStampedModel):
         - admin: Full administrative access
         - sales: Commercial operations (quotes, orders, customers)
         - production: Production floor (orders, production jobs)
+        - wholesale: Internal vendor (dashboard orders + catalog purchases)
         - customer: End-user access (own orders/quotes)
 
     Deprecated roles (kept for migration compatibility):
@@ -115,6 +116,7 @@ class Role(TimeStampedModel):
     ADMIN = 'admin'
     SALES = 'sales'
     PRODUCTION = 'production'
+    WHOLESALE = 'wholesale'
     CUSTOMER = 'customer'
 
     # Deprecated roles - kept for migration compatibility
@@ -125,6 +127,7 @@ class Role(TimeStampedModel):
         (ADMIN, _('Administrator')),
         (SALES, _('Sales')),
         (PRODUCTION, _('Production')),
+        (WHOLESALE, _('Vendor')),
         (CUSTOMER, _('Customer')),
         # Deprecated choices - kept for existing data
         (SUPERADMIN, _('Super Administrator (Deprecated)')),
@@ -417,11 +420,17 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel, SoftDeleteModel
             return False
         return self.role.name == Role.PRODUCTION
 
-    def is_staff_member(self):
-        """Check if user is staff (admin, sales, or production)."""
+    def is_wholesale(self):
+        """Check if user has the internal vendor role."""
         if not self.role:
             return False
-        return self.role.name in [Role.ADMIN, Role.SUPERADMIN, Role.SALES, Role.PRODUCTION]
+        return self.role.name == Role.WHOLESALE
+
+    def is_staff_member(self):
+        """Check if user is staff (admin, sales, production, or vendor)."""
+        if not self.role:
+            return False
+        return self.role.name in [Role.ADMIN, Role.SUPERADMIN, Role.SALES, Role.PRODUCTION, Role.WHOLESALE]
 
     def is_operations(self):
         """DEPRECATED: Check if user has operations role. Use is_admin() instead."""

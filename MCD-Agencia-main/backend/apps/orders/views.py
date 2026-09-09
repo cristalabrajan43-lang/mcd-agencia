@@ -111,9 +111,12 @@ def user_has_operations_permission(user) -> bool:
 
 
 def user_can_access_admin_orders(user) -> bool:
-    """Staff, production, and logistics supervisors can access admin orders."""
+    """Staff, production, logistics, and vendor roles can access admin orders."""
     if not user or not user.is_authenticated:
         return False
+    role_name = getattr(getattr(user, 'role', None), 'name', None)
+    if role_name == 'wholesale':
+        return True
     return (
         is_internal_user(user)
         or user_has_production_permission(user)
@@ -832,6 +835,12 @@ class OrderAdminViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'payment_method', 'user']
     search_fields = ['order_number', 'user__email', 'user__first_name', 'user__last_name']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if getattr(getattr(self.request.user, 'role', None), 'name', None) == 'wholesale':
+            return qs.filter(lines__variant__catalog_item__vendor=self.request.user).distinct()
+        return qs
 
     @staticmethod
     def _role_name(user) -> str:

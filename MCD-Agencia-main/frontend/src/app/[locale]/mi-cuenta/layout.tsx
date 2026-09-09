@@ -16,7 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions, getRoleDisplayName } from '@/hooks/usePermissions';
 import { LoadingPage } from '@/components/ui';
 import { cn, getInitials } from '@/lib/utils';
 
@@ -40,7 +40,9 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       ? `/${locale}/dashboard/produccion`
       : permissions.canViewLogisticsPanel
         ? `/${locale}/dashboard/logistica`
-        : `/${locale}/dashboard`;
+        : permissions.isWholesale
+          ? `/${locale}/dashboard/catalogo`
+          : `/${locale}/dashboard`;
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -76,6 +78,14 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       router.push(`/${locale}/login?redirect=/${locale}/mi-cuenta`);
     }
   }, [isLoading, isAuthenticated, router, locale]);
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || !isStaff) return;
+    const customerOnlyPaths = ['/mi-cuenta/pedidos', '/mi-cuenta/favoritos', '/mi-cuenta/cotizaciones'];
+    if (customerOnlyPaths.some((path) => pathname.includes(path))) {
+      router.replace(dashboardHome);
+    }
+  }, [isLoading, isAuthenticated, isStaff, pathname, dashboardHome, router]);
 
   if (isLoading) {
     return <LoadingPage message="Cargando..." />;
@@ -114,9 +124,11 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
                 {getInitials(user?.full_name || user?.email || '')}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-white text-sm truncate">Mi Cuenta</span>
+                <span className="font-semibold text-white text-sm truncate">
+                  {isStaff ? 'Panel interno' : 'Mi Cuenta'}
+                </span>
                 <span className="text-[10px] text-neutral-400 truncate">
-                  {user?.first_name || user?.full_name || user?.email}
+                  {isStaff ? getRoleDisplayName(permissions.role) : (user?.first_name || user?.full_name || user?.email)}
                 </span>
               </div>
             </Link>
@@ -163,7 +175,7 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
 
           <div className="flex-shrink-0 p-4 border-t border-neutral-800 bg-neutral-900">
             <div className="text-xs text-neutral-500">
-              {permissions.isStaff ? 'Acceso staff activo' : 'Acceso cliente'}
+              {isStaff ? 'Acceso staff activo' : 'Acceso cliente'}
             </div>
           </div>
 

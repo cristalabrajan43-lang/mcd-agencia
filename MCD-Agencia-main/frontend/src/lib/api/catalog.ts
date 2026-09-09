@@ -112,6 +112,8 @@ export interface Product {
   is_in_stock: boolean;
   is_active: boolean;
   is_featured: boolean;
+  vendor_id?: string | null;
+  vendor_name?: string | null;
   specifications?: Record<string, unknown>;
   installation_info?: string;
   installation_info_en?: string;
@@ -158,6 +160,8 @@ export interface ProductListItem {
   track_inventory?: boolean;
   is_active: boolean;
   is_featured: boolean;
+  vendor_id?: string | null;
+  vendor_name?: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -185,6 +189,8 @@ export interface ProductFilters {
   ordering?: string;
   page?: number;
   page_size?: number;
+  scope?: 'mine' | 'vendors';
+  vendor?: string;
 }
 
 // API Functions

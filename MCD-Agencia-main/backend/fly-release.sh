@@ -94,6 +94,17 @@ roles_data = [
             'production': {'view': True, 'edit': True, 'manage': True},
         },
     },
+    {
+        'name': 'wholesale',
+        'display_name': 'Vendedor',
+        'description': 'Vendedor interno: panel de pedidos y compras en catálogo.',
+        'is_system': True,
+        'permissions': {
+            'catalog': {'view': True},
+            'orders': {'view': True, 'create': True},
+            'quotes': {'view': True, 'create': True},
+        },
+    },
 ]
 
 for role_data in roles_data:
@@ -153,11 +164,11 @@ python manage.py shell -c "
 from apps.users.models import User, Role
 
 staff_updated = User.objects.filter(
-    role__name__in=['admin', 'sales', 'production'],
+    role__name__in=['admin', 'sales', 'production', 'wholesale'],
     is_staff=False,
     is_active=True,
 ).update(is_staff=True)
-print(f'Set is_staff=True for {staff_updated} admin/sales/production users')
+print(f'Set is_staff=True for {staff_updated} admin/sales/production/wholesale users')
 
 customer_updated = User.objects.filter(
     role__name='customer',

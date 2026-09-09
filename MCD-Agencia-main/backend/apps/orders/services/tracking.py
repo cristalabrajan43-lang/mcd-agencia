@@ -17,7 +17,7 @@ ORDER_STATUS_LABELS = {
     Order.STATUS_PAID: 'Pago confirmado',
     Order.STATUS_PARTIALLY_PAID: 'Pago parcial recibido',
     Order.STATUS_IN_PRODUCTION: 'En producción',
-    Order.STATUS_READY: 'Pedido listo',
+    Order.STATUS_READY: 'Pedido realizado',
     Order.STATUS_IN_DELIVERY: 'En camino',
     Order.STATUS_COMPLETED: 'Entregado',
     Order.STATUS_CANCELLED: 'Pedido cancelado',
@@ -58,7 +58,7 @@ PENDING_STEPS_SHIPPING = [
     ('pending_payment', 'Esperando confirmación de pago'),
     ('paid', 'Pago confirmado'),
     ('in_production', 'En producción'),
-    ('ready', 'Pedido listo'),
+    ('ready', 'Pedido realizado'),
     ('in_delivery', 'En camino'),
     ('completed', 'Entregado'),
 ]
@@ -86,7 +86,7 @@ STATUS_ORDER = [
 def _pickup_ready_label(order: Order) -> str:
     if order.delivery_method == Order.DELIVERY_PICKUP:
         return 'Listo para recoger'
-    return 'Pedido listo'
+    return 'Pedido realizado'
 
 
 def record_tracking_event(

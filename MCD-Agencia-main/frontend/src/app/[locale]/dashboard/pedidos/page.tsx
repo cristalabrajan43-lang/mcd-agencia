@@ -39,7 +39,7 @@ const statusLabels: Record<string, string> = {
   paid: 'Pagado',
   partially_paid: 'Pago Parcial',
   in_production: 'En Producción',
-  ready: 'Listo',
+  ready: 'Pedido realizado',
   in_delivery: 'En Camino',
   completed: 'Completado',
   cancelled: 'Cancelado',
@@ -62,7 +62,7 @@ const nextStatusOptions: Record<string, { value: string; label: string }[]> = {
     { value: 'cancelled', label: 'Cancelar' },
   ],
   in_production: [
-    { value: 'ready', label: 'Marcar como Listo' },
+    { value: 'ready', label: 'Marcar como Pedido realizado' },
     { value: 'cancelled', label: 'Cancelar' },
   ],
   ready: [
@@ -219,7 +219,9 @@ export default function SalesOrdersPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Pedidos</h1>
         <p className="text-neutral-400">
-          Gestiona los pedidos de tus clientes
+          {permissions.isWholesale
+            ? 'Pedidos que te hace la agencia'
+            : 'Gestiona los pedidos de tus clientes'}
         </p>
       </div>
 
@@ -234,7 +236,7 @@ export default function SalesOrdersPage() {
           <p className="text-2xl font-bold text-purple-400">{inProduction}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-neutral-400 text-sm">Listos / En Camino</p>
+          <p className="text-neutral-400 text-sm">Realizados / En Camino</p>
           <p className="text-2xl font-bold text-cyan-400">{readyOrders}</p>
         </Card>
         <Card className="p-4">
@@ -274,7 +276,7 @@ export default function SalesOrdersPage() {
               <option value="paid">Pagado</option>
               <option value="partially_paid">Pago Parcial</option>
               <option value="in_production">En Producción</option>
-              <option value="ready">Listo</option>
+              <option value="ready">Pedido realizado</option>
               <option value="in_delivery">En Camino</option>
               <option value="completed">Completado</option>
               <option value="cancelled">Cancelado</option>

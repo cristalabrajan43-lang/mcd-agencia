@@ -20,7 +20,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.audit.models import AuditLog
 from apps.core.pagination import StandardPagination, LargePagination
-from apps.core.permissions import IsRoleAdmin, IsRoleStaff
+from apps.core.permissions import IsRoleAdmin, IsRoleStaff, IsRoleStaffOrVendor, is_role_staff_user, is_role_vendor_user
 from .models import (
     Category,
     Tag,
@@ -210,8 +210,8 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def get_queryset(self):
-        """Return items based on user permissions."""
-        qs = CatalogItem.objects.select_related('category').prefetch_related(
+        """Return items based on user permissions and catalog scope."""
+        qs = CatalogItem.objects.select_related('category', 'vendor').prefetch_related(
             'tags',
             'images',
             Prefetch(
@@ -222,8 +222,42 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
             )
         )
 
-        if not self.request.user.is_staff:
-            qs = qs.filter(is_active=True, is_deleted=False)
+        user = self.request.user
+        scope = self.request.query_params.get('scope')
+        is_staff = is_role_staff_user(user)
+        is_vendor = is_role_vendor_user(user)
+
+        if self.action in ('list', 'featured'):
+            if scope == 'mine' and is_vendor:
+                qs = qs.filter(vendor=user)
+            elif scope == 'vendors' and (is_staff or is_vendor):
+                qs = qs.filter(vendor__isnull=False)
+                if is_vendor:
+                    qs = qs.filter(vendor=user)
+                vendor_id = self.request.query_params.get('vendor')
+                if vendor_id and is_staff:
+                    qs = qs.filter(vendor_id=vendor_id)
+            else:
+                qs = qs.filter(vendor__isnull=True).exclude(
+                    specifications__has_key='source_vendor_item_id'
+                )
+                if not is_staff:
+                    qs = qs.filter(is_active=True, is_deleted=False)
+        elif self.action in ('retrieve', 'by_slug'):
+            if is_staff:
+                pass
+            elif is_vendor:
+                qs = qs.filter(Q(vendor=user) | Q(vendor__isnull=True, is_active=True, is_deleted=False))
+                qs = qs.exclude(specifications__has_key='source_vendor_item_id')
+            else:
+                qs = qs.filter(vendor__isnull=True, is_active=True, is_deleted=False).exclude(
+                    specifications__has_key='source_vendor_item_id'
+                )
+        else:
+            if is_vendor:
+                qs = qs.filter(vendor=user)
+            elif not is_staff:
+                qs = qs.none()
 
         # Filter by category slug
         category_slug = self.request.query_params.get('category_slug')
@@ -260,19 +294,23 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
         """Return appropriate serializer based on action."""
         if self.action == 'list':
             return CatalogItemListSerializer
-        if self.request.user.is_staff:
+        if is_role_staff_user(self.request.user) or is_role_vendor_user(self.request.user):
             return CatalogItemAdminSerializer
         return CatalogItemDetailSerializer
 
     def get_permissions(self):
         """Set permissions based on action."""
-        if self.action in ['list', 'retrieve', 'by_slug']:
+        if self.action in ['list', 'retrieve', 'by_slug', 'featured']:
             return [permissions.AllowAny()]
-        return [IsRoleStaff()]
+        return [IsRoleStaffOrVendor()]
 
     def perform_create(self, serializer):
-        """Log item creation."""
-        item = serializer.save()
+        """Log item creation and attach vendor ownership."""
+        extra = {}
+        if is_role_vendor_user(self.request.user):
+            extra['vendor'] = self.request.user
+            extra['is_featured'] = False
+        item = serializer.save(**extra)
         AuditLog.log(
             entity=item,
             action=AuditLog.ACTION_CREATED,
@@ -284,7 +322,11 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         """Log item update."""
         before_state = CatalogItemAdminSerializer(self.get_object()).data
-        item = serializer.save()
+        extra = {}
+        if is_role_vendor_user(self.request.user):
+            extra['vendor'] = self.request.user
+            extra['is_featured'] = False
+        item = serializer.save(**extra)
         AuditLog.log(
             entity=item,
             action=AuditLog.ACTION_UPDATED,
@@ -348,6 +390,11 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
     def toggle_featured(self, request, pk=None):
         """Toggle item featured status (admin)."""
         item = self.get_object()
+        if item.vendor_id:
+            return Response(
+                {'error': _('Vendor catalog items cannot be featured on the public store.')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         item.is_featured = not item.is_featured
         item.save(update_fields=['is_featured', 'updated_at'])
         return Response({'is_featured': item.is_featured})
@@ -444,11 +491,20 @@ class ProductVariantViewSet(viewsets.ModelViewSet):
     pagination_class = StandardPagination
     filterset_fields = ['catalog_item', 'is_active']
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if is_role_vendor_user(user):
+            return qs.filter(catalog_item__vendor=user)
+        if not is_role_staff_user(user):
+            return qs.filter(catalog_item__vendor__isnull=True)
+        return qs
+
     def get_permissions(self):
         """Set permissions based on action."""
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
-        return [IsRoleStaff()]
+        return [IsRoleStaffOrVendor()]
 
     def perform_create(self, serializer):
         """Log variant creation."""

@@ -8,6 +8,7 @@
  * - admin: Full access to all features
  * - sales: Commercial operations (quotes, orders, customers, catalog view)
  * - production: Production floor (orders + production jobs)
+ * - wholesale: Vendor that sells supplies to the agency (own catalog + orders)
  * - customer: End-user access (own orders, quotes, profile)
  */
 
@@ -24,8 +25,9 @@ export interface Permissions {
   isSales: boolean;
   isProduction: boolean;
   isLogistics: boolean;
+  isWholesale: boolean;
   isCustomer: boolean;
-  isStaff: boolean; // admin or sales (commercial)
+  isStaff: boolean; // admin or sales (commercial staff)
 
   // Admin panel access
   canAccessDashboard: boolean;
@@ -38,6 +40,7 @@ export interface Permissions {
   canViewCatalog: boolean;
   canEditCatalog: boolean;
   canDeleteCatalog: boolean;
+  canViewVendorCatalog: boolean;
 
   // Orders permissions
   canViewAllOrders: boolean;
@@ -87,6 +90,7 @@ export function usePermissions(): Permissions {
   const isProductionRole = role === 'production';
   const isProduction = isProductionRole || groups.includes('production_supervisors');
   const isLogistics = groups.includes('operations_supervisors');
+  const isWholesale = role === 'wholesale';
   const isCustomer = role === 'customer';
   const isStaff = isAdmin || isSales;
 
@@ -97,23 +101,25 @@ export function usePermissions(): Permissions {
     isSales,
     isProduction,
     isLogistics,
+    isWholesale,
     isCustomer,
     isStaff,
 
     // Admin panel access
-    canAccessDashboard: isStaff || isProduction || isLogistics,
+    canAccessDashboard: isStaff || isProduction || isLogistics || isWholesale,
     canAccessAdmin: isStaff,
     canViewOperationsPanel: isStaff,
     canViewProductionPanel: isAdmin || isProduction,
     canViewLogisticsPanel: isAdmin || isLogistics,
 
-    // Catalog - admin can edit, sales can view
+    // Catalog - admin manages the public store; vendor manages their own catalog
     canViewCatalog: true, // Everyone can view public catalog
-    canEditCatalog: isAdmin,
-    canDeleteCatalog: isAdmin,
+    canEditCatalog: isAdmin || isWholesale,
+    canDeleteCatalog: isAdmin || isWholesale,
+    canViewVendorCatalog: isStaff,
 
-    // Orders - admin/sales/production can view and edit
-    canViewAllOrders: isStaff || isProduction,
+    // Orders - admin/sales/production can view and edit; vendedor can view
+    canViewAllOrders: isStaff || isProduction || isWholesale,
     canEditOrders: isStaff || isProduction,
     canDeleteOrders: isAdmin,
 

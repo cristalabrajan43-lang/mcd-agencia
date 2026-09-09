@@ -51,7 +51,7 @@ def sync_is_staff_with_role(sender, instance, **kwargs):
         except Role.DoesNotExist:
             role_name = None
 
-        if role_name in (Role.ADMIN, Role.SALES, Role.PRODUCTION):
+        if role_name in (Role.ADMIN, Role.SALES, Role.PRODUCTION, Role.WHOLESALE):
             instance.is_staff = True
         elif role_name == Role.CUSTOMER:
             # Don't demote superusers

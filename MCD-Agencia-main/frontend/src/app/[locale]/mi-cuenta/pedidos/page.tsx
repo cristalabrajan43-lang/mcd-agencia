@@ -19,7 +19,7 @@ const STATUS_OPTIONS = [
   { value: 'pending_payment', label: 'Pendiente de pago' },
   { value: 'paid', label: 'Pagado' },
   { value: 'in_production', label: 'En producción' },
-  { value: 'ready', label: 'Listo' },
+  { value: 'ready', label: 'Pedido realizado' },
   { value: 'in_delivery', label: 'En camino' },
   { value: 'completed', label: 'Completado' },
   { value: 'cancelled', label: 'Cancelado' },

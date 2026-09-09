@@ -53,7 +53,7 @@ const statusLabels: Record<string, string> = {
   paid: 'Pagado',
   partially_paid: 'Pago Parcial',
   in_production: 'En Producción',
-  ready: 'Listo',
+  ready: 'Pedido realizado',
   in_delivery: 'En Camino',
   completed: 'Completado',
   cancelled: 'Cancelado',
@@ -89,7 +89,7 @@ const nextStatusOptions: Record<string, { value: string; label: string }[]> = {
     { value: 'cancelled', label: 'Cancelar Pedido' },
   ],
   in_production: [
-    { value: 'ready', label: 'Marcar como Listo' },
+    { value: 'ready', label: 'Marcar como Pedido realizado' },
     { value: 'cancelled', label: 'Cancelar Pedido' },
   ],
   ready: [
@@ -429,7 +429,7 @@ export default function StaffOrderDetailPage() {
     { key: 'created', label: 'Creación', active: true, date: order.created_at },
     { key: 'payment', label: canManualConfirmPayment ? 'Esperando confirmación' : 'Pagado', active: order.is_fully_paid || ['paid', 'partially_paid', 'in_production', 'ready', 'in_delivery', 'completed'].includes(workflowStatus), date: order.paid_at },
     { key: 'production', label: 'En producción', active: ['in_production', 'ready', 'in_delivery', 'completed'].includes(workflowStatus), date: order.status_history?.find((history) => history.to_status === 'in_production')?.created_at },
-    { key: 'ready', label: 'Listo', active: ['ready', 'in_delivery', 'completed'].includes(workflowStatus), date: order.status_history?.find((history) => history.to_status === 'ready')?.created_at },
+    { key: 'ready', label: 'Pedido realizado', active: ['ready', 'in_delivery', 'completed'].includes(workflowStatus), date: order.status_history?.find((history) => history.to_status === 'ready')?.created_at },
     { key: 'delivery', label: order.delivery_method === 'pickup' ? 'Listo para recoger' : 'Enviado', active: ['in_delivery', 'completed'].includes(workflowStatus), date: order.tracking_number ? order.completed_at || order.paid_at : undefined },
     { key: 'done', label: 'Entregado', active: workflowStatus === 'completed', date: order.completed_at },
   ];

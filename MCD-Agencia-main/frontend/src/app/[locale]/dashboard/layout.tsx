@@ -15,6 +15,7 @@ import {
   XMarkIcon,
   ArrowLeftOnRectangleIcon,
   ArchiveBoxIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,6 +52,7 @@ const MENU_ITEMS: MenuItem[] = [
 
   // ── Admin-only ──────────────────────────────────────────────────────────
   { href: '/dashboard/catalogo', label: 'Catálogo', icon: CubeIcon, permission: 'canEditCatalog', separator: true },
+  { href: '/dashboard/proveedores', label: 'Proveedores', icon: BuildingStorefrontIcon, permission: 'canViewVendorCatalog' },
   { href: '/dashboard/inventario', label: 'Inventario', icon: ArchiveBoxIcon, permission: 'canViewInventory' },
   { href: '/dashboard/usuarios', label: 'Usuarios', icon: UsersIcon, permission: 'canEditUsers' },
   { href: '/dashboard/contenido', label: 'Contenido', icon: PhotoIcon, permission: 'canEditContent' },
@@ -67,7 +69,6 @@ const OPERATION_BRANCHES: OperationBranchItem[] = [
 ];
 
 const ADMIN_ONLY_PATHS = [
-  '/dashboard/catalogo',
   '/dashboard/usuarios',
   '/dashboard/contenido',
   '/dashboard/analytics',
@@ -80,6 +81,7 @@ const COMMERCIAL_ONLY_PATHS = [
   '/dashboard/cotizaciones',
   '/dashboard/clientes',
   '/dashboard/inventario',
+  '/dashboard/proveedores',
 ];
 
 // ---------------------------------------------------------------------------
@@ -127,9 +129,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         router.replace(`/${locale}/dashboard/produccion`);
       } else if (permissions.canViewLogisticsPanel) {
         router.replace(`/${locale}/dashboard/logistica`);
+      } else if (permissions.isWholesale) {
+        router.replace(`/${locale}/dashboard/catalogo`);
       }
     }
-  }, [pathname, locale, router, permissions.canViewOperationsPanel, permissions.canViewProductionPanel, permissions.canViewLogisticsPanel]);
+  }, [pathname, locale, router, permissions.canViewOperationsPanel, permissions.canViewProductionPanel, permissions.canViewLogisticsPanel, permissions.isWholesale]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && permissions.canAccessDashboard && !permissions.isAdmin) {
@@ -139,7 +143,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           ? `/${locale}/dashboard/operaciones`
           : permissions.canViewProductionPanel
             ? `/${locale}/dashboard/produccion`
-            : `/${locale}/dashboard`;
+            : permissions.isWholesale
+              ? `/${locale}/dashboard/catalogo`
+              : `/${locale}/dashboard`;
         router.replace(fallback);
         return;
       }
@@ -151,12 +157,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             ? `/${locale}/dashboard/produccion`
             : permissions.canViewLogisticsPanel
               ? `/${locale}/dashboard/logistica`
-              : `/${locale}/dashboard`;
+              : permissions.isWholesale
+                ? `/${locale}/dashboard/catalogo`
+                : `/${locale}/dashboard`;
           router.replace(fallback);
         }
       }
     }
-  }, [isLoading, isAuthenticated, permissions.canAccessDashboard, permissions.isAdmin, permissions.isStaff, permissions.canViewOperationsPanel, permissions.canViewProductionPanel, permissions.canViewLogisticsPanel, pathname, router, locale]);
+  }, [isLoading, isAuthenticated, permissions.canAccessDashboard, permissions.isAdmin, permissions.isStaff, permissions.canViewOperationsPanel, permissions.canViewProductionPanel, permissions.canViewLogisticsPanel, permissions.isWholesale, pathname, router, locale]);
 
   if (isLoading) {
     return <LoadingPage message="Cargando..." />;
@@ -235,7 +243,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 ? `/${locale}/dashboard/produccion`
                 : permissions.canViewLogisticsPanel
                   ? `/${locale}/dashboard/logistica`
-                  : `/${locale}/dashboard`;
+                  : permissions.isWholesale
+                    ? `/${locale}/dashboard/pedidos`
+                    : `/${locale}/dashboard`;
             const fullHref = isOperationsParent ? operationsRootHref : `/${locale}${item.href}`;
             const operationBranchActive = OPERATION_BRANCHES.some((branch) => pathname.startsWith(`/${locale}${branch.href}`));
             const isActive = item.exact
@@ -272,7 +282,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         ? 'Producción'
                         : permissions.canViewLogisticsPanel
                           ? 'Logística'
-                          : item.label
+                          : permissions.isWholesale
+                            ? 'Pedidos'
+                            : item.label
                       : item.label}
                   </Link>
 

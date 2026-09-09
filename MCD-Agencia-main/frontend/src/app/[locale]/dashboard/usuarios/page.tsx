@@ -30,6 +30,7 @@ interface Role {
 const ROLE_OPTIONS = [
   { value: '', label: 'Todos los roles' },
   { value: 'customer', label: 'Cliente' },
+  { value: 'wholesale', label: 'Vendedor' },
   { value: 'sales', label: 'Ventas' },
   { value: 'production', label: 'Producción' },
   { value: 'admin', label: 'Administrador' },
@@ -52,7 +53,7 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
   const [userToPromote, setUserToPromote] = useState<{ id: string; name: string } | null>(null);
-  const [promoteRoleName, setPromoteRoleName] = useState<'sales' | 'production'>('production');
+  const [promoteRoleName, setPromoteRoleName] = useState<'sales' | 'production' | 'wholesale'>('wholesale');
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [showTemporaryPasswordModal, setShowTemporaryPasswordModal] = useState(false);
   const [temporaryPassword, setTemporaryPassword] = useState('');
@@ -87,6 +88,7 @@ export default function AdminUsersPage() {
 
   const salesRole = rolesData?.results?.find((r) => r.name === 'sales');
   const productionRole = rolesData?.results?.find((r) => r.name === 'production');
+  const wholesaleRole = rolesData?.results?.find((r) => r.name === 'wholesale');
 
   const activateMutation = useMutation({
     mutationFn: activateUser,
@@ -163,7 +165,12 @@ export default function AdminUsersPage() {
   });
 
   const handlePromoteUser = () => {
-    const targetRole = promoteRoleName === 'production' ? productionRole : salesRole;
+    const targetRole =
+      promoteRoleName === 'production'
+        ? productionRole
+        : promoteRoleName === 'wholesale'
+          ? wholesaleRole
+          : salesRole;
     if (userToPromote && targetRole) {
       promoteToSalesMutation.mutate({
         userId: userToPromote.id,
@@ -325,7 +332,7 @@ export default function AdminUsersPage() {
                         </Button>
 
                         {/* Solo mostrar activar/desactivar para vendedores */}
-                        {['sales', 'production'].includes(user.role?.name || '') && (
+                        {['sales', 'production', 'wholesale'].includes(user.role?.name || '') && (
                           user.is_active ? (
                             <Button
                               variant="ghost"
@@ -423,7 +430,7 @@ export default function AdminUsersPage() {
                     <TrashIcon className="h-5 w-5 text-red-400" />
                   </Button>
 
-                  {['sales', 'production'].includes(user.role?.name || '') && (
+                  {['sales', 'production', 'wholesale'].includes(user.role?.name || '') && (
                     user.is_active ? (
                       <Button variant="ghost" size="sm" onClick={() => deactivateMutation.mutate(user.id)} title="Desactivar vendedor">
                         <XCircleIcon className="h-5 w-5 text-red-400" />
@@ -475,15 +482,16 @@ export default function AdminUsersPage() {
       >
         <div className="space-y-4">
           <p className="text-neutral-300">
-            Promover a <strong className="text-white">{userToPromote?.name}</strong> a un rol interno.
+            Promover a <strong className="text-white">{userToPromote?.name}</strong>.
           </p>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-2">Rol</label>
             <select
               value={promoteRoleName}
-              onChange={(e) => setPromoteRoleName(e.target.value as 'sales' | 'production')}
+              onChange={(e) => setPromoteRoleName(e.target.value as 'sales' | 'production' | 'wholesale')}
               className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white"
             >
+              <option value="wholesale">Vendedor</option>
               <option value="production">Producción</option>
               <option value="sales">Ventas</option>
             </select>
@@ -491,6 +499,8 @@ export default function AdminUsersPage() {
           <p className="text-sm text-neutral-400">
             {promoteRoleName === 'production'
               ? 'Tendrá acceso al panel de producción y podrá gestionar pedidos y trabajos de fabricación.'
+              : promoteRoleName === 'wholesale'
+              ? 'Tendrá su propio catálogo de insumos y verá los pedidos que le haga la agencia.'
               : 'Tendrá acceso al panel de ventas y podrá gestionar cotizaciones y pedidos.'}
           </p>
           <div className="flex justify-end gap-3 pt-4">
@@ -563,7 +573,7 @@ export default function AdminUsersPage() {
               options={[
                 { value: '', label: 'Selecciona un rol' },
                 ...(rolesData?.results
-                  ?.filter((role) => ['admin', 'sales', 'production', 'customer'].includes(role.name))
+                  ?.filter((role) => ['admin', 'sales', 'production', 'wholesale', 'customer'].includes(role.name))
                   .map((role) => ({ value: role.id.toString(), label: role.display_name })) || []),
               ]}
             />

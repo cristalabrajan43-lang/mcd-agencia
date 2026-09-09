@@ -637,7 +637,7 @@ class UserAdminViewSet(viewsets.ModelViewSet):
         user.role = role
 
         # Sync is_staff based on new role
-        if role.name in (Role.ADMIN, Role.SALES, Role.PRODUCTION):
+        if role.name in (Role.ADMIN, Role.SALES, Role.PRODUCTION, Role.WHOLESALE):
             user.is_staff = True
         elif role.name == Role.CUSTOMER and not user.is_superuser:
             user.is_staff = False
@@ -757,7 +757,7 @@ class UserAdminViewSet(viewsets.ModelViewSet):
             )
             
             # Set is_staff if role is admin, sales, or production
-            if role and role.name in (Role.ADMIN, Role.SALES, Role.PRODUCTION):
+            if role and role.name in (Role.ADMIN, Role.SALES, Role.PRODUCTION, Role.WHOLESALE):
                 user.is_staff = True
                 user.save(update_fields=['is_staff'])
             
@@ -867,7 +867,7 @@ class AdminCreateUserView(APIView):
                 is_email_verified=False,
             )
             
-            if role and role.name in (Role.ADMIN, Role.SALES, Role.PRODUCTION):
+            if role and role.name in (Role.ADMIN, Role.SALES, Role.PRODUCTION, Role.WHOLESALE):
                 user.is_staff = True
                 user.save(update_fields=['is_staff'])
             

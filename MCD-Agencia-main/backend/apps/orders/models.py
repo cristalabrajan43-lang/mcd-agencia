@@ -350,7 +350,7 @@ class Order(TimeStampedModel, SoftDeleteModel):
         (STATUS_PAID, _('Paid')),
         (STATUS_PARTIALLY_PAID, _('Partially Paid')),
         (STATUS_IN_PRODUCTION, _('In Production')),
-        (STATUS_READY, _('Ready')),
+        (STATUS_READY, _('Pedido realizado')),
         (STATUS_IN_DELIVERY, _('In Delivery')),
         (STATUS_COMPLETED, _('Completed')),
         (STATUS_CANCELLED, _('Cancelled')),

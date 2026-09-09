@@ -33,7 +33,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<User>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -191,7 +191,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (credentials: LoginCredentials) => {
     const { user: loggedInUser } = await apiLogin(credentials);
     setUser(loggedInUser);
-    // Session timer will start automatically via useEffect
+    return loggedInUser;
   }, []);
 
   const register = useCallback(async (data: RegisterData) => {
