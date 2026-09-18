@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TagIcon } from '@heroicons/react/24/solid';
 
 import { getPromoBanners, type PromoBanner } from '@/lib/api/content';
+import { MediaImage } from '@/components/ui/MediaImage';
 import { resolvePromoBannerStyle } from '@/lib/promo-banner-style';
 import { cn } from '@/lib/utils';
 
@@ -41,12 +42,22 @@ function PromoBannerChip({ banner, locale }: { banner: PromoBanner; locale: stri
   const content = (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-xl border px-4 py-3 min-w-[220px] max-w-[320px]',
+        'flex items-center gap-3 rounded-xl border px-4 py-3 min-w-[220px] max-w-[360px]',
         'shadow-lg backdrop-blur-sm transition-transform hover:scale-[1.02] cursor-pointer',
         style.containerClassName
       )}
       style={style.containerStyle}
     >
+      {banner.image_url && (
+        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-black/10">
+          <MediaImage
+            src={banner.image_url}
+            alt={title}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
       {badge && (
         <span
           className={cn(

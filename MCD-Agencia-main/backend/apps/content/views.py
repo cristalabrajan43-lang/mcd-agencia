@@ -245,8 +245,12 @@ class PromoBannerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return PromoBanner.objects.all().prefetch_related('catalog_items').order_by('position')
-        return PromoBanner.objects.filter(is_active=True).order_by('position')
+            return PromoBanner.objects.all().prefetch_related(
+                'catalog_items__images', 'image_item__images'
+            ).order_by('position')
+        return PromoBanner.objects.filter(is_active=True).prefetch_related(
+            'catalog_items__images', 'image_item__images'
+        ).order_by('position')
 
     def get_serializer_class(self):
         if not self.request.user.is_staff:

@@ -30,6 +30,39 @@ from .models import (
     SiteConfiguration,
 )
 
+PUBLIC_CATALOG_QS = CatalogItem.objects.filter(
+    is_active=True,
+    is_deleted=False,
+    vendor__isnull=True,
+    sale_mode__in=('BUY', 'HYBRID'),
+).exclude(specifications__has_key='source_vendor_item_id')
+
+
+def _absolute_media_url(request, file_field):
+    if not file_field:
+        return None
+    url = file_field.url
+    if request:
+        return request.build_absolute_uri(url)
+    return url
+
+
+def promo_banner_image_url(banner, request=None):
+    """Uploaded photo, then chosen product photo, then first discounted product."""
+    if banner.image:
+        return _absolute_media_url(request, banner.image)
+
+    item = getattr(banner, 'image_item', None)
+    if item is None and banner.apply_to == PromoBanner.APPLY_SELECTED:
+        item = banner.catalog_items.first()
+    if item is None:
+        return None
+
+    photo = item.images.filter(is_primary=True).first() or item.images.first()
+    if photo and photo.image:
+        return _absolute_media_url(request, photo.image)
+    return None
+
 
 class CarouselSlideSerializer(serializers.ModelSerializer):
     """Serializer for CarouselSlide model with automatic image optimization."""
@@ -87,14 +120,20 @@ class PromoBannerSerializer(serializers.ModelSerializer):
     """Admin serializer for promo banners."""
 
     catalog_item_ids = serializers.PrimaryKeyRelatedField(
-        queryset=CatalogItem.objects.filter(
-            is_active=True,
-            sale_mode__in=('BUY', 'HYBRID'),
-        ),
+        queryset=PUBLIC_CATALOG_QS,
         source='catalog_items',
         many=True,
         required=False,
     )
+    image = serializers.ImageField(required=False, allow_null=True)
+    image_item_id = serializers.PrimaryKeyRelatedField(
+        queryset=PUBLIC_CATALOG_QS,
+        source='image_item',
+        required=False,
+        allow_null=True,
+    )
+    image_url = serializers.SerializerMethodField()
+    clear_image = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = PromoBanner
@@ -105,14 +144,21 @@ class PromoBannerSerializer(serializers.ModelSerializer):
             'text_color', 'subtitle_color', 'badge_background_color',
             'badge_text_color', 'badge_shape', 'font_family', 'title_size',
             'title_weight', 'text_transform', 'discount_percent',
-            'apply_to', 'catalog_item_ids', 'position', 'is_active',
+            'apply_to', 'catalog_item_ids', 'image', 'image_item_id', 'image_url',
+            'clear_image', 'position', 'is_active',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'image_url']
+
+    def get_image_url(self, obj):
+        return promo_banner_image_url(obj, self.context.get('request'))
 
     def validate(self, attrs):
         apply_to = attrs.get('apply_to', getattr(self.instance, 'apply_to', PromoBanner.APPLY_ALL))
         catalog_items = attrs.get('catalog_items')
         discount_percent = attrs.get('discount_percent', getattr(self.instance, 'discount_percent', 0))
+
+        if apply_to == PromoBanner.APPLY_ALL:
+            attrs['catalog_items'] = []
 
         if apply_to == PromoBanner.APPLY_SELECTED:
             items = catalog_items if catalog_items is not None else (
@@ -152,9 +198,22 @@ class PromoBannerSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    def create(self, validated_data):
+        validated_data.pop('clear_image', None)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        if validated_data.pop('clear_image', False):
+            if instance.image:
+                instance.image.delete(save=False)
+            validated_data['image'] = None
+        return super().update(instance, validated_data)
+
 
 class PromoBannerPublicSerializer(serializers.ModelSerializer):
     """Public serializer for promo banners."""
+
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = PromoBanner
@@ -165,9 +224,12 @@ class PromoBannerPublicSerializer(serializers.ModelSerializer):
             'text_color', 'subtitle_color', 'badge_background_color',
             'badge_text_color', 'badge_shape', 'font_family', 'title_size',
             'title_weight', 'text_transform', 'discount_percent',
-            'apply_to', 'position',
+            'apply_to', 'image_url', 'position',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'image_url']
+
+    def get_image_url(self, obj):
+        return promo_banner_image_url(obj, self.context.get('request'))
 
 
 class TestimonialSerializer(serializers.ModelSerializer):

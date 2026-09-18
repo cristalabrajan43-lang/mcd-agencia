@@ -314,6 +314,21 @@ class PromoBanner(TimeStampedModel, OrderedModel):
         related_name='promo_banners',
         help_text=_('Products affected when apply_to is "selected".'),
     )
+    image = models.ImageField(
+        _('product photo'),
+        upload_to='content/promos/',
+        blank=True,
+        null=True,
+        help_text=_('Optional product photo shown on the discount banner.'),
+    )
+    image_item = models.ForeignKey(
+        'catalog.CatalogItem',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='promo_banner_photos',
+        help_text=_('Catalog product whose photo is shown when no custom image is uploaded.'),
+    )
     is_active = models.BooleanField(_('is active'), default=True)
 
     class Meta:

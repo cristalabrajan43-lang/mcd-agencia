@@ -28,6 +28,7 @@ import {
 } from '@/lib/api/content';
 import { getProducts, type ProductListItem } from '@/lib/api/catalog';
 import { Card, Button, Input, Textarea, Modal, Badge } from '@/components/ui';
+import { MediaImage } from '@/components/ui/MediaImage';
 import { resolvePromoBannerStyle } from '@/lib/promo-banner-style';
 import { cn } from '@/lib/utils';
 
@@ -116,6 +117,114 @@ function PromoPricePreview({
           + {products.length - previewItems.length} producto(s) más con el mismo descuento
         </p>
       )}
+    </div>
+  );
+}
+
+function resolveFormImageUrl(
+  form: PromoFormState,
+  imagePreview: string | null,
+  catalogProducts: ProductListItem[],
+) {
+  if (imagePreview) return imagePreview;
+  const chosen = catalogProducts.find((product) => product.id === form.image_item_id);
+  if (chosen?.primary_image?.image) return chosen.primary_image.image;
+  if (form.apply_to === 'selected') {
+    const firstWithPhoto = catalogProducts.find(
+      (product) => form.catalog_item_ids.includes(product.id) && product.primary_image?.image
+    );
+    return firstWithPhoto?.primary_image?.image || null;
+  }
+  return null;
+}
+
+function ProductPhotoPicker({
+  catalogProducts,
+  selectedIds,
+  applyTo,
+  imageItemId,
+  imagePreview,
+  onSelectProduct,
+  onUpload,
+  onClear,
+}: {
+  catalogProducts: ProductListItem[];
+  selectedIds: string[];
+  applyTo: 'all' | 'selected';
+  imageItemId: string;
+  imagePreview: string | null;
+  onSelectProduct: (product: ProductListItem) => void;
+  onUpload: (file: File) => void;
+  onClear: () => void;
+}) {
+  const sourceProducts = useMemo(() => {
+    const pool =
+      applyTo === 'selected' && selectedIds.length > 0
+        ? catalogProducts.filter((product) => selectedIds.includes(product.id))
+        : catalogProducts;
+    return pool.filter((product) => product.primary_image?.image).slice(0, 12);
+  }, [applyTo, catalogProducts, selectedIds]);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-sm font-medium text-white">Foto del producto</p>
+        <p className="text-xs text-neutral-500">
+          Elige la foto de un producto del catálogo o sube una imagen para el banner.
+        </p>
+      </div>
+
+      {sourceProducts.length > 0 && (
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+          {sourceProducts.map((product) => {
+            const selected = !imagePreview && imageItemId === product.id;
+            return (
+              <button
+                key={product.id}
+                type="button"
+                onClick={() => onSelectProduct(product)}
+                className={cn(
+                  'relative h-16 overflow-hidden rounded-lg border bg-neutral-800',
+                  selected ? 'border-cyan-400 ring-2 ring-cyan-400/40' : 'border-neutral-700 hover:border-neutral-500'
+                )}
+                title={product.name}
+              >
+                <MediaImage
+                  src={product.primary_image?.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="inline-flex cursor-pointer items-center rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-xs text-neutral-200 hover:border-neutral-500">
+          Subir foto
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onUpload(file);
+              event.target.value = '';
+            }}
+          />
+        </label>
+        {(imagePreview || imageItemId) && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-xs text-neutral-400 hover:text-white"
+          >
+            Quitar foto
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -252,6 +361,11 @@ function CatalogProductPicker({
               key={product.id}
               className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-3 py-1 text-xs text-cyan-200"
             >
+              {product.primary_image?.image && (
+                <span className="relative h-5 w-5 overflow-hidden rounded-full bg-neutral-800">
+                  <MediaImage src={product.primary_image.image} alt="" fill className="object-cover" />
+                </span>
+              )}
               {product.name}
               <button
                 type="button"
@@ -293,6 +407,7 @@ interface PromoFormState {
   discount_percent: number;
   apply_to: 'all' | 'selected';
   catalog_item_ids: string[];
+  image_item_id: string;
   position: number;
   is_active: boolean;
 }
@@ -320,6 +435,7 @@ function createEmptyForm(position: number): PromoFormState {
     discount_percent: 0,
     apply_to: 'all',
     catalog_item_ids: [],
+    image_item_id: '',
     position,
     is_active: true,
   };
@@ -421,7 +537,7 @@ function SelectField<T extends string>({
   );
 }
 
-function PromoBannerPreview({ form }: { form: PromoFormState }) {
+function PromoBannerPreview({ form, imageUrl }: { form: PromoFormState; imageUrl?: string | null }) {
   const style = resolvePromoBannerStyle(form);
   const badge =
     form.badge_text ||
@@ -434,11 +550,16 @@ function PromoBannerPreview({ form }: { form: PromoFormState }) {
       </p>
       <div
         className={cn(
-          'flex items-center gap-3 rounded-xl border px-4 py-3 min-w-[220px] max-w-[320px] shadow-lg',
+          'flex items-center gap-3 rounded-xl border px-4 py-3 min-w-[220px] max-w-[360px] shadow-lg',
           style.containerClassName
         )}
         style={style.containerStyle}
       >
+        {imageUrl && (
+          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-black/10">
+            <MediaImage src={imageUrl} alt={form.title || 'Producto'} fill className="object-cover" />
+          </div>
+        )}
         {badge && (
           <span
             className={cn(
@@ -478,6 +599,9 @@ export function PromoBannersTab({
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<PromoBannerAdmin | null>(null);
   const [form, setForm] = useState<PromoFormState>(() => createEmptyForm(0));
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [clearImage, setClearImage] = useState(false);
 
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['catalog-products-for-promos'],
@@ -507,8 +631,11 @@ export function PromoBannersTab({
       .filter((product): product is ProductListItem => Boolean(product));
   }, [form.apply_to, form.catalog_item_ids, catalogProducts, productsById]);
 
+  const previewImageUrl = resolveFormImageUrl(form, imagePreview, catalogProducts);
+
   const createMut = useMutation({
-    mutationFn: createPromoBanner,
+    mutationFn: ({ data, file }: { data: Partial<PromoBannerAdmin>; file?: File | null }) =>
+      createPromoBanner(data, file),
     onSuccess: () => {
       toast.success('Banner creado y precios actualizados en catálogo');
       queryClient.invalidateQueries({ queryKey: ['admin-promo-banners'] });
@@ -519,8 +646,15 @@ export function PromoBannersTab({
   });
 
   const updateMut = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<PromoBannerAdmin> }) =>
-      updatePromoBanner(id, data),
+    mutationFn: ({
+      id,
+      data,
+      file,
+    }: {
+      id: string;
+      data: Partial<PromoBannerAdmin>;
+      file?: File | null;
+    }) => updatePromoBanner(id, data, file),
     onSuccess: () => {
       toast.success('Banner actualizado');
       queryClient.invalidateQueries({ queryKey: ['admin-promo-banners'] });
@@ -543,6 +677,9 @@ export function PromoBannersTab({
   const openCreate = () => {
     setEditing(null);
     setForm(createEmptyForm(promos.length));
+    setImageFile(null);
+    setImagePreview(null);
+    setClearImage(false);
     setShowModal(true);
   };
 
@@ -572,14 +709,21 @@ export function PromoBannersTab({
       discount_percent: Number(promo.discount_percent || 0),
       apply_to: promo.apply_to || 'all',
       catalog_item_ids: (promo.catalog_item_ids || []).filter((id) => productsById.has(id)),
+      image_item_id: promo.image_item_id || '',
       is_active: promo.is_active,
     });
+    setImageFile(null);
+    setImagePreview(promo.image || null);
+    setClearImage(false);
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
     setEditing(null);
+    setImageFile(null);
+    setImagePreview(null);
+    setClearImage(false);
   };
 
   const toggleActive = (promo: PromoBannerAdmin) => {
@@ -608,16 +752,18 @@ export function PromoBannersTab({
       return;
     }
 
-    const payload = {
+    const payload: Partial<PromoBannerAdmin> = {
       ...form,
+      image_item_id: form.image_item_id || null,
+      clear_image: clearImage && !imageFile,
       discount_percent: Number(form.discount_percent) || 0,
       badge_text: form.badge_text || (form.discount_percent > 0 ? `-${Math.round(form.discount_percent)}%` : ''),
     };
 
     if (editing) {
-      updateMut.mutate({ id: editing.id, data: payload });
+      updateMut.mutate({ id: editing.id, data: payload, file: imageFile });
     } else {
-      createMut.mutate(payload);
+      createMut.mutate({ data: payload, file: imageFile });
     }
   };
 
@@ -663,11 +809,17 @@ export function PromoBannersTab({
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div
                     className={cn(
-                      'rounded-xl px-4 py-3 min-w-[180px] border',
+                      'flex items-center gap-3 rounded-xl px-4 py-3 min-w-[180px] border',
                       promoStyle.containerClassName
                     )}
                     style={promoStyle.containerStyle}
                   >
+                    {promo.image_url && (
+                      <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-black/10">
+                        <MediaImage src={promo.image_url} alt={promo.title} fill className="object-cover" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
                     <p className={promoStyle.titleClassName} style={promoStyle.titleStyle}>
                       {promo.badge_text || promo.title}
                     </p>
@@ -679,6 +831,7 @@ export function PromoBannersTab({
                         {promo.subtitle}
                       </p>
                     )}
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -764,7 +917,32 @@ export function PromoBannersTab({
               </p>
             </div>
 
-            <PromoBannerPreview form={form} />
+            <PromoBannerPreview form={form} imageUrl={previewImageUrl} />
+
+            <ProductPhotoPicker
+              catalogProducts={catalogProducts}
+              selectedIds={form.catalog_item_ids}
+              applyTo={form.apply_to}
+              imageItemId={form.image_item_id}
+              imagePreview={imagePreview}
+              onSelectProduct={(product) => {
+                setImageFile(null);
+                setImagePreview(null);
+                setClearImage(Boolean(editing?.image));
+                setForm({ ...form, image_item_id: product.id });
+              }}
+              onUpload={(file) => {
+                setImageFile(file);
+                setImagePreview(URL.createObjectURL(file));
+                setClearImage(false);
+              }}
+              onClear={() => {
+                setImageFile(null);
+                setImagePreview(null);
+                setClearImage(true);
+                setForm({ ...form, image_item_id: '' });
+              }}
+            />
 
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-2">Paletas rápidas</label>

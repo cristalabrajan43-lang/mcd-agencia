@@ -61,12 +61,16 @@ export interface PromoBanner {
   text_transform: PromoTextTransform;
   discount_percent: number;
   apply_to: 'all' | 'selected';
+  image_url?: string | null;
   position: number;
 }
 
 export interface PromoBannerAdmin extends PromoBanner {
   is_active: boolean;
   catalog_item_ids?: string[];
+  image_item_id?: string | null;
+  image?: string | null;
+  clear_image?: boolean;
 }
 
 export interface Testimonial {
@@ -857,11 +861,51 @@ export async function getAdminPromoBanners(): Promise<PromoBannerAdmin[]> {
   return Array.isArray(response) ? response : response.results;
 }
 
-export async function createPromoBanner(data: Partial<PromoBannerAdmin>): Promise<PromoBannerAdmin> {
+function toPromoBannerFormData(data: Partial<PromoBannerAdmin>, imageFile?: File) {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === undefined || key === 'image' || key === 'image_url') return;
+    if (key === 'catalog_item_ids' && Array.isArray(value)) {
+      value.forEach((id) => formData.append('catalog_item_ids', String(id)));
+      return;
+    }
+    if (value === null) {
+      return;
+    }
+    if (typeof value === 'boolean') {
+      formData.append(key, value ? 'true' : 'false');
+      return;
+    }
+    formData.append(key, String(value));
+  });
+  if (imageFile) formData.append('image', imageFile);
+  return formData;
+}
+
+export async function createPromoBanner(
+  data: Partial<PromoBannerAdmin>,
+  imageFile?: File | null,
+): Promise<PromoBannerAdmin> {
+  if (imageFile) {
+    return apiClient.upload<PromoBannerAdmin>(
+      '/content/promo-banners/',
+      toPromoBannerFormData(data, imageFile),
+    );
+  }
   return apiClient.post<PromoBannerAdmin>('/content/promo-banners/', data);
 }
 
-export async function updatePromoBanner(id: string, data: Partial<PromoBannerAdmin>): Promise<PromoBannerAdmin> {
+export async function updatePromoBanner(
+  id: string,
+  data: Partial<PromoBannerAdmin>,
+  imageFile?: File | null,
+): Promise<PromoBannerAdmin> {
+  if (imageFile) {
+    return apiClient.uploadPatch<PromoBannerAdmin>(
+      `/content/promo-banners/${id}/`,
+      toPromoBannerFormData(data, imageFile),
+    );
+  }
   return apiClient.patch<PromoBannerAdmin>(`/content/promo-banners/${id}/`, data);
 }
 
